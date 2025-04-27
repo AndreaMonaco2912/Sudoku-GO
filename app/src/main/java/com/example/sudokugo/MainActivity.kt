@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         mapController.setCenter(startPoint)
     }
 
+
     override fun onResume() {
         super.onResume()
         //this will refresh the osmdroid configuration on resuming.

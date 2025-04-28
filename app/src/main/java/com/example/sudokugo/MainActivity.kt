@@ -1,11 +1,12 @@
 package com.example.sudokugo
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
+import android.view.MotionEvent
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -16,17 +17,29 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
 import org.osmdroid.views.overlay.OverlayItem
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import kotlin.math.log
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     private lateinit var handler: android.os.Handler
     private lateinit var poiRunnable: Runnable
 
+
     private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
+
+    private var lastAngle = 0f
+    private var rotating = false
+    private var touchStartX = 0f
+    private var touchStartY = 0f
+    private var lastRotationSpeed = 0f
+    private var inertiaAnimator: ValueAnimator? = null
+
+    private val touchSlop = 10  // Pixel minimo per riconoscere drag vs tap
+    private val maxRotationSpeed = 5f // Limita la velocità massima di inerzia
+    private val fixedZoomLevel = 15.0
+
+
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
@@ -41,19 +54,82 @@ class MainActivity : AppCompatActivity() {
 
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setMultiTouchControls(true)
-        
+        map.setMultiTouchControls(false)
+        map.isClickable = true
+
         val mapController: IMapController = map.controller
-        mapController.setZoom(15.0)
+        mapController.setZoom(fixedZoomLevel)
+
 
         // This line will *force-follow* after any touch
-        map.setOnTouchListener { v, event ->
-            locationOverlay.enableFollowLocation()
-            false
+        map.setOnTouchListener { _, event ->
+            val projection = map.projection
+            val centerGeo = map.mapCenter
+            val centerPoint = projection.toPixels(centerGeo, null)
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // Stop any previous inertia
+                    inertiaAnimator?.cancel()
+
+                    touchStartX = event.x
+                    touchStartY = event.y
+
+                    val dx = event.x - centerPoint.x
+                    val dy = event.y - centerPoint.y
+                    lastAngle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+
+                    rotating = false
+                    lastRotationSpeed = 0f
+                    locationOverlay.enableFollowLocation()
+                    false
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val moveX = event.x - touchStartX
+                    val moveY = event.y - touchStartY
+                    val distanceMoved = Math.hypot(moveX.toDouble(), moveY.toDouble())
+
+                    if (distanceMoved > touchSlop) {
+                        rotating = true
+                    }
+
+                    if (rotating) {
+                        val dx = event.x - centerPoint.x
+                        val dy = event.y - centerPoint.y
+                        val currentAngle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+
+                        var deltaAngle = currentAngle - lastAngle
+                        if (deltaAngle > 180) deltaAngle -= 360
+                        if (deltaAngle < -180) deltaAngle += 360
+
+                        // Limit rotation speed
+                        lastRotationSpeed = deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
+
+                        map.mapOrientation = (map.mapOrientation + deltaAngle) % 360
+                        map.invalidate()
+
+                        lastAngle = currentAngle
+                        true
+                    } else {
+                        locationOverlay.enableFollowLocation()
+                        false
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (rotating && lastRotationSpeed != 0f) {
+                        startInertiaRotation(lastRotationSpeed)
+                    }
+                    rotating = false
+                    locationOverlay.enableFollowLocation()
+                    false
+                }
+                else -> false
+            }
         }
-        val rotationGestureOverlay = RotationGestureOverlay(map)
-        rotationGestureOverlay.isEnabled = true
-        map.overlays.add(rotationGestureOverlay)
+
+//        val rotationGestureOverlay = RotationGestureOverlay(map)
+//        rotationGestureOverlay.isEnabled = true
+//        map.overlays.add(rotationGestureOverlay)
 
         // Crea gpsProvider personalizzato
         val gpsProvider = GpsMyLocationProvider(this).apply {
@@ -105,10 +181,25 @@ class MainActivity : AppCompatActivity() {
                     val center = GeoPoint(location.latitude, location.longitude)
                     generateRandomPOIs(center)
                 }
-                handler.postDelayed(this, 5000) // repeat after 5 seconds
+                handler.postDelayed(this, 1000) // repeat after 5 seconds
             }
         }
         handler.post(poiRunnable)
+    }
+
+    private fun startInertiaRotation(initialSpeed: Float) {
+        inertiaAnimator = ValueAnimator.ofFloat(initialSpeed, 0f).apply {
+            duration = 1000 // 1 secondo di inerzia
+            interpolator = DecelerateInterpolator()
+
+            addUpdateListener { animation ->
+                val delta = animation.animatedValue as Float
+                map.mapOrientation = (map.mapOrientation + delta) % 360
+                map.invalidate()
+            }
+
+            start()
+        }
     }
 
     private fun generateRandomPOIs(center: GeoPoint) {
@@ -166,5 +257,23 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //this will refresh the osmdroid configuration on resuming.
+        //if you make changes to the configuration, use
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //this will refresh the osmdroid configuration on resuming.
+        //if you make changes to the configuration, use
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        //Configuration.getInstance().save(this, prefs);
+        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
     }
 }

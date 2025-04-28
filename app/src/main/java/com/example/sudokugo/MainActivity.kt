@@ -1,79 +1,136 @@
 package com.example.sudokugo
 
-import android.content.Context
-import android.content.SharedPreferences
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import org.osmdroid.config.Configuration.*
+import org.osmdroid.api.IMapController
+import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-
-const val REQUEST_PERMISSIONS_REQUEST_CODE = 1
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import kotlin.math.log
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var map : MapView
+    private lateinit var map: MapView
+    private lateinit var locationOverlay: MyLocationNewOverlay
+
+    private val REQUEST_PERMISSIONS_REQUEST_CODE = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sharedPreferences: SharedPreferences = this.getSharedPreferences("osmdroid_prefs", Context.MODE_PRIVATE)
-
-        //handle permissions first, before map is created. not depicted here
-
-        //load/initialize the osmdroid configuration, this can be done
-        // This won't work unless you have imported this: org.osmdroid.config.Configuration.*
-        getInstance().load(this, sharedPreferences)
-        //setting this before the layout is inflated is a good idea
-        //it 'should' ensure that the map has a writable location for the map cache, even without permissions
-        //if no tiles are displayed, you can try overriding the cache path using Configuration.getInstance().setCachePath
-        //see also StorageUtils
-        //note, the load method also sets the HTTP User Agent to your application's package name, if you abuse osm's
-        //tile servers will get you banned based on this string.
-
-        //inflate and create the map
+        Configuration.getInstance().userAgentValue = packageName
         setContentView(R.layout.activity_main)
 
-        map = findViewById<MapView>(R.id.map)
+        map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
-        val mapController = map.controller
-        mapController.setZoom(9.5)
-        val startPoint = GeoPoint(48.8583, 2.2944)
-        mapController.setCenter(startPoint)
-    }
+        map.setMultiTouchControls(true)
 
+        val mapController: IMapController = map.controller
+        mapController.setZoom(15.0)
 
-    override fun onResume() {
-        super.onResume()
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        map.onResume() //needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
-        map.onPause()  //needed for compass, my location overlays, v6.0.0 and up
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        val permissionsToRequest = ArrayList<String>()
-        var i = 0
-        while (i < grantResults.size) {
-            permissionsToRequest.add(permissions[i])
-            i++
+        // Crea gpsProvider personalizzato
+        val gpsProvider = GpsMyLocationProvider(this).apply {
+            locationUpdateMinDistance = 5.0F // metri
+            locationUpdateMinTime = 2000    // millisecondi
         }
-        if (permissionsToRequest.size > 0) {
+
+        // Passa il provider a MyLocationNewOverlay
+        locationOverlay = MyLocationNewOverlay(gpsProvider, map)
+        locationOverlay.enableMyLocation()
+        map.overlays.add(locationOverlay)
+
+//        locationOverlay.myLocationProvider?.locationSource?.let { provider ->
+//            if (provider is GpsMyLocationProvider) {
+//                provider.addLocationSource(object : GpsMyLocationProvider.LocationSource {
+//                    override fun onLocationChanged(location: Location, providerName: String?) {
+//                        runOnUiThread {
+//                            val userLocation = GeoPoint(location.latitude, location.longitude)
+//                            map.controller.animateTo(userLocation)
+//                        }
+//                    }
+//                })
+//            }
+//        }
+        // Quando trova per la prima volta la posizione
+//        locationOverlay.runOnFirstFix {
+//            val location = locationOverlay.myLocation
+//            location?.let {
+//                runOnUiThread {
+//                    val userLocation = GeoPoint(it.latitude, it.longitude)
+//                    map.controller.animateTo(userLocation)
+//                    generateRandomPOIs(userLocation)
+//                }
+//            }
+//        }
+
+        locationOverlay.enableFollowLocation()
+
+        requestPermissionsIfNecessary(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ))
+    }
+
+    private fun generateRandomPOIs(center: GeoPoint) {
+        val items = mutableListOf<OverlayItem>()
+
+        repeat(3) { i ->
+            val latOffset = (Random.nextDouble() - 0.5) / 500
+            val lonOffset = (Random.nextDouble() - 0.5) / 500
+            val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+
+            val item = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
+            items.add(item)
+        }
+
+        val poiOverlay = ItemizedIconOverlay(
+            items,
+            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+                    item?.let {
+                        Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                    }
+                    return true
+                }
+
+                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
+                    return false
+                }
+            },
+            applicationContext
+        )
+
+        map.overlays.add(poiOverlay)
+    }
+
+    private fun requestPermissionsIfNecessary(permissions: Array<String>) {
+        val permissionsToRequest = permissions.filter {
+            ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 this,
                 permissionsToRequest.toTypedArray(),
-                REQUEST_PERMISSIONS_REQUEST_CODE)
+                REQUEST_PERMISSIONS_REQUEST_CODE
+            )
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }

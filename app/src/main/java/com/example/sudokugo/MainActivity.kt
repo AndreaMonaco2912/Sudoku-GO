@@ -4,12 +4,15 @@ import android.Manifest
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -20,6 +23,11 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
+import androidx.core.graphics.drawable.toDrawable
+import kotlin.math.atan2
+import kotlin.math.hypot
 
 class MainActivity : AppCompatActivity() {
     private lateinit var handler: android.os.Handler
@@ -77,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
                     val dx = event.x - centerPoint.x
                     val dy = event.y - centerPoint.y
-                    lastAngle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                    lastAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
 
                     rotating = false
                     lastRotationSpeed = 0f
@@ -87,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_MOVE -> {
                     val moveX = event.x - touchStartX
                     val moveY = event.y - touchStartY
-                    val distanceMoved = Math.hypot(moveX.toDouble(), moveY.toDouble())
+                    val distanceMoved = hypot(moveX.toDouble(), moveY.toDouble())
 
                     if (distanceMoved > touchSlop) {
                         rotating = true
@@ -96,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                     if (rotating) {
                         val dx = event.x - centerPoint.x
                         val dy = event.y - centerPoint.y
-                        val currentAngle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                        val currentAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
 
                         var deltaAngle = currentAngle - lastAngle
                         if (deltaAngle > 180) deltaAngle -= 360
@@ -125,6 +133,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+
+
         }
 
 //        val rotationGestureOverlay = RotationGestureOverlay(map)
@@ -139,6 +149,28 @@ class MainActivity : AppCompatActivity() {
 
         // Passa il provider a MyLocationNewOverlay
         locationOverlay = MyLocationNewOverlay(gpsProvider, map)
+
+        locationOverlay.isDrawAccuracyEnabled = false
+
+        // Carica l'immagine da drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.character_icon) as BitmapDrawable
+        val originalBitmap = drawable.bitmap
+
+// Ritaglia a forma circolare
+        val circularBitmap = getCircularBitmap(originalBitmap)
+
+// Ridimensiona l'immagine (es: 100x100 pixel)
+        val scaledBitmap = circularBitmap.scale(100, 100)
+
+// Imposta l'icona personalizzata
+        locationOverlay.setPersonIcon(scaledBitmap)
+        locationOverlay.setDirectionIcon(scaledBitmap)
+
+// Centra l'icona
+        locationOverlay.setPersonAnchor(0.5f, 0.5f)
+        locationOverlay.setDirectionAnchor(0.5f, 0.5f)
+
+
         locationOverlay.enableMyLocation()
         map.overlays.add(locationOverlay)
 
@@ -187,6 +219,33 @@ class MainActivity : AppCompatActivity() {
         handler.post(poiRunnable)
     }
 
+    private fun getCircularBitmap(bitmap: Bitmap): Bitmap {
+        val size = minOf(bitmap.width, bitmap.height)
+        val output = createBitmap(size, size)
+
+        val canvas = android.graphics.Canvas(output)
+        val paint = android.graphics.Paint().apply {
+            isAntiAlias = true
+        }
+
+        val radius = size / 2f
+        canvas.drawCircle(radius, radius, radius, paint)
+
+        paint.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN)
+        val srcRect = android.graphics.Rect(
+            (bitmap.width - size) / 2,
+            (bitmap.height - size) / 2,
+            (bitmap.width + size) / 2,
+            (bitmap.height + size) / 2
+        )
+        val destRect = android.graphics.Rect(0, 0, size, size)
+        canvas.drawBitmap(bitmap, srcRect, destRect, paint)
+
+        return output
+    }
+
+
+
     private fun startInertiaRotation(initialSpeed: Float) {
         inertiaAnimator = ValueAnimator.ofFloat(initialSpeed, 0f).apply {
             duration = 1000 // 1 secondo di inerzia
@@ -202,11 +261,86 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun generateRandomPOIs(center: GeoPoint) {
+//    private fun generateRandomPOIs(center: GeoPoint) {
+//
+//        poiOverlay?.let {
+//            map.overlays.remove(it)
+//        }
+//        val items = mutableListOf<OverlayItem>()
+//
+//        repeat(3) { i ->
+//            val latOffset = (Random.nextDouble() - 0.5) / 500
+//            val lonOffset = (Random.nextDouble() - 0.5) / 500
+//            val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+//
+//            val item = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
+//            items.add(item)
+//        }
+//
+//         poiOverlay = ItemizedIconOverlay(
+//            items,
+//            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+//                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+//                    item?.let {
+//                        Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+//                    }
+//                    return true
+//                }
+//
+//                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
+//                    return false
+//                }
+//            },
+//            applicationContext
+//        )
+//
+//        map.overlays.add(poiOverlay)
+//    }
 
+    private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
+        val output = createBitmap(size, size)
+        val canvas = android.graphics.Canvas(output)
+
+        val paint = android.graphics.Paint().apply {
+            isAntiAlias = true
+            color = android.graphics.Color.WHITE // Sfondo bianco pieno
+            style = android.graphics.Paint.Style.FILL
+        }
+
+        // Disegna lo sfondo bianco interamente
+        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+
+        // Carica l'immagine dell'icona
+        val drawable = ContextCompat.getDrawable(this, drawableId) as BitmapDrawable
+        val originalBitmap = drawable.bitmap
+
+        // Calcola proporzioni corrette per scalare l'immagine
+        val scale = minOf(
+            size.toFloat() / originalBitmap.width,
+            size.toFloat() / originalBitmap.height
+        )
+
+        val newWidth = (originalBitmap.width * scale).toInt()
+        val newHeight = (originalBitmap.height * scale).toInt()
+
+        val left = (size - newWidth) / 2
+        val top = (size - newHeight) / 2
+
+        val destRect = android.graphics.Rect(left, top, left + newWidth, top + newHeight)
+
+        // Disegna l'immagine sopra
+        canvas.drawBitmap(originalBitmap, null, destRect, null)
+
+        return output
+    }
+
+
+
+    private fun generateRandomPOIs(center: GeoPoint) {
         poiOverlay?.let {
             map.overlays.remove(it)
         }
+
         val items = mutableListOf<OverlayItem>()
 
         repeat(3) { i ->
@@ -214,11 +348,18 @@ class MainActivity : AppCompatActivity() {
             val lonOffset = (Random.nextDouble() - 0.5) / 500
             val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
-            val item = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
-            items.add(item)
+            val poiItem = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
+
+            val poiBitmap = createPoiIcon(R.drawable.poi_image, 100) // Immagine quadrata
+            val markerDrawable = poiBitmap.toDrawable(resources)
+
+            poiItem.setMarker(markerDrawable)
+            poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER // <--- ECCO QUI!
+
+            items.add(poiItem)
         }
 
-         poiOverlay = ItemizedIconOverlay(
+        poiOverlay = ItemizedIconOverlay(
             items,
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
                 override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
@@ -236,7 +377,14 @@ class MainActivity : AppCompatActivity() {
         )
 
         map.overlays.add(poiOverlay)
+
+        // Riaggiungo il personaggio sopra
+        map.overlays.remove(locationOverlay)
+        map.overlays.add(locationOverlay)
     }
+
+
+
 
     private fun requestPermissionsIfNecessary(permissions: Array<String>) {
         val permissionsToRequest = permissions.filter {

@@ -1,6 +1,7 @@
 package com.example.sudokugo
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -15,18 +16,24 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
 import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.math.log
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var handler: android.os.Handler
+    private lateinit var poiRunnable: Runnable
+
+    private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
 
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 1
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().userAgentValue = packageName
@@ -35,9 +42,18 @@ class MainActivity : AppCompatActivity() {
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
-
+        
         val mapController: IMapController = map.controller
         mapController.setZoom(15.0)
+
+        // This line will *force-follow* after any touch
+        map.setOnTouchListener { v, event ->
+            locationOverlay.enableFollowLocation()
+            false
+        }
+        val rotationGestureOverlay = RotationGestureOverlay(map)
+        rotationGestureOverlay.isEnabled = true
+        map.overlays.add(rotationGestureOverlay)
 
         // Crea gpsProvider personalizzato
         val gpsProvider = GpsMyLocationProvider(this).apply {
@@ -79,9 +95,27 @@ class MainActivity : AppCompatActivity() {
         requestPermissionsIfNecessary(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION
         ))
+
+        handler = android.os.Handler(mainLooper)
+
+        poiRunnable = object : Runnable {
+            override fun run() {
+                val location = locationOverlay.myLocation
+                if (location != null) {
+                    val center = GeoPoint(location.latitude, location.longitude)
+                    generateRandomPOIs(center)
+                }
+                handler.postDelayed(this, 5000) // repeat after 5 seconds
+            }
+        }
+        handler.post(poiRunnable)
     }
 
     private fun generateRandomPOIs(center: GeoPoint) {
+
+        poiOverlay?.let {
+            map.overlays.remove(it)
+        }
         val items = mutableListOf<OverlayItem>()
 
         repeat(3) { i ->
@@ -93,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             items.add(item)
         }
 
-        val poiOverlay = ItemizedIconOverlay(
+         poiOverlay = ItemizedIconOverlay(
             items,
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
                 override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {

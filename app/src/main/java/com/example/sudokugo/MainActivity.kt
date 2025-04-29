@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,7 @@ import kotlin.random.Random
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import org.osmdroid.views.overlay.Polygon
 import kotlin.math.atan2
 import kotlin.math.hypot
 
@@ -47,6 +49,8 @@ class MainActivity : AppCompatActivity() {
     private val maxRotationSpeed = 5f // Limita la velocità massima di inerzia
     private val fixedZoomLevel = 15.0
 
+    private lateinit var scaleDetector: ScaleGestureDetector
+    private var scaleFactor = 1.0f
 
 
     private lateinit var map: MapView
@@ -60,26 +64,46 @@ class MainActivity : AppCompatActivity() {
         Configuration.getInstance().userAgentValue = packageName
         setContentView(R.layout.activity_main)
 
+        scaleDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoom = map.zoomLevelDouble
+                val scale = detector.scaleFactor
+
+                // Use scale to adjust zoom level
+                val newZoom = if (scale > 1) currentZoom + 0.1 else currentZoom - 0.1
+                map.controller.setZoom(newZoom.coerceIn(map.minZoomLevel, map.maxZoomLevel))
+                return true
+            }
+        })
+
         map = findViewById(R.id.map)
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setMultiTouchControls(false)
+        map.setMultiTouchControls(true)
         map.isClickable = true
 
         val mapController: IMapController = map.controller
         mapController.setZoom(fixedZoomLevel)
 
+        map.minZoomLevel = 15.0 // Example: limit zoom out to level 10
+
 
         // This line will *force-follow* after any touch
         map.setOnTouchListener { _, event ->
+            scaleDetector.onTouchEvent(event) // Handle pinch zoom
+
+            val pointerCount = event.pointerCount
+            if (pointerCount > 1) {
+                // Don't process rotation when multi-touch (likely pinch)
+                return@setOnTouchListener false
+            }
+
             val projection = map.projection
             val centerGeo = map.mapCenter
             val centerPoint = projection.toPixels(centerGeo, null)
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // Stop any previous inertia
                     inertiaAnimator?.cancel()
-
                     touchStartX = event.x
                     touchStartY = event.y
 
@@ -110,7 +134,6 @@ class MainActivity : AppCompatActivity() {
                         if (deltaAngle > 180) deltaAngle -= 360
                         if (deltaAngle < -180) deltaAngle += 360
 
-                        // Limit rotation speed
                         lastRotationSpeed = deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
 
                         map.mapOrientation = (map.mapOrientation + deltaAngle) % 360
@@ -133,9 +156,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> false
             }
-
-
         }
+
 
 //        val rotationGestureOverlay = RotationGestureOverlay(map)
 //        rotationGestureOverlay.isEnabled = true
@@ -212,8 +234,9 @@ class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     val center = GeoPoint(location.latitude, location.longitude)
                     generateRandomPOIs(center)
+                    drawUserCenteredCircle(center, 25.0) // radius in meters
                 }
-                handler.postDelayed(this, 1000) // repeat after 5 seconds
+                handler.postDelayed(this, 3000) // repeat after 3 seconds
             }
         }
         handler.post(poiRunnable)
@@ -334,8 +357,6 @@ class MainActivity : AppCompatActivity() {
         return output
     }
 
-
-
     private fun generateRandomPOIs(center: GeoPoint) {
         poiOverlay?.let {
             map.overlays.remove(it)
@@ -350,7 +371,7 @@ class MainActivity : AppCompatActivity() {
 
             val poiItem = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
 
-            val poiBitmap = createPoiIcon(R.drawable.poi_image, 100) // Immagine quadrata
+            val poiBitmap = createPoiIcon(R.drawable.sudoku_icon, 100) // Immagine quadrata
             val markerDrawable = poiBitmap.toDrawable(resources)
 
             poiItem.setMarker(markerDrawable)
@@ -383,7 +404,28 @@ class MainActivity : AppCompatActivity() {
         map.overlays.add(locationOverlay)
     }
 
+    private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {
+        val circle = Polygon().apply {
+            points = Polygon.pointsAsCircle(center, radiusInMeters)
+            outlinePaint.color = android.graphics.Color.BLUE
+            outlinePaint.strokeWidth = 2f
+            outlinePaint.style = android.graphics.Paint.Style.STROKE
+            outlinePaint.isAntiAlias = true
 
+            // Fill
+            fillPaint.color = android.graphics.Color.argb(50, 0, 0, 255)
+            fillPaint.style = android.graphics.Paint.Style.FILL
+            fillPaint.isAntiAlias = true
+
+            setInfoWindow(null)
+        }
+
+        // Remove old if exists
+        map.overlays.removeIf { it is Polygon && it.infoWindow == null }
+
+        map.overlays.add(circle)
+        map.invalidate()
+    }
 
 
     private fun requestPermissionsIfNecessary(permissions: Array<String>) {

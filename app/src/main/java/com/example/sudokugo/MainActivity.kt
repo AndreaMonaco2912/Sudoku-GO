@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     private val touchSlop = 10  // Pixel minimo per riconoscere drag vs tap
     private val maxRotationSpeed = 5f // Limita la velocità massima di inerzia
-    private val fixedZoomLevel = 15.0
+    private val fixedZoomLevel = 19.0
 
     private val poiItems = mutableListOf<TimedPOI>()
 
@@ -100,7 +100,8 @@ class MainActivity : AppCompatActivity() {
         val mapController: IMapController = map.controller
         mapController.setZoom(fixedZoomLevel)
 
-        map.minZoomLevel = 30.0 // Example: limit zoom out to level 10
+        map.minZoomLevel = 10.0 // Example: limit zoom out to level 10
+        map.maxZoomLevel = 20.0 // Example: limit zoom in to level 20
 
 
         // This line will *force-follow* after any touch

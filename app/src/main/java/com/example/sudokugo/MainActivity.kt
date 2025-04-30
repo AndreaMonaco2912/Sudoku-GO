@@ -12,6 +12,7 @@ import android.view.ScaleGestureDetector
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import org.osmdroid.api.IMapController
@@ -51,17 +52,17 @@ class MainActivity : AppCompatActivity() {
     private var lastRotationSpeed = 0f
     private var inertiaAnimator: ValueAnimator? = null
 
+    private var initialRotationAngle = 0f
+    private var lastMultiTouchAngle = 0f
+
+
     private val touchSlop = 10  // Pixel minimo per riconoscere drag vs tap
     private val maxRotationSpeed = 5f // Limita la velocità massima di inerzia
     private val fixedZoomLevel = 15.0
 
     private val poiItems = mutableListOf<TimedPOI>()
-    private val maxPoiCount = 7
-    private val minPoiCount = 2
-    private val removalDistanceMeters = 100.0
 
     private lateinit var scaleDetector: ScaleGestureDetector
-    private var scaleFactor = 1.0f
 
 
     private lateinit var map: MapView
@@ -69,11 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     private var lastPoiAddTime = 0L
     private var poiAddInterval = randomAddInterval() // 17-30 secondi
-    private fun randomAddInterval() = (20_000L..45_000L).random()
-    private val minPoiLifespan = 25_000L
-    private val maxPoiLifespan = 40_000L
-
-
+    private fun randomAddInterval() = (200L..400L).random()
 
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 1
 
@@ -103,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         val mapController: IMapController = map.controller
         mapController.setZoom(fixedZoomLevel)
 
-        map.minZoomLevel = 15.0 // Example: limit zoom out to level 10
+        map.minZoomLevel = 30.0 // Example: limit zoom out to level 10
 
 
         // This line will *force-follow* after any touch
@@ -111,10 +108,10 @@ class MainActivity : AppCompatActivity() {
             scaleDetector.onTouchEvent(event) // Handle pinch zoom
 
             val pointerCount = event.pointerCount
-            if (pointerCount > 1) {
-                // Don't process rotation when multi-touch (likely pinch)
-                return@setOnTouchListener false
-            }
+//            if (pointerCount > 1) {
+//                // Don't process rotation when multi-touch (likely pinch)
+//                return@setOnTouchListener false
+//            }
 
             val projection = map.projection
             val centerGeo = map.mapCenter
@@ -136,33 +133,57 @@ class MainActivity : AppCompatActivity() {
                     false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    val moveX = event.x - touchStartX
-                    val moveY = event.y - touchStartY
-                    val distanceMoved = hypot(moveX.toDouble(), moveY.toDouble())
+                    if (event.pointerCount == 2) {
+                        val x1 = event.getX(0)
+                        val y1 = event.getY(0)
+                        val x2 = event.getX(1)
+                        val y2 = event.getY(1)
 
-                    if (distanceMoved > touchSlop) {
-                        rotating = true
-                    }
+                        val angle = Math.toDegrees(
+                            atan2((y2 - y1).toDouble(), (x2 - x1).toDouble())
+                        ).toFloat()
 
-                    if (rotating) {
-                        val dx = event.x - centerPoint.x
-                        val dy = event.y - centerPoint.y
-                        val currentAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                        if (!rotating) {
+                            initialRotationAngle = angle
+                            lastMultiTouchAngle = map.mapOrientation
+                            rotating = true
+                        } else {
+                            val deltaAngle = angle - initialRotationAngle
+                            map.mapOrientation = (lastMultiTouchAngle + deltaAngle + 360) % 360
+                            map.invalidate()
+                        }
 
-                        var deltaAngle = currentAngle - lastAngle
-                        if (deltaAngle > 180) deltaAngle -= 360
-                        if (deltaAngle < -180) deltaAngle += 360
-
-                        lastRotationSpeed = deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
-
-                        map.mapOrientation = (map.mapOrientation + deltaAngle) % 360
-                        map.invalidate()
-
-                        lastAngle = currentAngle
                         true
                     } else {
-                        locationOverlay.enableFollowLocation()
-                        false
+                        val moveX = event.x - touchStartX
+                        val moveY = event.y - touchStartY
+                        val distanceMoved = hypot(moveX.toDouble(), moveY.toDouble())
+
+                        if (distanceMoved > touchSlop) {
+                            rotating = true
+                        }
+
+                        if (rotating) {
+
+                            val dx = event.x - centerPoint.x
+                            val dy = event.y - centerPoint.y
+                            val currentAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
+
+                            var deltaAngle = currentAngle - lastAngle
+                            if (deltaAngle > 180) deltaAngle -= 360
+                            if (deltaAngle < -180) deltaAngle += 360
+
+                            lastRotationSpeed = deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
+
+                            map.mapOrientation = (map.mapOrientation + deltaAngle) % 360
+                            map.invalidate()
+
+                            lastAngle = currentAngle
+                            true
+                        } else {
+                            locationOverlay.enableFollowLocation()
+                            false
+                        }
                     }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -408,69 +429,37 @@ class MainActivity : AppCompatActivity() {
 //        })
 //    }
 //
-//    private fun animateDespawn(poi: TimedPOI) {
-//        val fadeOut = android.view.animation.AlphaAnimation(1f, 0f).apply {
-//            duration = 500
-//            fillAfter = true
-//        }
-//
-//        val mapView = map
-//        val view = android.view.View(this).apply {
-//            layoutParams = android.view.ViewGroup.LayoutParams(50, 50)
-//            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-//            startAnimation(fadeOut)
-//        }
-//
-//        mapView.overlayManager.add(object : org.osmdroid.views.overlay.Overlay() {
-//            override fun draw(c: android.graphics.Canvas?, osmv: MapView?, shadow: Boolean) {
-//                osmv?.overlayManager?.remove(this)
-//            }
-//        })
-//    }
+private fun animateDespawn(poi: TimedPOI) {
+    val item = poi.item
+    val originalDrawable = item.drawable as? BitmapDrawable ?: return
+    val originalBitmap = originalDrawable.bitmap
 
-    private fun generateRandomPOIs(center: GeoPoint) {
-        val currentTime = System.currentTimeMillis()
+    val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+    val canvas = android.graphics.Canvas(mutableBitmap)
+    val paint = android.graphics.Paint().apply { isAntiAlias = true }
 
-        // Rimuovi POI troppo lontani o troppo vecchi
-        poiItems.removeIf {
-            haversineDistance(it.item.point, center) > removalDistanceMeters ||
-                    currentTime - it.createdAt > it.lifespan
+    val animator = ValueAnimator.ofInt(255, 0).apply {
+        duration = 500
+        addUpdateListener {
+            val alpha = it.animatedValue as Int
+            paint.alpha = alpha
+            mutableBitmap.eraseColor(android.graphics.Color.TRANSPARENT)
+            canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
+            item.setMarker(mutableBitmap.toDrawable(resources))
+            map.invalidate()
         }
-
-        val currentCount = poiItems.size
-        val shouldAdd = currentCount < minPoiCount || (currentCount < maxPoiCount && currentTime - lastPoiAddTime > poiAddInterval)
-
-        if (shouldAdd) {
-            val maxToAdd = (maxPoiCount - currentCount).coerceAtMost(2)
-            val toAdd = if (currentCount < minPoiCount) {
-                minPoiCount - currentCount
-            } else {
-                (0..maxToAdd).random()
-            }
-
-            repeat(toAdd) {
-                val latOffset = (Random.nextDouble() - 0.5) / 500
-                val lonOffset = (Random.nextDouble() - 0.5) / 500
-                val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
-                val poiItem = OverlayItem("POI #${System.currentTimeMillis()}", "Punto di interesse", poiLocation)
-
-                val poiBitmap = createPoiIcon(R.drawable.sudoku_icon, 100)
-                val markerDrawable = poiBitmap.toDrawable(resources)
-                poiItem.setMarker(markerDrawable)
-                poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER
-
-                poiItems.add(TimedPOI(poiItem, currentTime, (minPoiLifespan..maxPoiLifespan).random()))
-
-            }
-
-            lastPoiAddTime = currentTime
-            poiAddInterval = randomAddInterval()
-
+        doOnEnd {
+            // Dopo fade out completo, rimuovi
+            poiItems.remove(poi)
+            recreatePoiOverlay()
         }
+        start()
+    }
+}
 
-        // Ricrea overlay
+
+    private fun recreatePoiOverlay() {
         poiOverlay?.let { map.overlays.remove(it) }
-
         poiOverlay = ItemizedIconOverlay(
             poiItems.map { it.item },
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
@@ -485,13 +474,100 @@ class MainActivity : AppCompatActivity() {
             },
             applicationContext
         )
-
         map.overlays.add(poiOverlay)
 
-        // Riaggiungi l’overlay della posizione
+        // Assicura che l'overlay utente sia sopra
         map.overlays.remove(locationOverlay)
         map.overlays.add(locationOverlay)
     }
+
+
+
+
+
+    private fun generateRandomPOIs(center: GeoPoint) {
+        val currentTime = System.currentTimeMillis()
+
+        // Rimuovi quelli scaduti
+        val iterator = poiItems.iterator()
+        while (iterator.hasNext()) {
+            val poi = iterator.next()
+            if (currentTime > poi.createdAt + poi.lifespan) {
+                animateDespawn(poi)
+            }
+        }
+
+        // Controlla se aggiungere nuovi POI
+        if (currentTime - lastPoiAddTime >= poiAddInterval) {
+            val currentCount = poiItems.size
+            val forceAdd = currentCount < 3
+            val allowAdd = currentCount < 7
+
+            if (forceAdd || allowAdd) {
+                val toAdd = if (forceAdd) (3 - currentCount) else 1
+                repeat(toAdd) {
+                    val latOffset = (Random.nextDouble() - 0.5) / 500
+                    val lonOffset = (Random.nextDouble() - 0.5) / 500
+                    val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+
+                    val poiItem = OverlayItem("Sudoku", "Gioca!", location)
+                    val bitmap = createPoiIcon(R.drawable.sudoku_icon, 100)
+                    val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                    val canvas = android.graphics.Canvas(mutableBitmap)
+                    val paint = android.graphics.Paint()
+
+                    // Animazione Fade-In
+                    ValueAnimator.ofInt(0, 255).apply {
+                        duration = 500
+                        addUpdateListener {
+                            paint.alpha = it.animatedValue as Int
+                            mutableBitmap.eraseColor(android.graphics.Color.TRANSPARENT)
+                            canvas.drawBitmap(bitmap, 0f, 0f, paint)
+                            map.invalidate()
+                        }
+                        start()
+                    }
+
+                    poiItem.setMarker(mutableBitmap.toDrawable(resources))
+                    poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER
+
+                    poiItems.add(
+                        TimedPOI(
+                            item = poiItem,
+                            createdAt = currentTime,
+                            lifespan = (25000L..40000L).random()
+                        )
+                    )
+                }
+
+                lastPoiAddTime = currentTime
+                poiAddInterval = (20000L..30000L).random()
+            }
+        }
+
+        // Ricrea overlay
+        poiOverlay?.let { map.overlays.remove(it) }
+        poiOverlay = ItemizedIconOverlay(
+            poiItems.map { it.item },
+            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+                    item?.let {
+                        Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                    }
+                    return true
+                }
+
+                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
+            },
+            applicationContext
+        )
+        map.overlays.add(poiOverlay)
+
+        // Riaggiungi marker utente
+        map.overlays.remove(locationOverlay)
+        map.overlays.add(locationOverlay)
+    }
+
 
 
     private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {

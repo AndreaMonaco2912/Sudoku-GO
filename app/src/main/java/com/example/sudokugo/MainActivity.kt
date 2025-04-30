@@ -27,11 +27,17 @@ import kotlin.random.Random
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import org.osmdroid.api.IGeoPoint
 import org.osmdroid.views.overlay.Polygon
 import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
+    data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
+
     private lateinit var handler: android.os.Handler
     private lateinit var poiRunnable: Runnable
 
@@ -49,12 +55,25 @@ class MainActivity : AppCompatActivity() {
     private val maxRotationSpeed = 5f // Limita la velocità massima di inerzia
     private val fixedZoomLevel = 15.0
 
+    private val poiItems = mutableListOf<TimedPOI>()
+    private val maxPoiCount = 7
+    private val minPoiCount = 2
+    private val removalDistanceMeters = 100.0
+
     private lateinit var scaleDetector: ScaleGestureDetector
     private var scaleFactor = 1.0f
 
 
     private lateinit var map: MapView
     private lateinit var locationOverlay: MyLocationNewOverlay
+
+    private var lastPoiAddTime = 0L
+    private var poiAddInterval = randomAddInterval() // 17-30 secondi
+    private fun randomAddInterval() = (20_000L..45_000L).random()
+    private val minPoiLifespan = 25_000L
+    private val maxPoiLifespan = 40_000L
+
+
 
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 1
 
@@ -357,31 +376,103 @@ class MainActivity : AppCompatActivity() {
         return output
     }
 
+    private fun haversineDistance(p1: IGeoPoint, p2: GeoPoint): Double {
+        val R = 6371000.0 // raggio Terra in metri
+        val dLat = Math.toRadians(p2.latitude - p1.latitude)
+        val dLon = Math.toRadians(p2.longitude - p1.longitude)
+        val lat1 = Math.toRadians(p1.latitude)
+        val lat2 = Math.toRadians(p2.latitude)
+
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+                sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return R * c
+    }
+
+//    private fun animateSpawn(poiItem: OverlayItem) {
+//        val fadeIn = android.view.animation.AlphaAnimation(0f, 1f).apply {
+//            duration = 500
+//            fillAfter = true
+//        }
+//        val mapView = map
+//        val view = android.view.View(this).apply {
+//            layoutParams = android.view.ViewGroup.LayoutParams(50, 50)
+//            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+//            startAnimation(fadeIn)
+//        }
+//        mapView.overlayManager.addAfter(poiOverlay, object : org.osmdroid.views.overlay.Overlay() {
+//            override fun draw(c: android.graphics.Canvas?, osmv: MapView?, shadow: Boolean) {
+//                osmv?.overlayManager?.remove(this)
+//            }
+//        })
+//    }
+//
+//    private fun animateDespawn(poi: TimedPOI) {
+//        val fadeOut = android.view.animation.AlphaAnimation(1f, 0f).apply {
+//            duration = 500
+//            fillAfter = true
+//        }
+//
+//        val mapView = map
+//        val view = android.view.View(this).apply {
+//            layoutParams = android.view.ViewGroup.LayoutParams(50, 50)
+//            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+//            startAnimation(fadeOut)
+//        }
+//
+//        mapView.overlayManager.add(object : org.osmdroid.views.overlay.Overlay() {
+//            override fun draw(c: android.graphics.Canvas?, osmv: MapView?, shadow: Boolean) {
+//                osmv?.overlayManager?.remove(this)
+//            }
+//        })
+//    }
+
     private fun generateRandomPOIs(center: GeoPoint) {
-        poiOverlay?.let {
-            map.overlays.remove(it)
+        val currentTime = System.currentTimeMillis()
+
+        // Rimuovi POI troppo lontani o troppo vecchi
+        poiItems.removeIf {
+            haversineDistance(it.item.point, center) > removalDistanceMeters ||
+                    currentTime - it.createdAt > it.lifespan
         }
 
-        val items = mutableListOf<OverlayItem>()
+        val currentCount = poiItems.size
+        val shouldAdd = currentCount < minPoiCount || (currentCount < maxPoiCount && currentTime - lastPoiAddTime > poiAddInterval)
 
-        repeat(3) { i ->
-            val latOffset = (Random.nextDouble() - 0.5) / 500
-            val lonOffset = (Random.nextDouble() - 0.5) / 500
-            val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+        if (shouldAdd) {
+            val maxToAdd = (maxPoiCount - currentCount).coerceAtMost(2)
+            val toAdd = if (currentCount < minPoiCount) {
+                minPoiCount - currentCount
+            } else {
+                (0..maxToAdd).random()
+            }
 
-            val poiItem = OverlayItem("POI #${i + 1}", "Punto di interesse", poiLocation)
+            repeat(toAdd) {
+                val latOffset = (Random.nextDouble() - 0.5) / 500
+                val lonOffset = (Random.nextDouble() - 0.5) / 500
+                val poiLocation = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+                val poiItem = OverlayItem("POI #${System.currentTimeMillis()}", "Punto di interesse", poiLocation)
 
-            val poiBitmap = createPoiIcon(R.drawable.sudoku_icon, 100) // Immagine quadrata
-            val markerDrawable = poiBitmap.toDrawable(resources)
+                val poiBitmap = createPoiIcon(R.drawable.sudoku_icon, 100)
+                val markerDrawable = poiBitmap.toDrawable(resources)
+                poiItem.setMarker(markerDrawable)
+                poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER
 
-            poiItem.setMarker(markerDrawable)
-            poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER // <--- ECCO QUI!
+                poiItems.add(TimedPOI(poiItem, currentTime, (minPoiLifespan..maxPoiLifespan).random()))
 
-            items.add(poiItem)
+            }
+
+            lastPoiAddTime = currentTime
+            poiAddInterval = randomAddInterval()
+
         }
+
+        // Ricrea overlay
+        poiOverlay?.let { map.overlays.remove(it) }
 
         poiOverlay = ItemizedIconOverlay(
-            items,
+            poiItems.map { it.item },
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
                 override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
                     item?.let {
@@ -390,19 +481,18 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
 
-                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
-                    return false
-                }
+                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
             },
             applicationContext
         )
 
         map.overlays.add(poiOverlay)
 
-        // Riaggiungo il personaggio sopra
+        // Riaggiungi l’overlay della posizione
         map.overlays.remove(locationOverlay)
         map.overlays.add(locationOverlay)
     }
+
 
     private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {
         val circle = Polygon().apply {

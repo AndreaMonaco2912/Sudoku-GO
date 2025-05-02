@@ -100,15 +100,15 @@ class MainActivity : AppCompatActivity() {
         val mapController: IMapController = map.controller
         mapController.setZoom(fixedZoomLevel)
 
-        map.minZoomLevel = 10.0 // Example: limit zoom out to level 10
-        map.maxZoomLevel = 20.0 // Example: limit zoom in to level 20
+        map.minZoomLevel = 16.0 // Example: limit zoom out to level 10
+        map.maxZoomLevel = 21.0 // Example: limit zoom in to level 20
 
 
         // This line will *force-follow* after any touch
         map.setOnTouchListener { _, event ->
             scaleDetector.onTouchEvent(event) // Handle pinch zoom
 
-            val pointerCount = event.pointerCount
+//            val pointerCount = event.pointerCount
 //            if (pointerCount > 1) {
 //                // Don't process rotation when multi-touch (likely pinch)
 //                return@setOnTouchListener false
@@ -275,7 +275,7 @@ class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     val center = GeoPoint(location.latitude, location.longitude)
                     generateRandomPOIs(center)
-                    drawUserCenteredCircle(center, 25.0) // radius in meters
+                    drawUserCenteredCircle(center, 120.0) // radius in meters
                 }
                 handler.postDelayed(this, 3000) // repeat after 3 seconds
             }
@@ -398,7 +398,7 @@ class MainActivity : AppCompatActivity() {
         return output
     }
 
-    private fun haversineDistance(p1: IGeoPoint, p2: GeoPoint): Double {
+    private fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
         val R = 6371000.0 // raggio Terra in metri
         val dLat = Math.toRadians(p2.latitude - p1.latitude)
         val dLon = Math.toRadians(p2.longitude - p1.longitude)
@@ -465,8 +465,15 @@ private fun animateDespawn(poi: TimedPOI) {
             poiItems.map { it.item },
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
                 override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    item?.let {
-                        Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                    val userLocation = locationOverlay.myLocation
+                    if (item != null && userLocation != null) {
+                        val distance = haversineDistance(userLocation, item.point)
+                        if (distance <= 25.0) {
+                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+                        } else {
+                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     return true
                 }
@@ -501,14 +508,14 @@ private fun animateDespawn(poi: TimedPOI) {
         // Controlla se aggiungere nuovi POI
         if (currentTime - lastPoiAddTime >= poiAddInterval) {
             val currentCount = poiItems.size
-            val forceAdd = currentCount < 3
-            val allowAdd = currentCount < 7
+            val forceAdd = currentCount < 12
+            val allowAdd = currentCount < 28
 
             if (forceAdd || allowAdd) {
-                val toAdd = if (forceAdd) (3 - currentCount) else 1
+                val toAdd = if (forceAdd) (12 - currentCount + (0 .. 6).random()) else (0..2).random()
                 repeat(toAdd) {
-                    val latOffset = (Random.nextDouble() - 0.5) / 500
-                    val lonOffset = (Random.nextDouble() - 0.5) / 500
+                    val latOffset = (Random.nextDouble() - 0.5) / 125
+                    val lonOffset = (Random.nextDouble() - 0.5) / 125
                     val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
                     val poiItem = OverlayItem("Sudoku", "Gioca!", location)
@@ -542,7 +549,7 @@ private fun animateDespawn(poi: TimedPOI) {
                 }
 
                 lastPoiAddTime = currentTime
-                poiAddInterval = (20000L..30000L).random()
+                poiAddInterval = (2000L..30000L).random()
             }
         }
 
@@ -552,8 +559,15 @@ private fun animateDespawn(poi: TimedPOI) {
             poiItems.map { it.item },
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
                 override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    item?.let {
-                        Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                    val userLocation = locationOverlay.myLocation
+                    if (item != null && userLocation != null) {
+                        val distance = haversineDistance(userLocation, item.point)
+                        if (distance <= 120.0) {
+                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+                        } else {
+                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                     return true
                 }
@@ -574,15 +588,14 @@ private fun animateDespawn(poi: TimedPOI) {
     private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {
         val circle = Polygon().apply {
             points = Polygon.pointsAsCircle(center, radiusInMeters)
-            outlinePaint.color = android.graphics.Color.BLUE
-            outlinePaint.strokeWidth = 2f
+            outlinePaint.color = android.graphics.Color.DKGRAY
+            outlinePaint.strokeWidth = 4f
             outlinePaint.style = android.graphics.Paint.Style.STROKE
             outlinePaint.isAntiAlias = true
 
-            // Fill
-            fillPaint.color = android.graphics.Color.argb(50, 0, 0, 255)
-            fillPaint.style = android.graphics.Paint.Style.FILL
-            fillPaint.isAntiAlias = true
+//            // Fill
+//            fillPaint.style = android.graphics.Paint.Style.FILL
+//            fillPaint.isAntiAlias = true
 
             setInfoWindow(null)
         }

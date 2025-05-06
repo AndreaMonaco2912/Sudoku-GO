@@ -25,12 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.sudokugo.ui.composables.AppBar
 
 @Composable
-fun UserScreen() {
+fun UserScreen(navController: NavController, userId: String) {
     Scaffold(
-        topBar = { AppBar(title = "User") }
+        topBar = { AppBar(navController, title = userId) }
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -84,7 +85,7 @@ fun UserScreen() {
                     "2 Classificato",
                     "3 Classificato",
                     "4 Classificato",
-                    "Tu"
+                    userId
                 )
 
                 Card(

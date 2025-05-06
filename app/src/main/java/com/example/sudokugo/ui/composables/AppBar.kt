@@ -2,6 +2,7 @@ package com.example.sudokugo.ui.composables
 
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -13,10 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
+import com.example.sudokugo.ui.SudokuGORoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(title: String) {
+fun AppBar(navController: NavController, title: String) {
+    val fakeUserId = "1"
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -24,9 +28,21 @@ fun AppBar(title: String) {
                 fontWeight = FontWeight.Medium,
             )
         },
+        navigationIcon = {
+            if (navController.previousBackStackEntry != null) {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Go Back")
+                }
+            }
+        },
         actions = {
-            if (title != "Settings") {
+            if (title == "Sudoku List") {
                 IconButton(onClick = { /*TODO*/ }) {
+                    Icon(Icons.Outlined.Search, contentDescription = "Search")
+                }
+            }
+            if (title != "Settings" && title != "Login" && title != "Register") {
+                IconButton(onClick = { navController.navigate(SudokuGORoute.Settings(fakeUserId)) }) {
                     Icon(Icons.Outlined.Settings, "Settings")
                 }
             }

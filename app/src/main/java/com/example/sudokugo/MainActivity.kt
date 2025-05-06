@@ -18,6 +18,7 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -37,6 +38,8 @@ import kotlin.random.Random
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import androidx.navigation.compose.rememberNavController
+import com.example.sudokugo.ui.SudokuGONavGraph
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.views.overlay.Polygon
 import kotlin.math.atan2
@@ -77,6 +80,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         Configuration.getInstance().userAgentValue = packageName
 
         requestPermissionsIfNecessary(arrayOf(
@@ -85,14 +89,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SudokuGOTheme {
-                MapScreen()
-//                HomeScreen()
-//                SudokuListScreen()
-//                SudokuDetailsScreen()
-//                LoginScreen()
-//                RegisterScreen()
-//                UserScreen()
-//                SolveScreen()
+                val navController = rememberNavController()
+                SudokuGONavGraph(navController)
             }
         }
     }

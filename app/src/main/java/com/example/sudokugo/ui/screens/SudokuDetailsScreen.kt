@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui.screens
 
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,18 +25,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.sudokugo.ui.composables.AppBar
 
 
 @Composable
-fun SudokuDetailsScreen() {
+fun SudokuDetailsScreen(navController: NavController, sudokuId: String) {
+    val ctx = LocalContext.current
+
+    fun shareDetails() {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, sudokuId)
+        }
+        val shareIntent = Intent.createChooser(sendIntent, "Share Sudoku")
+        if (shareIntent.resolveActivity(ctx.packageManager) != null) {
+            ctx.startActivity(shareIntent)
+        }
+    }
     Scaffold(
-        topBar = { AppBar(title = "Sudoku Details") },
+        topBar = { AppBar(navController, title = "Sudoku Details") },
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.tertiary,
-                onClick = { /*TODO*/ }
+                onClick = ::shareDetails
             ) {
                 Icon(Icons.Outlined.Share, "Share Sudoku")
             }
@@ -59,7 +74,7 @@ fun SudokuDetailsScreen() {
                     .padding(36.dp)
             )
             Text(
-                "Sudoku name",
+                sudokuId,
                 style = MaterialTheme.typography.titleLarge
             )
             Text(

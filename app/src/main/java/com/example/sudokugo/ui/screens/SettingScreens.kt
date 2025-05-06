@@ -18,18 +18,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.sudokugo.ui.composables.AppBar
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navController: NavController, userId: String) {
     Scaffold(
-        topBar = { AppBar(title = "Settings") }
+        topBar = { AppBar(navController, title = "Settings") }
     ) { contentPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(contentPadding).padding(12.dp).fillMaxSize()
         ) {
-            var username by rememberSaveable { mutableStateOf("username") }
+            var username by rememberSaveable { mutableStateOf(userId) }
 
             OutlinedTextField(
                 value = username,

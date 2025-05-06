@@ -34,16 +34,18 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.sudokugo.ui.SudokuGORoute
 
 import com.example.sudokugo.ui.composables.AppBar
 
 
 @Composable
-fun SudokuListScreen() {
-    val items = (1..20).map { "Item n°$it" }
+fun SudokuListScreen(navController: NavController) {
+    val items = (1..20).map { "Sudoku n°$it" }
 
     Scaffold(
-        topBar = { AppBar(title = "SudokuGO") }
+        topBar = { AppBar(navController, title = "Sudoku List") }
     ) { contentPadding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -52,16 +54,18 @@ fun SudokuListScreen() {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier =  Modifier.padding(contentPadding)
         ) {
-            items(items) { item -> SudokuItem(item) }
+            items(items) { item -> SudokuItem(
+                item,
+                onClick = { navController.navigate(SudokuGORoute.SudokuDetails(item)) }) }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SudokuItem(item: String) {
+fun SudokuItem(item: String, onClick: () -> Unit) {
     Card(
-        onClick = { /*TODO*/ },
+        onClick = onClick,
         modifier = Modifier
             .size(150.dp)
             .fillMaxWidth(),

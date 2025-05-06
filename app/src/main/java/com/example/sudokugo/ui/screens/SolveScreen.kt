@@ -43,13 +43,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.AppBar
 
 @Composable
-fun SolveScreen() {
+fun SolveScreen(navController: NavController, sudokuId: String) {
     Scaffold(
-        topBar = { AppBar(title = "User") }
+        topBar = { AppBar(navController, title = sudokuId) }
     ){  contentPadding ->
         Column(
             modifier = Modifier

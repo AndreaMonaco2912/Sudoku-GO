@@ -34,66 +34,118 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.sudokugo.ui.SudokuGORoute
 
 import com.example.sudokugo.ui.composables.AppBar
 
 
 @Composable
-fun HomeScreen() {
-    val items = (1..20).map { "Item n°$it" }
-
+fun HomeScreen(navController: NavController) {
+    val fakeSudokuId = "Sudoku 12"
+    val fakeUserId = "Pippo"
     Scaffold(
-        topBar = { AppBar(title = "SudokuGO") }
+        topBar = { AppBar(navController, title = "SudokuGO")},
     ) { contentPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
-            modifier =  Modifier.padding(contentPadding)
-        ) {
-            items(items) { item -> TravelItem(item) }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TravelItem(item: String) {
-    Card(
-        onClick = { /*TODO*/ },
-        modifier = Modifier
-            .size(150.dp)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor =  MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier =  Modifier.padding(contentPadding).padding(12.dp)
         ) {
-            Image(
-                Icons.Outlined.Image,
-                "Travel picture",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+            Card(onClick = { navController.navigate(SudokuGORoute.SudokuList)},
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(20.dp)
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(
-                item,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
+                    .size(150.dp)
+                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                   Text(
+                       text = "Sudoku List",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Card(onClick = { navController.navigate(SudokuGORoute.User(userId = fakeUserId))},
+                modifier = Modifier
+                    .size(150.dp)
+                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = "User",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Card(onClick = { navController.navigate(SudokuGORoute.Solve(sudokuId = fakeSudokuId))},
+                modifier = Modifier
+                    .size(150.dp)
+                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = "Solve Sudoku",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Card(onClick = { navController.navigate(SudokuGORoute.Login)},
+                modifier = Modifier
+                    .size(150.dp)
+                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = "Login",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Card(onClick = { navController.navigate(SudokuGORoute.Register)},
+                modifier = Modifier
+                    .size(150.dp)
+                    .fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        text = "Register",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
 }

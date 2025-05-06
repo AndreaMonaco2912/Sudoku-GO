@@ -46,6 +46,17 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import com.example.sudokugo.ui.theme.SudokuGOTheme
 
+import com.example.sudokugo.ui.screens.HomeScreen
+import com.example.sudokugo.ui.screens.SudokuListScreen
+import com.example.sudokugo.ui.screens.SudokuDetailsScreen
+import com.example.sudokugo.ui.screens.LoginScreen
+import com.example.sudokugo.ui.screens.RegisterScreen
+import com.example.sudokugo.ui.screens.UserScreen
+import com.example.sudokugo.ui.screens.SolveScreen
+
+
+
+
 class MainActivity : ComponentActivity() {
 
     private lateinit var mapView: MapView
@@ -75,6 +86,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             SudokuGOTheme {
                 MapScreen()
+//                HomeScreen()
+//                SudokuListScreen()
+//                SudokuDetailsScreen()
+//                LoginScreen()
+//                RegisterScreen()
+//                UserScreen()
+//                SolveScreen()
             }
         }
     }

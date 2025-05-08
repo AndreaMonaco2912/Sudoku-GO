@@ -9,74 +9,18 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PorterDuffXfermode
-import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.Bookmark
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Rocket
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
@@ -90,33 +34,17 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
-import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.map.classes.InertiaAnimation
+import com.example.sudokugo.map.classes.PoiManager
 import com.example.sudokugo.map.functions.getCircularBitmap
-import com.example.sudokugo.map.functions.createPoiIcon
+import com.example.sudokugo.map.functions.drawUserCenteredCircle
 import com.example.sudokugo.map.functions.haversineDistance
-import com.example.sudokugo.ui.SudokuGONavGraph
-import org.osmdroid.api.IGeoPoint
 import org.osmdroid.views.overlay.Polygon
 import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.hypot
-import kotlin.math.sin
-import kotlin.math.sqrt
 import com.example.sudokugo.ui.theme.SudokuGOTheme
-
-import com.example.sudokugo.ui.screens.HomeScreen
-import com.example.sudokugo.ui.screens.SudokuListScreen
-import com.example.sudokugo.ui.screens.SudokuDetailsScreen
-import com.example.sudokugo.ui.screens.LoginScreen
-import com.example.sudokugo.ui.screens.RegisterScreen
-import com.example.sudokugo.ui.screens.UserScreen
-import com.example.sudokugo.ui.screens.SolveScreen
-
-
 
 
 class MainActivity : ComponentActivity() {
@@ -126,11 +54,7 @@ class MainActivity : ComponentActivity() {
 
     data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
 
-    private val poiItems = mutableListOf<TimedPOI>()
-    private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
-    private var lastPoiAddTime = 0L
-    private var poiAddInterval = randomAddInterval() // 17-30 secondi
-    private fun randomAddInterval() = (200L..400L).random()
+
 
     private lateinit var scaleDetector: ScaleGestureDetector
 
@@ -197,18 +121,7 @@ class MainActivity : ComponentActivity() {
                     })
 
 
-                    // Start POI loop
-                    val handler = android.os.Handler(mainLooper)
-                    handler.post(object : Runnable {
-                        override fun run() {
-                            locationOverlay.myLocation?.let {
-                                val center = GeoPoint(it.latitude, it.longitude)
-                                generateRandomPOIs(context, center)
-                                drawUserCenteredCircle(center, 120.0)
-                            }
-                            handler.postDelayed(this, 3000)
-                        }
-                    })
+
                 }
 
                 val inertiaAnimation = InertiaAnimation(mapView)
@@ -319,6 +232,21 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                val poiManager = PoiManager(context, mapView)
+
+                // Start POI loop
+                val handler = android.os.Handler(mainLooper)
+                handler.post(object : Runnable {
+                    override fun run() {
+                        locationOverlay.myLocation?.let {
+                            val center = GeoPoint(it.latitude, it.longitude)
+                            poiManager.generateRandomPOIs(context, mapView, locationOverlay, center)
+                            drawUserCenteredCircle(mapView, center, 120.0)
+                        }
+                        handler.postDelayed(this, 3000)
+                    }
+                })
+
                 mapView
             },
             modifier = Modifier.fillMaxSize()
@@ -377,175 +305,175 @@ class MainActivity : ComponentActivity() {
 //        return R * c
 //    }
 
-    private fun animateDespawn(poi: TimedPOI) {
-        val item = poi.item
-        val originalDrawable = item.drawable as? BitmapDrawable ?: return
-        val originalBitmap = originalDrawable.bitmap
-
-        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(mutableBitmap)
-        val paint = Paint().apply { isAntiAlias = true }
-
-        val animator = ValueAnimator.ofInt(255, 0).apply {
-            duration = 500
-            addUpdateListener {
-                val alpha = it.animatedValue as Int
-                paint.alpha = alpha
-                mutableBitmap.eraseColor(Color.TRANSPARENT)
-                canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
-                item.setMarker(mutableBitmap.toDrawable(resources))
-                mapView.invalidate()
-            }
-            doOnEnd {
-                // Dopo fade out completo, rimuovi
-                poiItems.remove(poi)
-                recreatePoiOverlay()
-            }
-            start()
-        }
-    }
-
-    private fun recreatePoiOverlay() {
-        poiOverlay?.let { mapView.overlays.remove(it) }
-        poiOverlay = ItemizedIconOverlay(
-            poiItems.map { it.item },
-            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
-                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    val userLocation = locationOverlay.myLocation
-                    if (item != null && userLocation != null) {
-                        val distance = haversineDistance(userLocation, item.point)
-                        if (distance <= 120.0) {
-                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
-                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
-                        } else {
-                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    return true
-                }
-
-                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
-            },
-            applicationContext
-        )
-        mapView.overlays.add(poiOverlay)
-
-        // Assicura che l'overlay utente sia sopra
-        mapView.overlays.remove(locationOverlay)
-        mapView.overlays.add(locationOverlay)
-    }
-
-    private fun generateRandomPOIs(context: Context, center: GeoPoint) {
-        val currentTime = System.currentTimeMillis()
-
-        // Rimuovi quelli scaduti
-        val iterator = poiItems.iterator()
-        while (iterator.hasNext()) {
-            val poi = iterator.next()
-            if (currentTime > poi.createdAt + poi.lifespan) {
-                animateDespawn(poi)
-            }
-        }
-
-        // Controlla se aggiungere nuovi POI
-        if (currentTime - lastPoiAddTime >= poiAddInterval) { //Very very very sus
-            val currentCount = poiItems.size
-            val forceAdd = currentCount < 12
-            val allowAdd = currentCount < 28
-
-            if (forceAdd || allowAdd) {
-                val toAdd = if (forceAdd) (12 - currentCount + (0 .. 6).random()) else (0..2).random()
-                repeat(toAdd) {
-                    val latOffset = (Random.nextDouble() - 0.5) / 125
-                    val lonOffset = (Random.nextDouble() - 0.5) / 125
-                    val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
-
-                    val poiItem = OverlayItem("Sudoku", "Gioca!", location)
-                    val bitmap = createPoiIcon(context, R.drawable.sudoku_icon, 100)
-                    val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                    val canvas = Canvas(mutableBitmap)
-                    val paint = Paint()
-
-                    // Animazione Fade-In
-                    ValueAnimator.ofInt(0, 255).apply {
-                        duration = 500
-                        addUpdateListener {
-                            paint.alpha = it.animatedValue as Int
-                            mutableBitmap.eraseColor(Color.TRANSPARENT)
-                            canvas.drawBitmap(bitmap, 0f, 0f, paint)
-                            mapView.invalidate()
-                        }
-                        start()
-                    }
-
-                    poiItem.setMarker(mutableBitmap.toDrawable(resources))
-                    poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER
-
-                    poiItems.add(
-                        TimedPOI(
-                            item = poiItem,
-                            createdAt = currentTime,
-                            lifespan = (25000L..40000L).random()
-                        )
-                    )
-                }
-
-                lastPoiAddTime = currentTime
-                poiAddInterval = (2000L..30000L).random()
-            }
-        }
-
-        // Ricrea overlay
-        poiOverlay?.let { mapView.overlays.remove(it) }
-        poiOverlay = ItemizedIconOverlay(
-            poiItems.map { it.item },
-            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
-                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    val userLocation = locationOverlay.myLocation
-                    if (item != null && userLocation != null) {
-                        val distance = haversineDistance(userLocation, item.point)
-                        if (distance <= 120.0) {
-                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
-                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
-                        } else {
-                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    return true
-                }
-
-                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
-            },
-            applicationContext
-        )
-        mapView.overlays.add(poiOverlay)
-
-        // Riaggiungi marker utente
-        mapView.overlays.remove(locationOverlay)
-        mapView.overlays.add(locationOverlay)
-    }
-
-    private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {
-        val circle = Polygon().apply {
-            points = Polygon.pointsAsCircle(center, radiusInMeters)
-            outlinePaint.color = android.graphics.Color.DKGRAY
-            outlinePaint.strokeWidth = 4f
-            outlinePaint.style = Paint.Style.STROKE
-            outlinePaint.isAntiAlias = true
-
-//            // Fill
-//            fillPaint.style = android.graphics.Paint.Style.FILL
-//            fillPaint.isAntiAlias = true
-
-            setInfoWindow(null)
-        }
-
-        // Remove old if exists
-        mapView.overlays.removeIf { it is Polygon && it.infoWindow == null }
-
-        mapView.overlays.add(circle)
-        mapView.invalidate()
-    }
+//    private fun animateDespawn(poi: TimedPOI) {
+//        val item = poi.item
+//        val originalDrawable = item.drawable as? BitmapDrawable ?: return
+//        val originalBitmap = originalDrawable.bitmap
+//
+//        val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
+//        val canvas = Canvas(mutableBitmap)
+//        val paint = Paint().apply { isAntiAlias = true }
+//
+//        val animator = ValueAnimator.ofInt(255, 0).apply {
+//            duration = 500
+//            addUpdateListener {
+//                val alpha = it.animatedValue as Int
+//                paint.alpha = alpha
+//                mutableBitmap.eraseColor(Color.TRANSPARENT)
+//                canvas.drawBitmap(originalBitmap, 0f, 0f, paint)
+//                item.setMarker(mutableBitmap.toDrawable(resources))
+//                mapView.invalidate()
+//            }
+//            doOnEnd {
+//                // Dopo fade out completo, rimuovi
+//                poiItems.remove(poi)
+//                recreatePoiOverlay()
+//            }
+//            start()
+//        }
+//    }
+//
+//    private fun recreatePoiOverlay() {
+//        poiOverlay?.let { mapView.overlays.remove(it) }
+//        poiOverlay = ItemizedIconOverlay(
+//            poiItems.map { it.item },
+//            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+//                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+//                    val userLocation = locationOverlay.myLocation
+//                    if (item != null && userLocation != null) {
+//                        val distance = haversineDistance(userLocation, item.point)
+//                        if (distance <= 120.0) {
+//                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+//                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+//                        } else {
+//                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                    return true
+//                }
+//
+//                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
+//            },
+//            applicationContext
+//        )
+//        mapView.overlays.add(poiOverlay)
+//
+//        // Assicura che l'overlay utente sia sopra
+//        mapView.overlays.remove(locationOverlay)
+//        mapView.overlays.add(locationOverlay)
+//    }
+//
+//    private fun generateRandomPOIs(context: Context, center: GeoPoint) {
+//        val currentTime = System.currentTimeMillis()
+//
+//        // Rimuovi quelli scaduti
+//        val iterator = poiItems.iterator()
+//        while (iterator.hasNext()) {
+//            val poi = iterator.next()
+//            if (currentTime > poi.createdAt + poi.lifespan) {
+//                animateDespawn(poi)
+//            }
+//        }
+//
+//        // Controlla se aggiungere nuovi POI
+//        if (currentTime - lastPoiAddTime >= poiAddInterval) { //Very very very sus
+//            val currentCount = poiItems.size
+//            val forceAdd = currentCount < 12
+//            val allowAdd = currentCount < 28
+//
+//            if (forceAdd || allowAdd) {
+//                val toAdd = if (forceAdd) (12 - currentCount + (0 .. 6).random()) else (0..2).random()
+//                repeat(toAdd) {
+//                    val latOffset = (Random.nextDouble() - 0.5) / 125
+//                    val lonOffset = (Random.nextDouble() - 0.5) / 125
+//                    val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+//
+//                    val poiItem = OverlayItem("Sudoku", "Gioca!", location)
+//                    val bitmap = createPoiIcon(context, R.drawable.sudoku_icon, 100)
+//                    val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+//                    val canvas = Canvas(mutableBitmap)
+//                    val paint = Paint()
+//
+//                    // Animazione Fade-In
+//                    ValueAnimator.ofInt(0, 255).apply {
+//                        duration = 500
+//                        addUpdateListener {
+//                            paint.alpha = it.animatedValue as Int
+//                            mutableBitmap.eraseColor(Color.TRANSPARENT)
+//                            canvas.drawBitmap(bitmap, 0f, 0f, paint)
+//                            mapView.invalidate()
+//                        }
+//                        start()
+//                    }
+//
+//                    poiItem.setMarker(mutableBitmap.toDrawable(resources))
+//                    poiItem.markerHotspot = OverlayItem.HotspotPlace.CENTER
+//
+//                    poiItems.add(
+//                        TimedPOI(
+//                            item = poiItem,
+//                            createdAt = currentTime,
+//                            lifespan = (25000L..40000L).random()
+//                        )
+//                    )
+//                }
+//
+//                lastPoiAddTime = currentTime
+//                poiAddInterval = (2000L..30000L).random()
+//            }
+//        }
+//
+//        // Ricrea overlay
+//        poiOverlay?.let { mapView.overlays.remove(it) }
+//        poiOverlay = ItemizedIconOverlay(
+//            poiItems.map { it.item },
+//            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+//                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+//                    val userLocation = locationOverlay.myLocation
+//                    if (item != null && userLocation != null) {
+//                        val distance = haversineDistance(userLocation, item.point)
+//                        if (distance <= 120.0) {
+//                            Toast.makeText(this@MainActivity, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+//                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+//                        } else {
+//                            Toast.makeText(this@MainActivity, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                    return true
+//                }
+//
+//                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
+//            },
+//            applicationContext
+//        )
+//        mapView.overlays.add(poiOverlay)
+//
+//        // Riaggiungi marker utente
+//        mapView.overlays.remove(locationOverlay)
+//        mapView.overlays.add(locationOverlay)
+//    }
+//
+//    private fun drawUserCenteredCircle(center: GeoPoint, radiusInMeters: Double) {
+//        val circle = Polygon().apply {
+//            points = Polygon.pointsAsCircle(center, radiusInMeters)
+//            outlinePaint.color = android.graphics.Color.DKGRAY
+//            outlinePaint.strokeWidth = 4f
+//            outlinePaint.style = Paint.Style.STROKE
+//            outlinePaint.isAntiAlias = true
+//
+////            // Fill
+////            fillPaint.style = android.graphics.Paint.Style.FILL
+////            fillPaint.isAntiAlias = true
+//
+//            setInfoWindow(null)
+//        }
+//
+//        // Remove old if exists
+//        mapView.overlays.removeIf { it is Polygon && it.infoWindow == null }
+//
+//        mapView.overlays.add(circle)
+//        mapView.invalidate()
+//    }
 
     private fun requestPermissionsIfNecessary(permissions: Array<String>) {
         val toRequest = permissions.filter {

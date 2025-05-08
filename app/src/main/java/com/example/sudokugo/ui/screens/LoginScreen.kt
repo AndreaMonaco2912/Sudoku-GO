@@ -34,12 +34,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.R
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun LoginScreen(navController: NavController) {
     Scaffold(
-        topBar = { AppBar(navController, title = "Login") }
+        topBar = { TopSudokuGoAppBar(navController, title = "Login") }
     ) { contentPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),

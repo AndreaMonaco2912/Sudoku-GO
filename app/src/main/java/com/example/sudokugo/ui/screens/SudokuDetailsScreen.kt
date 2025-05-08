@@ -28,7 +28,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.BottomNavSelected
+import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 
 @Composable
@@ -46,7 +48,8 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: String) {
         }
     }
     Scaffold(
-        topBar = { AppBar(navController, title = "Sudoku Details") },
+        topBar = { TopSudokuGoAppBar(navController, title = "Sudoku Details") },
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) },
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.tertiary,

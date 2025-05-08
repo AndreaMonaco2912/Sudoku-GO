@@ -19,12 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.BottomNavSelected
+import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun SettingsScreen(navController: NavController, userId: String) {
     Scaffold(
-        topBar = { AppBar(navController, title = "Settings") }
+        topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) }
     ) { contentPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

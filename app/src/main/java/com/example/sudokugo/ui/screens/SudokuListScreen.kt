@@ -36,8 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
+import com.example.sudokugo.ui.composables.BottomNavSelected
+import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 
 @Composable
@@ -45,7 +47,8 @@ fun SudokuListScreen(navController: NavController) {
     val items = (1..20).map { "Sudoku n°$it" }
 
     Scaffold(
-        topBar = { AppBar(navController, title = "Sudoku List") }
+        topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
     ) { contentPadding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),

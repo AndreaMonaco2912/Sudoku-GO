@@ -45,12 +45,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.R
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun SolveScreen(navController: NavController, sudokuId: String) {
     Scaffold(
-        topBar = { AppBar(navController, title = sudokuId) }
+        topBar = { TopSudokuGoAppBar(navController, title = sudokuId) }
     ){  contentPadding ->
         Column(
             modifier = Modifier

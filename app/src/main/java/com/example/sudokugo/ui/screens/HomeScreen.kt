@@ -36,8 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
+import com.example.sudokugo.ui.composables.BottomNavSelected
+import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 
 @Composable
@@ -45,7 +47,8 @@ fun HomeScreen(navController: NavController) {
     val fakeSudokuId = "Sudoku 12"
     val fakeUserId = "Pippo"
     Scaffold(
-        topBar = { AppBar(navController, title = "SudokuGO")},
+        topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO")},
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.EXPLORE) }
     ) { contentPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),

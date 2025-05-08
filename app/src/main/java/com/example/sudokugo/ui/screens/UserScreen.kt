@@ -26,12 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.sudokugo.ui.composables.AppBar
+import com.example.sudokugo.ui.composables.BottomNavSelected
+import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
+import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun UserScreen(navController: NavController, userId: String) {
     Scaffold(
-        topBar = { AppBar(navController, title = userId) }
+        topBar = { TopSudokuGoAppBar(navController, title = userId) },
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.USER) }
     ) { contentPadding ->
         Column(
             modifier = Modifier

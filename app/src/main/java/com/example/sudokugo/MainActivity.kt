@@ -2,6 +2,8 @@ package com.example.sudokugo
 
 import android.Manifest
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -128,9 +130,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var scaleDetector: ScaleGestureDetector
 
-
-    private var inertiaAnimator: ValueAnimator? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -150,6 +149,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @Composable
     fun MapScreen() {
 //        val context = LocalContext.current
@@ -192,97 +192,9 @@ class MainActivity : ComponentActivity() {
                         }
                     })
 
-                    // Gesture rotation handler (direttamente qui dentro)
-                    var lastAngle = 0f
-                    var rotating = false
-                    var lastRotationSpeed = 0f
-                    var touchStartX = 0f
-                    var touchStartY = 0f
-                    var ignoreTouchUntil = 0L
-                    val touchSlop = 10
-                    val maxRotationSpeed = 5f
 
-                    setOnTouchListener { _, event ->
-                        if (System.currentTimeMillis() < ignoreTouchUntil) return@setOnTouchListener true
 
-                        scaleDetector.onTouchEvent(event)
-                        val projection = projection
-                        val center = mapCenter
-                        val centerPoint = projection.toPixels(center, null)
 
-                        when (event.actionMasked) {
-                            MotionEvent.ACTION_DOWN -> {
-                                inertiaAnimator?.cancel()
-                                touchStartX = event.x
-                                touchStartY = event.y
-                                val dx = event.x - centerPoint.x
-                                val dy = event.y - centerPoint.y
-                                lastAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
-                                rotating = false
-                                lastRotationSpeed = 0f
-                                locationOverlay.enableFollowLocation()
-                                false
-                            }
-                            MotionEvent.ACTION_POINTER_UP -> {
-                                // Ignora input per 200ms quando si passa da 2 a 1 dito
-                                if (event.pointerCount == 2) {
-                                    ignoreTouchUntil = System.currentTimeMillis() + 200
-                                }
-                                true
-                            }
-                            MotionEvent.ACTION_MOVE -> {
-                                if (event.pointerCount == 2) {
-                                    val x1 = event.getX(0)
-                                    val y1 = event.getY(0)
-                                    val x2 = event.getX(1)
-                                    val y2 = event.getY(1)
-                                    val angle = Math.toDegrees(atan2((y2 - y1).toDouble(), (x2 - x1).toDouble())).toFloat()
-                                    if (!rotating) {
-                                        rotating = true
-                                        lastAngle = angle
-                                    } else {
-                                        val deltaAngle = angle - lastAngle
-                                        mapOrientation = (mapOrientation + deltaAngle + 360) % 360
-                                        invalidate()
-                                        lastAngle = angle
-                                    }
-                                    true
-                                } else {
-                                    val moveX = event.x - touchStartX
-                                    val moveY = event.y - touchStartY
-                                    val distance = hypot(moveX.toDouble(), moveY.toDouble())
-                                    if (distance > touchSlop) rotating = true
-                                    if (rotating) {
-                                        val dx = event.x - centerPoint.x
-                                        val dy = event.y - centerPoint.y
-                                        val angle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
-                                        var deltaAngle = angle - lastAngle
-                                        if (deltaAngle > 180) deltaAngle -= 360
-                                        if (deltaAngle < -180) deltaAngle += 360
-                                        lastRotationSpeed = deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
-                                        mapOrientation = (mapOrientation + deltaAngle) % 360
-                                        invalidate()
-                                        lastAngle = angle
-                                        true
-                                    } else {
-                                        locationOverlay.enableFollowLocation()
-                                        false
-                                    }
-                                }
-                            }
-                            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                                if (rotating && lastRotationSpeed != 0f) {
-                                    startInertiaRotation(lastRotationSpeed)
-                                }
-                                rotating = false
-                                locationOverlay.enableFollowLocation()
-
-                                mapView.performClick()
-                                false
-                            }
-                            else -> false
-                        }
-                    }
 
                     // Start POI loop
                     val handler = android.os.Handler(mainLooper)
@@ -297,6 +209,115 @@ class MainActivity : ComponentActivity() {
                         }
                     })
                 }
+
+                val inertiaAnimation = InertiaAnimation(mapView)
+
+                // Gesture rotation handler (direttamente qui dentro)
+                var lastAngle = 0f
+                var rotating = false
+                var lastRotationSpeed = 0f
+                var touchStartX = 0f
+                var touchStartY = 0f
+                var ignoreTouchUntil = 0L
+                val touchSlop = 10
+                val maxRotationSpeed = 5f
+
+                mapView.setOnTouchListener { _, event ->
+                    if (System.currentTimeMillis() < ignoreTouchUntil) return@setOnTouchListener true
+
+                    scaleDetector.onTouchEvent(event)
+                    val projection = mapView.projection
+                    val center = mapView.mapCenter
+                    val centerPoint = projection.toPixels(center, null)
+
+                    when (event.actionMasked) {
+                        MotionEvent.ACTION_DOWN -> {
+                            inertiaAnimation.stopInertiaRotation()
+                            touchStartX = event.x
+                            touchStartY = event.y
+                            val dx = event.x - centerPoint.x
+                            val dy = event.y - centerPoint.y
+                            lastAngle =
+                                Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                            rotating = false
+                            lastRotationSpeed = 0f
+                            locationOverlay.enableFollowLocation()
+                            false
+                        }
+
+                        MotionEvent.ACTION_POINTER_UP -> {
+                            // Ignora input per 200ms quando si passa da 2 a 1 dito
+                            if (event.pointerCount == 2) {
+                                ignoreTouchUntil = System.currentTimeMillis() + 200
+                            }
+                            true
+                        }
+
+                        MotionEvent.ACTION_MOVE -> {
+                            if (event.pointerCount == 2) {
+                                val x1 = event.getX(0)
+                                val y1 = event.getY(0)
+                                val x2 = event.getX(1)
+                                val y2 = event.getY(1)
+                                val angle = Math.toDegrees(
+                                    atan2(
+                                        (y2 - y1).toDouble(),
+                                        (x2 - x1).toDouble()
+                                    )
+                                ).toFloat()
+                                if (!rotating) {
+                                    rotating = true
+                                    lastAngle = angle
+                                } else {
+                                    val deltaAngle = angle - lastAngle
+                                    mapView.mapOrientation =
+                                        (mapView.mapOrientation + deltaAngle + 360) % 360
+                                    mapView.invalidate()
+                                    lastAngle = angle
+                                }
+                                true
+                            } else {
+                                val moveX = event.x - touchStartX
+                                val moveY = event.y - touchStartY
+                                val distance = hypot(moveX.toDouble(), moveY.toDouble())
+                                if (distance > touchSlop) rotating = true
+                                if (rotating) {
+                                    val dx = event.x - centerPoint.x
+                                    val dy = event.y - centerPoint.y
+                                    val angle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble()))
+                                        .toFloat()
+                                    var deltaAngle = angle - lastAngle
+                                    if (deltaAngle > 180) deltaAngle -= 360
+                                    if (deltaAngle < -180) deltaAngle += 360
+                                    lastRotationSpeed =
+                                        deltaAngle.coerceIn(-maxRotationSpeed, maxRotationSpeed)
+                                    mapView.mapOrientation =
+                                        (mapView.mapOrientation + deltaAngle) % 360
+                                    mapView.invalidate()
+                                    lastAngle = angle
+                                    true
+                                } else {
+                                    locationOverlay.enableFollowLocation()
+                                    false
+                                }
+                            }
+                        }
+
+                        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                            if (rotating && lastRotationSpeed != 0f) {
+                                inertiaAnimation.startInertiaRotation(lastRotationSpeed)
+                            }
+                            rotating = false
+                            locationOverlay.enableFollowLocation()
+
+                            mapView.performClick()
+                            false
+                        }
+
+                        else -> false
+                    }
+                }
+
                 mapView
             },
             modifier = Modifier.fillMaxSize()
@@ -325,21 +346,6 @@ class MainActivity : ComponentActivity() {
         canvas.drawBitmap(bitmap, srcRect, destRect, paint)
 
         return output
-    }
-
-    private fun startInertiaRotation(initialSpeed: Float) {
-        inertiaAnimator = ValueAnimator.ofFloat(initialSpeed, 0f).apply {
-            duration = 1000 // 1 secondo di inerzia
-            interpolator = DecelerateInterpolator()
-
-            addUpdateListener { animation ->
-                val delta = animation.animatedValue as Float
-                mapView.mapOrientation = (mapView.mapOrientation + delta) % 360
-                mapView.invalidate()
-            }
-
-            start()
-        }
     }
 
     private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {

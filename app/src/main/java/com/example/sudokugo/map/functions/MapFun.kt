@@ -1,6 +1,7 @@
 package com.example.sudokugo.map.functions
 
 import android.animation.ValueAnimator
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -53,57 +54,57 @@ fun getCircularBitmap(bitmap: Bitmap): Bitmap {
     return output
 }
 
-//private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
-//    val output = createBitmap(size, size)
-//    val canvas = Canvas(output)
-//
-//    val paint = Paint().apply {
-//        isAntiAlias = true
-//        color = Color.WHITE // Sfondo bianco pieno
-//        style = Paint.Style.FILL
-//    }
-//
-//    // Disegna lo sfondo bianco interamente
-//    canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
-//
-//    // Carica l'immagine dell'icona
-//    val drawable = ContextCompat.getDrawable(this, drawableId) as BitmapDrawable
-//    val originalBitmap = drawable.bitmap
-//
-//    // Calcola proporzioni corrette per scalare l'immagine
-//    val scale = minOf(
-//        size.toFloat() / originalBitmap.width,
-//        size.toFloat() / originalBitmap.height
-//    )
-//
-//    val newWidth = (originalBitmap.width * scale).toInt()
-//    val newHeight = (originalBitmap.height * scale).toInt()
-//
-//    val left = (size - newWidth) / 2
-//    val top = (size - newHeight) / 2
-//
-//    val destRect = Rect(left, top, left + newWidth, top + newHeight)
-//
-//    // Disegna l'immagine sopra
-//    canvas.drawBitmap(originalBitmap, null, destRect, null)
-//
-//    return output
-//}
-//
-//private fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
-//    val R = 6371000.0 // raggio Terra in metri
-//    val dLat = Math.toRadians(p2.latitude - p1.latitude)
-//    val dLon = Math.toRadians(p2.longitude - p1.longitude)
-//    val lat1 = Math.toRadians(p1.latitude)
-//    val lat2 = Math.toRadians(p2.latitude)
-//
-//    val a = sin(dLat / 2) * sin(dLat / 2) +
-//            sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
-//    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-//
-//    return R * c
-//}
-//
+fun createPoiIcon(context: Context, drawableId: Int, size: Int): Bitmap {
+    val output = createBitmap(size, size)
+    val canvas = Canvas(output)
+
+    val paint = Paint().apply {
+        isAntiAlias = true
+        color = Color.WHITE // Sfondo bianco pieno
+        style = Paint.Style.FILL
+    }
+
+    // Disegna lo sfondo bianco interamente
+    canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+
+    // Carica l'immagine dell'icona
+    val drawable = ContextCompat.getDrawable(context, drawableId) as BitmapDrawable
+    val originalBitmap = drawable.bitmap
+
+    // Calcola proporzioni corrette per scalare l'immagine
+    val scale = minOf(
+        size.toFloat() / originalBitmap.width,
+        size.toFloat() / originalBitmap.height
+    )
+
+    val newWidth = (originalBitmap.width * scale).toInt()
+    val newHeight = (originalBitmap.height * scale).toInt()
+
+    val left = (size - newWidth) / 2
+    val top = (size - newHeight) / 2
+
+    val destRect = Rect(left, top, left + newWidth, top + newHeight)
+
+    // Disegna l'immagine sopra
+    canvas.drawBitmap(originalBitmap, null, destRect, null)
+
+    return output
+}
+
+fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
+    val R = 6371000.0 // raggio Terra in metri
+    val dLat = Math.toRadians(p2.latitude - p1.latitude)
+    val dLon = Math.toRadians(p2.longitude - p1.longitude)
+    val lat1 = Math.toRadians(p1.latitude)
+    val lat2 = Math.toRadians(p2.latitude)
+
+    val a = sin(dLat / 2) * sin(dLat / 2) +
+            sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
+}
+
 //private fun animateDespawn(poi: TimedPOI) {
 //    val item = poi.item
 //    val originalDrawable = item.drawable as? BitmapDrawable ?: return

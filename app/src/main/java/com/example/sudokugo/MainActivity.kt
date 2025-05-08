@@ -71,6 +71,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -94,6 +95,9 @@ import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
 import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.map.classes.InertiaAnimation
+import com.example.sudokugo.map.functions.getCircularBitmap
+import com.example.sudokugo.map.functions.createPoiIcon
+import com.example.sudokugo.map.functions.haversineDistance
 import com.example.sudokugo.ui.SudokuGONavGraph
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.views.overlay.Polygon
@@ -152,7 +156,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ClickableViewAccessibility")
     @Composable
     fun MapScreen() {
-//        val context = LocalContext.current
+        val context = LocalContext.current
 
         AndroidView(
             factory = {
@@ -193,16 +197,13 @@ class MainActivity : ComponentActivity() {
                     })
 
 
-
-
-
                     // Start POI loop
                     val handler = android.os.Handler(mainLooper)
                     handler.post(object : Runnable {
                         override fun run() {
                             locationOverlay.myLocation?.let {
                                 val center = GeoPoint(it.latitude, it.longitude)
-                                generateRandomPOIs(center)
+                                generateRandomPOIs(context, center)
                                 drawUserCenteredCircle(center, 120.0)
                             }
                             handler.postDelayed(this, 3000)
@@ -325,79 +326,56 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun getCircularBitmap(bitmap: Bitmap): Bitmap {
-        val size = minOf(bitmap.width, bitmap.height)
-        val output = createBitmap(size, size)
+//    private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
+//        val output = createBitmap(size, size)
+//        val canvas = Canvas(output)
+//
+//        val paint = Paint().apply {
+//            isAntiAlias = true
+//            color = Color.WHITE // Sfondo bianco pieno
+//            style = Paint.Style.FILL
+//        }
+//
+//        // Disegna lo sfondo bianco interamente
+//        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+//
+//        // Carica l'immagine dell'icona
+//        val drawable = ContextCompat.getDrawable(this, drawableId) as BitmapDrawable
+//        val originalBitmap = drawable.bitmap
+//
+//        // Calcola proporzioni corrette per scalare l'immagine
+//        val scale = minOf(
+//            size.toFloat() / originalBitmap.width,
+//            size.toFloat() / originalBitmap.height
+//        )
+//
+//        val newWidth = (originalBitmap.width * scale).toInt()
+//        val newHeight = (originalBitmap.height * scale).toInt()
+//
+//        val left = (size - newWidth) / 2
+//        val top = (size - newHeight) / 2
+//
+//        val destRect = Rect(left, top, left + newWidth, top + newHeight)
+//
+//        // Disegna l'immagine sopra
+//        canvas.drawBitmap(originalBitmap, null, destRect, null)
+//
+//        return output
+//    }
 
-        val canvas = Canvas(output)
-        val paint = Paint().apply { isAntiAlias = true }
-
-        val radius = size / 2f
-        canvas.drawCircle(radius, radius, radius, paint)
-
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        val srcRect = Rect(
-            (bitmap.width - size) / 2,
-            (bitmap.height - size) / 2,
-            (bitmap.width + size) / 2,
-            (bitmap.height + size) / 2
-        )
-        val destRect = Rect(0, 0, size, size)
-        canvas.drawBitmap(bitmap, srcRect, destRect, paint)
-
-        return output
-    }
-
-    private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
-        val output = createBitmap(size, size)
-        val canvas = Canvas(output)
-
-        val paint = Paint().apply {
-            isAntiAlias = true
-            color = Color.WHITE // Sfondo bianco pieno
-            style = Paint.Style.FILL
-        }
-
-        // Disegna lo sfondo bianco interamente
-        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
-
-        // Carica l'immagine dell'icona
-        val drawable = ContextCompat.getDrawable(this, drawableId) as BitmapDrawable
-        val originalBitmap = drawable.bitmap
-
-        // Calcola proporzioni corrette per scalare l'immagine
-        val scale = minOf(
-            size.toFloat() / originalBitmap.width,
-            size.toFloat() / originalBitmap.height
-        )
-
-        val newWidth = (originalBitmap.width * scale).toInt()
-        val newHeight = (originalBitmap.height * scale).toInt()
-
-        val left = (size - newWidth) / 2
-        val top = (size - newHeight) / 2
-
-        val destRect = Rect(left, top, left + newWidth, top + newHeight)
-
-        // Disegna l'immagine sopra
-        canvas.drawBitmap(originalBitmap, null, destRect, null)
-
-        return output
-    }
-
-    private fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
-        val R = 6371000.0 // raggio Terra in metri
-        val dLat = Math.toRadians(p2.latitude - p1.latitude)
-        val dLon = Math.toRadians(p2.longitude - p1.longitude)
-        val lat1 = Math.toRadians(p1.latitude)
-        val lat2 = Math.toRadians(p2.latitude)
-
-        val a = sin(dLat / 2) * sin(dLat / 2) +
-                sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return R * c
-    }
+//    private fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
+//        val R = 6371000.0 // raggio Terra in metri
+//        val dLat = Math.toRadians(p2.latitude - p1.latitude)
+//        val dLon = Math.toRadians(p2.longitude - p1.longitude)
+//        val lat1 = Math.toRadians(p1.latitude)
+//        val lat2 = Math.toRadians(p2.latitude)
+//
+//        val a = sin(dLat / 2) * sin(dLat / 2) +
+//                sin(dLon / 2) * sin(dLon / 2) * cos(lat1) * cos(lat2)
+//        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+//
+//        return R * c
+//    }
 
     private fun animateDespawn(poi: TimedPOI) {
         val item = poi.item
@@ -457,7 +435,7 @@ class MainActivity : ComponentActivity() {
         mapView.overlays.add(locationOverlay)
     }
 
-    private fun generateRandomPOIs(center: GeoPoint) {
+    private fun generateRandomPOIs(context: Context, center: GeoPoint) {
         val currentTime = System.currentTimeMillis()
 
         // Rimuovi quelli scaduti
@@ -483,7 +461,7 @@ class MainActivity : ComponentActivity() {
                     val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
                     val poiItem = OverlayItem("Sudoku", "Gioca!", location)
-                    val bitmap = createPoiIcon(R.drawable.sudoku_icon, 100)
+                    val bitmap = createPoiIcon(context, R.drawable.sudoku_icon, 100)
                     val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
                     val canvas = Canvas(mutableBitmap)
                     val paint = Paint()

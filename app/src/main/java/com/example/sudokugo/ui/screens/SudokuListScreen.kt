@@ -48,7 +48,7 @@ fun SudokuListScreen(navController: NavController) {
 
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
-        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) }
     ) { contentPadding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),

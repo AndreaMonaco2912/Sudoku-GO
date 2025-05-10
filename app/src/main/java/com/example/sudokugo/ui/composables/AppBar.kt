@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Rocket
 import androidx.compose.material.icons.outlined.Search
@@ -45,7 +47,7 @@ fun TopSudokuGoAppBar(navController: NavController, title: String) {
             )
         },
         navigationIcon = {
-            if (navController.previousBackStackEntry != null) {
+            if (title == "Sudoku Details" || title == "Settings") {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Go Back")
                 }
@@ -75,7 +77,7 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
     BottomAppBar(
         actions = {
             NavigationBarItem(
-                selected = selected == BottomNavSelected.EXPLORE,
+                selected = selected == BottomNavSelected.PLAY,
                 onClick = { navController.navigate(SudokuGORoute.Home) },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
@@ -88,15 +90,15 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
                 alwaysShowLabel = true
             )
             NavigationBarItem(
-                selected = selected == BottomNavSelected.PLAY,
+                selected = selected == BottomNavSelected.COLLECTED,
                 onClick = { navController.navigate(SudokuGORoute.SudokuList) },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
-                        Icon(Icons.Outlined.Rocket, contentDescription = null)
+                        Icon(Icons.Outlined.BookmarkBorder, contentDescription = null)
                     }
                 },
                 label = {
-                    Text(text = "Play")
+                    Text(text = "Collected")
                 },
                 alwaysShowLabel = true
             )
@@ -124,8 +126,8 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
 }
 
 enum class BottomNavSelected {
-    EXPLORE,
     PLAY,
+    COLLECTED,
     USER,
     NONE
 }

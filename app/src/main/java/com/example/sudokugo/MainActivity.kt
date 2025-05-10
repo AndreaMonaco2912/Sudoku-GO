@@ -36,11 +36,13 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
 import androidx.core.graphics.scale
 import androidx.core.graphics.drawable.toDrawable
+import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.map.classes.InertiaAnimation
 import com.example.sudokugo.map.classes.PoiManager
 import com.example.sudokugo.map.functions.getCircularBitmap
 import com.example.sudokugo.map.functions.drawUserCenteredCircle
 import com.example.sudokugo.map.functions.haversineDistance
+import com.example.sudokugo.ui.SudokuGONavGraph
 import org.osmdroid.views.overlay.Polygon
 import kotlin.math.atan2
 import kotlin.math.hypot
@@ -69,9 +71,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SudokuGOTheme {
-//                val navController = rememberNavController()
-//                SudokuGONavGraph(navController)
-                MapScreen()
+                val navController = rememberNavController()
+                SudokuGONavGraph(navController)
+//                MapScreen()
             }
         }
     }

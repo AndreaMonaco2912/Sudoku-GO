@@ -17,7 +17,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
-import com.example.sudokugo.MainActivity.TimedPOI
 import com.example.sudokugo.R
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
@@ -32,15 +31,15 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
+//data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
+//
+//private val poiItems = mutableListOf<TimedPOI>()
+//private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
+//private var lastPoiAddTime = 0L
+//private var poiAddInterval = randomAddInterval() // 17-30 secondi
+//private fun randomAddInterval() = (200L..400L).random()
 
-private val poiItems = mutableListOf<TimedPOI>()
-private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
-private var lastPoiAddTime = 0L
-private var poiAddInterval = randomAddInterval() // 17-30 secondi
-private fun randomAddInterval() = (200L..400L).random()
-
-private lateinit var scaleDetector: ScaleGestureDetector
+//private lateinit var scaleDetector: ScaleGestureDetector
 
 fun getCircularBitmap(bitmap: Bitmap): Bitmap {
     val size = minOf(bitmap.width, bitmap.height)

@@ -13,7 +13,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
-import com.example.sudokugo.MainActivity.TimedPOI
 import com.example.sudokugo.R
 import com.example.sudokugo.map.functions.haversineDistance
 import org.osmdroid.util.GeoPoint
@@ -24,6 +23,9 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
 
 class PoiManager(private val context: Context, private val mapView: MapView) {
+
+    data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
+
     private val poiItems = mutableListOf<TimedPOI>()
     private var poiOverlay: ItemizedIconOverlay<OverlayItem>? = null
     private var lastPoiAddTime = 0L

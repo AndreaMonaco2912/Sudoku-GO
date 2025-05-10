@@ -72,9 +72,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SudokuGOTheme {
-//                val navController = rememberNavController()
-//                SudokuGONavGraph(navController)
-                MapScreen()
+                val navController = rememberNavController()
+                SudokuGONavGraph(navController)
+//                MapScreen()
             }
         }
     }

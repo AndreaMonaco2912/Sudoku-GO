@@ -4,6 +4,7 @@ package com.example.sudokugo.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,7 @@ import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
+import com.example.sudokugo.ui.composables.MapScreen
 
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
@@ -50,10 +52,10 @@ fun HomeScreen(navController: NavController) {
         topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO")},
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
     ) { contentPadding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier =  Modifier.padding(contentPadding).padding(12.dp)
-        ) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)) {
+            MapScreen()
         }
     }
 }

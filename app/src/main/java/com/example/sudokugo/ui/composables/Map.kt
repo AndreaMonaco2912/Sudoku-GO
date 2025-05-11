@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui.composables
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -33,13 +34,21 @@ import kotlin.math.hypot
 
 @SuppressLint("ClickableViewAccessibility")
 @Composable
-fun MapScreen() {
+fun Map() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val mapView = remember { MapView(context) }
+    val (savedLat, savedLon, savedZoom) = remember { loadMapInfo(context) }
+    val mapView = remember {
+        MapView(context).apply {
+        configureMapView(this)
+        val center = GeoPoint(savedLat, savedLon)
+        controller.setCenter(center)
+        controller.setZoom(savedZoom)
+    } }
     val poiManager = remember { PoiManager(context, mapView) }
-    lateinit var locationOverlay: MyLocationNewOverlay
-    lateinit var scaleDetector: ScaleGestureDetector
+    val locationOverlay = remember { createLocationOverlay(context, mapView) }
+    val scaleDetector = remember { createScaleGestureDetector(context, mapView) }
+    val inertiaAnimation = remember { InertiaAnimation(mapView) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -55,47 +64,8 @@ fun MapScreen() {
 
     AndroidView(
         factory = {
-            mapView.apply {
-                setTileSource(TileSourceFactory.MAPNIK)
-                setMultiTouchControls(true)
-                minZoomLevel = 16.0
-                maxZoomLevel = 21.0
-                controller.setZoom(19.0)
-
-                // Setup GPS + overlay
-                val gpsProvider = GpsMyLocationProvider(it).apply {
-                    locationUpdateMinDistance = 5.0f
-                    locationUpdateMinTime = 2000
-                }
-                locationOverlay = MyLocationNewOverlay(gpsProvider, this).apply {
-                    isDrawAccuracyEnabled = false
-                    enableMyLocation()
-                    enableFollowLocation()
-                    setPersonAnchor(0.5f, 0.5f)
-                    setDirectionAnchor(0.5f, 0.5f)
-                    val drawable = ContextCompat.getDrawable(it, R.drawable.character_icon) as BitmapDrawable
-                    val scaled = getCircularBitmap(drawable.bitmap).scale(100, 100)
-                    setPersonIcon(scaled)
-                    setDirectionIcon(scaled)
-                }
-                overlays.add(locationOverlay)
-
-                // Scale detector
-                scaleDetector = ScaleGestureDetector(it, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                    override fun onScale(detector: ScaleGestureDetector): Boolean {
-                        val currentZoom = zoomLevelDouble
-                        val scale = detector.scaleFactor
-                        val newZoom = if (scale > 1) currentZoom + 0.1 else currentZoom - 0.1
-                        controller.setZoom(newZoom.coerceIn(minZoomLevel, maxZoomLevel))
-                        return true
-                    }
-                })
-
-
-
-            }
-
-            val inertiaAnimation = InertiaAnimation(mapView)
+            locationOverlay.enableFollowLocation()
+            mapView.overlays.add(locationOverlay)
 
             // Gesture rotation handler (direttamente qui dentro)
             var lastAngle = 0f
@@ -202,11 +172,6 @@ fun MapScreen() {
                     else -> false
                 }
             }
-
-            val poiManager = PoiManager(context, mapView)
-
-
-
             mapView
         },
         modifier = Modifier.fillMaxSize()
@@ -218,11 +183,70 @@ fun MapScreen() {
             val location = locationOverlay.myLocation
             if (location != null) {
                 val center = GeoPoint(location.latitude, location.longitude)
+                saveMapInfo(context, location.latitude, location.longitude, mapView.zoomLevelDouble)
+
+
                 poiManager.generateRandomPOIs(context, mapView, locationOverlay, center)
                 drawUserCenteredCircle(mapView, center, 120.0)
             }
             delay(3000) // aspetta 3 secondi
         }
     }
+}
 
+fun configureMapView(mapView: MapView) {
+    mapView.setTileSource(TileSourceFactory.MAPNIK)
+    mapView.setMultiTouchControls(true)
+    mapView.minZoomLevel = 16.0
+    mapView.maxZoomLevel = 21.0
+}
+
+fun createLocationOverlay(context: Context, mapView: MapView): MyLocationNewOverlay {
+    val gpsProvider = GpsMyLocationProvider(context).apply {
+        locationUpdateMinDistance = 5.0f
+        locationUpdateMinTime = 2000
+    }
+
+    return MyLocationNewOverlay(gpsProvider, mapView).apply {
+        isDrawAccuracyEnabled = false
+        enableMyLocation()
+        enableFollowLocation()
+        setPersonAnchor(0.5f, 0.5f)
+        setDirectionAnchor(0.5f, 0.5f)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.character_icon) as BitmapDrawable
+        val scaled = getCircularBitmap(drawable.bitmap).scale(100, 100)
+        setPersonIcon(scaled)
+        setDirectionIcon(scaled)
+    }
+}
+
+fun createScaleGestureDetector(context: Context, mapView: MapView): ScaleGestureDetector {
+    return ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val currentZoom = mapView.zoomLevelDouble
+            val scale = detector.scaleFactor
+            val newZoom = if (scale > 1) currentZoom + 0.1 else currentZoom - 0.1
+            mapView.controller.setZoom(newZoom.coerceIn(mapView.minZoomLevel, mapView.maxZoomLevel))
+            return true
+        }
+    })
+}
+
+fun saveMapInfo(context: Context, latitude: Double, longitude: Double, zoom: Double) {
+    val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+    prefs.edit().apply {
+        putFloat("latitude", latitude.toFloat())
+        putFloat("longitude", longitude.toFloat())
+        putFloat("zoom", zoom.toFloat())
+        apply()
+    }
+}
+
+fun loadMapInfo(context: Context): Triple<Double, Double, Double> {
+    val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+    val lat = prefs.getFloat("latitude", 45.4642f) // Default Milano
+    val lon = prefs.getFloat("longitude", 9.1900f)
+    val zoom = prefs.getFloat("zoom", 18f)
+    return Triple(lat.toDouble(), lon.toDouble(), zoom.toDouble())
 }

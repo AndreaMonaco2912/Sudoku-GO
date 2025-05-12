@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import androidx.compose.runtime.State
 import com.example.sudokugo.map.functions.createLocationOverlay
 import com.example.sudokugo.map.functions.createScaleGestureDetector
 import com.example.sudokugo.map.functions.drawUserCenteredCircle
 import com.example.sudokugo.ui.composables.configureMapView
-import com.example.sudokugo.ui.composables.saveMapInfo
+//import com.example.sudokugo.ui.composables.saveMapInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +22,7 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 
 @SuppressLint("ClickableViewAccessibility")
-class MyMap(private val context: Context) {
+class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel: State<Double>) {
     private val mapView: MapView
     private val poiManager: PoiManager
     private val locationOverlay: MyLocationNewOverlay
@@ -32,7 +33,7 @@ class MyMap(private val context: Context) {
     private var savedLon: Double = 0.0
     private var savedZoom: Double = 0.0
 
-    private var backgroundJob: Job? = null
+//    private var backgroundJob: Job? = null
 
     init {
 
@@ -56,7 +57,7 @@ class MyMap(private val context: Context) {
         mapView.overlays.add(locationOverlay)
 
         setupTouchListener()
-        startBackgroundLoop()
+//        startBackgroundLoop()
     }
 
     fun getMapView(): MapView = mapView
@@ -176,33 +177,42 @@ class MyMap(private val context: Context) {
         }
     }
 
-    private fun startBackgroundLoop() {
-        backgroundJob?.cancel()
+//    private fun startBackgroundLoop() {
+//        backgroundJob?.cancel()
+//
+//        backgroundJob = CoroutineScope(Dispatchers.Default).launch {
+//            while (true) {
+//                val location = locationOverlay.myLocation
+//                if (location != null) {
+//                    val center = GeoPoint(location.latitude, location.longitude)
+//                    saveMapInfo(
+//                        context,
+//                        location.latitude,
+//                        location.longitude,
+//                        mapView.zoomLevelDouble
+//                    )
+//
+//                    poiManager.generateRandomPOIs(context, mapView, locationOverlay, center)
+//                    drawUserCenteredCircle(mapView, center, 120.0)
+//                }
+//                delay(3000)
+//            }
+//        }
+//    }
 
-        backgroundJob = CoroutineScope(Dispatchers.Default).launch {
-            while (true) {
-                val location = locationOverlay.myLocation
-                if (location != null) {
-                    val center = GeoPoint(location.latitude, location.longitude)
-                    saveMapInfo(
-                        context,
-                        location.latitude,
-                        location.longitude,
-                        mapView.zoomLevelDouble
-                    )
+//    fun onDestroy() {
+//        backgroundJob?.cancel()
+//        backgroundJob = null
+//    }
 
-                    poiManager.generateRandomPOIs(context, mapView, locationOverlay, center)
-                    drawUserCenteredCircle(mapView, center, 120.0)
-                }
-                delay(3000)
-            }
-        }
+    fun generatePOI(location: GeoPoint) {
+        poiManager.generateRandomPOIs(context, mapView, locationOverlay, location)
+        drawUserCenteredCircle(mapView, location, 120.0)
     }
 
-    fun onDestroy() {
-        backgroundJob?.cancel()
-        backgroundJob = null
-    }
+    fun getLocation(): GeoPoint? = locationOverlay.myLocation
+
+    fun getZoom() = mapView.zoomLevelDouble
 
     fun onResume() = mapView.onResume()
 

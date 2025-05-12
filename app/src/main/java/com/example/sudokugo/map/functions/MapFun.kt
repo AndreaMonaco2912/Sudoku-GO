@@ -1,5 +1,6 @@
 package com.example.sudokugo.map.functions
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,11 +8,18 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.view.ScaleGestureDetector
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
+import com.example.sudokugo.R
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -69,4 +77,36 @@ fun drawUserCenteredCircle(mapView: MapView, center: GeoPoint, radiusInMeters: D
 
     mapView.overlays.add(circle)
     mapView.invalidate()
+}
+
+fun createLocationOverlay(context: Context, mapView: MapView): MyLocationNewOverlay {
+    val gpsProvider = GpsMyLocationProvider(context).apply {
+        locationUpdateMinDistance = 5.0f
+        locationUpdateMinTime = 2000
+    }
+
+    return MyLocationNewOverlay(gpsProvider, mapView).apply {
+        isDrawAccuracyEnabled = false
+        enableMyLocation()
+        enableFollowLocation()
+        setPersonAnchor(0.5f, 0.5f)
+        setDirectionAnchor(0.5f, 0.5f)
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.character_icon) as BitmapDrawable
+        val scaled = getCircularBitmap(drawable.bitmap).scale(100, 100)
+        setPersonIcon(scaled)
+        setDirectionIcon(scaled)
+    }
+}
+
+fun createScaleGestureDetector(context: Context, mapView: MapView): ScaleGestureDetector {
+    return ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val currentZoom = mapView.zoomLevelDouble
+            val scale = detector.scaleFactor
+            val newZoom = if (scale > 1) currentZoom + 0.1 else currentZoom - 0.1
+            mapView.controller.setZoom(newZoom.coerceIn(mapView.minZoomLevel, mapView.maxZoomLevel))
+            return true
+        }
+    })
 }

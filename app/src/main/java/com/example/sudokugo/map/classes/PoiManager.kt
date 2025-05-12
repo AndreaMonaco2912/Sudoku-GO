@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
@@ -15,6 +17,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import com.example.sudokugo.R
 import com.example.sudokugo.map.functions.haversineDistance
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
@@ -91,7 +95,9 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
             doOnEnd {
                 onAnimationEnd()
             }
-            start()
+            Handler(Looper.getMainLooper()).post {
+                start()
+            }
         }
     }
 
@@ -168,7 +174,9 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
                             canvas.drawBitmap(bitmap, 0f, 0f, paint)
                             mapView.invalidate()
                         }
-                        start()
+                        Handler(Looper.getMainLooper()).post {
+                            start()
+                        }
                     }
 
                     poiItem.setMarker(mutableBitmap.toDrawable(context.resources))

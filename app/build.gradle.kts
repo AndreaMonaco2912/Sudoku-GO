@@ -41,8 +41,13 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.supabase.postgrest.kt)   // database
+    implementation(libs.supabase.kt)    // core
+    implementation(libs.postgrest.kt)
+    implementation(libs.ktor.client.android)
     implementation(libs.osmdroid.android)
+    implementation(libs.dotenv.kotlin)
+    implementation(libs.postgresql.v4273)
     implementation (libs.caverock.androidsvg)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

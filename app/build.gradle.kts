@@ -41,6 +41,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.supabase.postgrest.kt)   // database
     implementation(libs.supabase.kt)    // core
     implementation(libs.postgrest.kt)

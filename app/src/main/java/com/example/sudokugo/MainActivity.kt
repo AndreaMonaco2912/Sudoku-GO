@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,9 +27,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.osmdroid.config.Configuration
 import androidx.navigation.compose.rememberNavController
+import com.example.sudokugo.data.models.Theme
 import com.example.sudokugo.ui.SudokuGONavGraph
+import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
 
 import io.github.jan.supabase.SupabaseClient
@@ -38,6 +43,7 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 
 val supabase: SupabaseClient = createSupabaseClient(
     supabaseUrl = "https://mkncxrzzbmjlrmmwmwkj.supabase.co",
@@ -101,9 +107,18 @@ class MainActivity : ComponentActivity() {
         ))
 
         setContent {
-            SudokuGOTheme {
+            val settingsViewModel = koinViewModel<SettingsViewModel>()
+            val themeState by settingsViewModel.state.collectAsStateWithLifecycle()
+
+            SudokuGOTheme(
+                darkTheme = when (themeState.theme){
+                    Theme.Dark -> true
+                    Theme.Light -> false
+                    Theme.System -> isSystemInDarkTheme()
+                }
+            ) {
                 val navController = rememberNavController()
-                SudokuGONavGraph(navController)
+                SudokuGONavGraph(navController, settingsViewModel, themeState)
             }
         }
     }

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.8.2"
 androidsvgVersion = "1.4"
 datastorePreferences = "1.1.6"
 dotenvKotlin = "6.4.1"

@@ -1,7 +1,6 @@
 package com.example.sudokugo.ui
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -9,11 +8,13 @@ import androidx.navigation.toRoute
 import com.example.sudokugo.ui.screens.HomeScreen
 import com.example.sudokugo.ui.screens.LoginScreen
 import com.example.sudokugo.ui.screens.RegisterScreen
-import com.example.sudokugo.ui.screens.SettingsScreen
+import com.example.sudokugo.ui.screens.settings.SettingsScreen
 import com.example.sudokugo.ui.screens.SolveScreen
 import com.example.sudokugo.ui.screens.SudokuDetailsScreen
 import com.example.sudokugo.ui.screens.SudokuListScreen
 import com.example.sudokugo.ui.screens.UserScreen
+import com.example.sudokugo.ui.screens.settings.SettingsState
+import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
 
 sealed interface SudokuGORoute {
@@ -28,7 +29,7 @@ sealed interface SudokuGORoute {
 }
 
 @Composable
-fun SudokuGONavGraph(navController: NavHostController){
+fun SudokuGONavGraph(navController: NavHostController, settingsViewModel: SettingsViewModel, themeState: SettingsState){
     NavHost(
         navController = navController,
         startDestination = SudokuGORoute.Home
@@ -59,7 +60,7 @@ fun SudokuGONavGraph(navController: NavHostController){
         }
         composable<SudokuGORoute.Settings> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Settings>()
-            SettingsScreen(navController, route.userId)
+            SettingsScreen(navController, route.userId, themeState, settingsViewModel::changeTheme)
         }
 
     }

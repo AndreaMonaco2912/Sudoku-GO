@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation ("ovh.plrapps:mapcompose:3.0.0")
     implementation(libs.supabase.postgrest.kt)   // database
     implementation(libs.supabase.kt)    // core
     implementation(libs.postgrest.kt)

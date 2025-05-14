@@ -36,42 +36,42 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
     private var poiAddInterval = randomAddInterval() // 17-30 secondi
     private fun randomAddInterval() = (200L..400L).random()
 
-    private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
-        val output = createBitmap(size, size)
-        val canvas = Canvas(output)
-
-        val paint = Paint().apply {
-            isAntiAlias = true
-            color = Color.WHITE // Sfondo bianco pieno
-            style = Paint.Style.FILL
-        }
-
-        // Disegna lo sfondo bianco interamente
-        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
-
-        // Carica l'immagine dell'icona
-        val drawable = ContextCompat.getDrawable(context, drawableId) as BitmapDrawable
-        val originalBitmap = drawable.bitmap
-
-        // Calcola proporzioni corrette per scalare l'immagine
-        val scale = minOf(
-            size.toFloat() / originalBitmap.width,
-            size.toFloat() / originalBitmap.height
-        )
-
-        val newWidth = (originalBitmap.width * scale).toInt()
-        val newHeight = (originalBitmap.height * scale).toInt()
-
-        val left = (size - newWidth) / 2
-        val top = (size - newHeight) / 2
-
-        val destRect = Rect(left, top, left + newWidth, top + newHeight)
-
-        // Disegna l'immagine sopra
-        canvas.drawBitmap(originalBitmap, null, destRect, null)
-
-        return output
-    }
+//    private fun createPoiIcon(drawableId: Int, size: Int): Bitmap {
+//        val output = createBitmap(size, size)
+//        val canvas = Canvas(output)
+//
+//        val paint = Paint().apply {
+//            isAntiAlias = true
+//            color = Color.WHITE // Sfondo bianco pieno
+//            style = Paint.Style.FILL
+//        }
+//
+//        // Disegna lo sfondo bianco interamente
+//        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+//
+//        // Carica l'immagine dell'icona
+//        val drawable = ContextCompat.getDrawable(context, drawableId) as BitmapDrawable
+//        val originalBitmap = drawable.bitmap
+//
+//        // Calcola proporzioni corrette per scalare l'immagine
+//        val scale = minOf(
+//            size.toFloat() / originalBitmap.width,
+//            size.toFloat() / originalBitmap.height
+//        )
+//
+//        val newWidth = (originalBitmap.width * scale).toInt()
+//        val newHeight = (originalBitmap.height * scale).toInt()
+//
+//        val left = (size - newWidth) / 2
+//        val top = (size - newHeight) / 2
+//
+//        val destRect = Rect(left, top, left + newWidth, top + newHeight)
+//
+//        // Disegna l'immagine sopra
+//        canvas.drawBitmap(originalBitmap, null, destRect, null)
+//
+//        return output
+//    }
 
     private fun animateDespawn(poi: TimedPOI, onAnimationEnd: () -> Unit) {
         val item = poi.item
@@ -139,7 +139,7 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
         expiredPOIs.forEach { expiredPoi ->
             animateDespawn(expiredPoi) {
                 poiItems.remove(expiredPoi)
-                recreatePoiOverlay(locationOverlay)
+//                recreatePoiOverlay(locationOverlay)
             }
         }
 
@@ -160,7 +160,10 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
                     val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
                     val poiItem = OverlayItem("Sudoku", "Gioca!", location)
-                    val bitmap = createPoiIcon(R.drawable.sudoku_icon, 100)
+                    val drawable = ContextCompat.getDrawable(context, R.drawable.poi_sudoku_w)
+                    val bitmap = (drawable as? BitmapDrawable)?.bitmap
+                    if(bitmap == null) return@repeat
+
                     val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
                     val canvas = Canvas(mutableBitmap)
                     val paint = Paint()
@@ -196,33 +199,35 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
             }
         }
 
-        // Ricrea overlay
-        poiOverlay?.let { mapView.overlays.remove(it) }
-        poiOverlay = ItemizedIconOverlay(
-            poiItems.map { it.item },
-            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
-                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    val userLocation = locationOverlay.myLocation
-                    if (item != null && userLocation != null) {
-                        val distance = haversineDistance(userLocation, item.point)
-                        if (distance <= 120.0) {
-                            Toast.makeText(context, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
-                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
-                        } else {
-                            Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    return true
-                }
+//        // Ricrea overlay
+//        poiOverlay?.let { mapView.overlays.remove(it) }
+//        poiOverlay = ItemizedIconOverlay(
+//            poiItems.map { it.item },
+//            object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+//                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
+//                    val userLocation = locationOverlay.myLocation
+//                    if (item != null && userLocation != null) {
+//                        val distance = haversineDistance(userLocation, item.point)
+//                        if (distance <= 120.0) {
+//                            Toast.makeText(context, "Cliccato: ${item.title}", Toast.LENGTH_SHORT).show()
+//                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+//                        } else {
+//                            Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                    return true
+//                }
+//
+//                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
+//            },
+//            context
+//        )
+//        mapView.overlays.add(poiOverlay)
+//
+//        // Riaggiungi marker utente
+//        mapView.overlays.remove(locationOverlay)
+//        mapView.overlays.add(locationOverlay)
 
-                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean = false
-            },
-            context
-        )
-        mapView.overlays.add(poiOverlay)
-
-        // Riaggiungi marker utente
-        mapView.overlays.remove(locationOverlay)
-        mapView.overlays.add(locationOverlay)
+        recreatePoiOverlay(locationOverlay)
     }
 }

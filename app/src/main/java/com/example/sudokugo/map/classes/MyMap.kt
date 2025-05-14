@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
@@ -29,24 +30,16 @@ class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel:
 //    private val scaleDetector: ScaleGestureDetector
     private val inertiaAnimation: InertiaAnimation
 
-    private var savedLat: Double = 0.0
-    private var savedLon: Double = 0.0
-    private var savedZoom: Double = 0.0
 
 //    private var backgroundJob: Job? = null
 
     init {
 
-        val (lat, lon, zoom) = loadMapInfo(this.context)
-        savedLat = lat
-        savedLon = lon
-        savedZoom = zoom
-
         mapView = MapView(this.context).apply {
             configureMapView(this)
-            val center = GeoPoint(savedLat, savedLon)
+            val center = mapCenter.value
             controller.setCenter(center)
-            controller.setZoom(savedZoom)
+            controller.setZoom(zoomLevel.value)
         }
 
         poiManager = PoiManager(this.context, mapView)
@@ -62,13 +55,13 @@ class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel:
 
     fun getMapView(): MapView = mapView
 
-    private fun loadMapInfo(context: Context): Triple<Double, Double, Double> {
-        val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
-        val lat = prefs.getFloat("latitude", 45.4642f) // Default Milano
-        val lon = prefs.getFloat("longitude", 9.1900f)
-        val zoom = prefs.getFloat("zoom", 18f)
-        return Triple(lat.toDouble(), lon.toDouble(), zoom.toDouble())
-    }
+//    private fun loadMapInfo(context: Context): Triple<Double, Double, Double> {
+//        val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+//        val lat = prefs.getFloat("latitude", 45.4642f) // Default Milano
+//        val lon = prefs.getFloat("longitude", 9.1900f)
+//        val zoom = 18f
+//        return Triple(lat.toDouble(), lon.toDouble(), zoom.toDouble())
+//    }
 
     private fun setupTouchListener() {
         var activePointerId = MotionEvent.INVALID_POINTER_ID
@@ -97,7 +90,7 @@ class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel:
                         rotating = false
                         lastRotationSpeed = 0f
                     }
-                    true
+                    false
                 }
 
                 MotionEvent.ACTION_MOVE -> {
@@ -167,7 +160,7 @@ class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel:
                     }
 
                     mapView.performClick()
-                    true
+                    false
                 }
 
                 else -> false
@@ -204,9 +197,10 @@ class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel:
 //        backgroundJob = null
 //    }
 
-    fun generatePOI(location: GeoPoint) {
-        poiManager.generateRandomPOIs(context, mapView, locationOverlay, location)
+    fun updateWorldMap(location: GeoPoint) {
+        locationOverlay.enableFollowLocation()
         drawUserCenteredCircle(mapView, location, 120.0)
+        poiManager.generateRandomPOIs(context, mapView, locationOverlay, location)
     }
 
     fun getLocation(): GeoPoint? = locationOverlay.myLocation

@@ -42,6 +42,7 @@ fun Map(viewModelMap: MapViewModel = viewModel()) {
         factory = {
             viewModelMap.loadMapInfo()
             map.getMapView()
+
         },
         modifier = Modifier.fillMaxSize()
     )
@@ -51,7 +52,7 @@ fun Map(viewModelMap: MapViewModel = viewModel()) {
             val location = map.getLocation()
             if(location != null){
                 viewModelMap.saveMapInfo(location.latitude, location.longitude, map.getZoom())
-                map.generatePOI(location)
+                map.updateWorldMap(location)
             }
             delay(3000)
         }

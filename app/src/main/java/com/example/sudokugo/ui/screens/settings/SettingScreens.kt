@@ -27,12 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.data.models.Theme
+import com.example.sudokugo.data.models.User
+import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.screens.login.LoginViewModel
 
 @Composable
-fun SettingsScreen(navController: NavController, userId: String, state: SettingsState, onThemeSelected: (Theme) -> Unit) {
+fun SettingsScreen(navController: NavController, userId: String, state: SettingsState, onThemeSelected: (Theme) -> Unit, onLogout: () -> Unit) {
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) }
@@ -61,6 +64,13 @@ fun SettingsScreen(navController: NavController, userId: String, state: Settings
 
             Button(onClick = { showDialog = true }) {
                 Text("Change theme")
+            }
+
+            Button(onClick = {
+                onLogout()
+                navController.navigate(SudokuGORoute.Login)
+            }) {
+                Text("Logout")
             }
 
             if (showDialog) {

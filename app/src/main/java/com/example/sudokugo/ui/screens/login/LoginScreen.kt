@@ -1,5 +1,6 @@
-package com.example.sudokugo.ui.screens
+package com.example.sudokugo.ui.screens.login
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -23,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,13 +34,25 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.R
+import com.example.sudokugo.data.models.Theme
+import com.example.sudokugo.data.models.User
+import com.example.sudokugo.supabase
+import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.screens.settings.SettingsState
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, state: UserState, onUserSetted: (User) -> Unit) {
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Login") }
     ) { contentPadding ->
+        if(state.email != "") {
+                    navController.navigate(SudokuGORoute.Home){
+                        popUpTo(SudokuGORoute.Login) { inclusive = true }
+                    }
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,9 +61,44 @@ fun LoginScreen(navController: NavController) {
                 .padding(12.dp)
                 .fillMaxSize()
         ) {
+
+            val scope = rememberCoroutineScope()
+
             var password by rememberSaveable { mutableStateOf("") }
             var passwordVisibility by remember { mutableStateOf(false)}
             var email by rememberSaveable { mutableStateOf("") }
+
+            Button(onClick = {
+                scope.launch {
+                    try {
+                        val result = supabase.from("users")
+                            .select(){
+                                filter {
+                                    eq("email", email)
+                                    eq("password", password)
+                                }
+                            }
+                            .decodeList<User>()
+
+                        if (result.isNotEmpty()) {
+                            // Login riuscito
+                            onUserSetted(result[0])
+                            navController.navigate(SudokuGORoute.Home) {
+                                popUpTo(SudokuGORoute.Login) { inclusive = true }
+                            }
+
+                        } else {
+                            // Credenziali sbagliate
+                            Log.d("Login", "Credenziali non valide")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("Login", "Errore durante il login", e)
+                    }
+                }
+            }) {
+                Text("Login")
+            }
+
 
             val icon = if(passwordVisibility)
                 painterResource(id = R.drawable.visibility)
@@ -60,7 +107,7 @@ fun LoginScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email=it },
+                onValueChange = { email=it.trim() },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -107,4 +154,6 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
+
+
 

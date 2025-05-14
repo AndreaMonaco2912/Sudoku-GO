@@ -17,8 +17,12 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class MapViewModel (
-    private val context: Application
-) : AndroidViewModel(context) {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val appContext: Context by lazy {
+        getApplication<Application>().applicationContext
+    }
 
     private val _mapCenter = mutableStateOf(GeoPoint(0.0, 0.0))
     val mapCenter: State<GeoPoint> = _mapCenter
@@ -33,7 +37,7 @@ class MapViewModel (
     }
 
     fun loadMapInfo() {
-        val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+        val prefs = appContext.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
         val lat = prefs.getFloat("latitude", 45.4642f)
         val lon = prefs.getFloat("longitude", 9.1900f)
         val zoom = prefs.getFloat("zoom", 18f)
@@ -43,7 +47,7 @@ class MapViewModel (
     }
 
     fun saveMapInfo(lat: Double, lon: Double, zoom: Double) {
-        val prefs = context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+        val prefs = appContext.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
             putFloat("latitude", lat.toFloat())
             putFloat("longitude", lon.toFloat())

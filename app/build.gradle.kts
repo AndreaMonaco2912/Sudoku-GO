@@ -41,7 +41,6 @@ android {
 }
 
 dependencies {
-    implementation ("ovh.plrapps:mapcompose:3.0.0")
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

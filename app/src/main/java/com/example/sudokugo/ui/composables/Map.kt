@@ -20,10 +20,9 @@ import com.example.sudokugo.map.classes.MyMap
 import kotlinx.coroutines.delay
 
 @Composable
-fun Map() {
+fun Map(viewModelMap: MapViewModel = viewModel()) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val viewModelMap: MapViewModel = viewModel()
     val map = remember { MyMap(context, viewModelMap.mapCenter, viewModelMap.zoomLevel) }
 
 
@@ -62,7 +61,7 @@ fun Map() {
 
 fun configureMapView(mapView: MapView) {
     mapView.setTileSource(TileSourceFactory.MAPNIK)
-    mapView.setMultiTouchControls(true)
+    mapView.setMultiTouchControls(false)
     mapView.minZoomLevel = 16.0
     mapView.maxZoomLevel = 21.0
 }

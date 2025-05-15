@@ -1,7 +1,5 @@
 package com.example.sudokugo.ui.composables.profilePic
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,7 +27,6 @@ import coil3.request.crossfade
 import com.example.sudokugo.R
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
-//import com.yalantis.ucrop.UCrop
 
 @Composable
 fun UserChangePicture() {
@@ -37,19 +34,9 @@ fun UserChangePicture() {
     val userPic by userPictureViewModel.userPic.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
 
-//    val cropLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//        val resultUri = UCrop.getOutput(result.data!!)
-//        if (result.resultCode == android.app.Activity.RESULT_OK && resultUri != null) {
-//            // salva l'immagine croppata
-//            val savedUri = saveImageToStorage(resultUri, ctx.contentResolver)
-//            userPictureViewModel.setUserPic(savedUri)
-//        }
-//    }
-
     val cameraLauncher = rememberCameraLauncher(
         onPictureTaken = { imageUri ->
-            val savedUri = saveImageToStorage(imageUri, ctx.contentResolver)
-            userPictureViewModel.setUserPic(savedUri)
+            userPictureViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver)
         }
     )
 

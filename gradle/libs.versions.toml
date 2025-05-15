@@ -24,7 +24,6 @@ material = "1.12.0"
 postgresqlVersion = "42.7.3"
 postgrestKt = "3.1.4"
 supabaseKt = "3.1.4"
-ucrop = "2.2.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,7 +58,6 @@ postgresql-v4273 = { module = "org.postgresql:postgresql", version.ref = "postgr
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabase-kt = { module = "io.github.jan-tennert.supabase:supabase-kt", version.ref = "supabaseKt" }
 supabase-postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKt" }
-ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

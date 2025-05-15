@@ -41,8 +41,6 @@ android {
 }
 
 dependencies {
-//    implementation (libs.ucrop)
-
     implementation(libs.coil.compose)
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.datastore.preferences)

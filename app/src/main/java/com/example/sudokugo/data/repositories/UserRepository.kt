@@ -18,6 +18,4 @@ class UserRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[EMAIL_KEY] = user.email}
 
     suspend fun logoutUser() = dataStore.edit { it.remove(EMAIL_KEY) }
-
-
 }

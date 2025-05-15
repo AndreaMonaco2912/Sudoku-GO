@@ -36,6 +36,7 @@ import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.composables.profilePic.UserChangePicture
 
 @Composable
 fun UserScreen(navController: NavController, userId: String) {
@@ -52,38 +53,7 @@ fun UserScreen(navController: NavController, userId: String) {
         ) {
             Spacer(Modifier.size(8.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                // Immagine dell'utente
-                Image(
-                    painter = painterResource(id = R.drawable.default_character_icon), // Usa l'avatar utente reale
-                    contentDescription = "User Profile Image",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                )
-
-                // Bottone con icona della fotocamera
-                IconButton(
-                    onClick = { /* TODO: Logica per cambiare immagine profilo */ },
-                    modifier = Modifier
-                        .offset(x = 40.dp)
-                        .size(32.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.PhotoCamera,
-                        contentDescription = "Cambia immagine",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
+            UserChangePicture()
 
             // Stats Card
             Card(

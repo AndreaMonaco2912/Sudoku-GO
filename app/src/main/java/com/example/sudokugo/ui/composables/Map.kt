@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.composables
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -16,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sudokugo.map.classes.MapViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
-import com.example.sudokugo.map.classes.MyMap
+import com.example.sudokugo.map.view.MyMap
 import kotlinx.coroutines.delay
 
 @Composable
@@ -63,8 +62,8 @@ fun Map(viewModelMap: MapViewModel = viewModel()) {
 fun configureMapView(mapView: MapView) {
     mapView.setTileSource(TileSourceFactory.MAPNIK)
     mapView.setMultiTouchControls(false)
-    mapView.minZoomLevel = 16.0
-    mapView.maxZoomLevel = 21.0
+    mapView.minZoomLevel = 17.0
+    mapView.maxZoomLevel = 19.0
 }
 
 //fun saveMapInfo(context: Context, latitude: Double, longitude: Double, zoom: Double) {

@@ -22,8 +22,4 @@ class InertiaAnimation(mapView: MapView) {
         inertiaAnimator?.setFloatValues(initialSpeed, 0f)
         inertiaAnimator?.start()
     }
-
-    fun stopInertiaRotation() {
-        inertiaAnimator?.cancel()
-    }
 }

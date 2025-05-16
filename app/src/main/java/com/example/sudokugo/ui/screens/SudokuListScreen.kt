@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,22 +38,40 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.sudokugo.data.database.Sudoku
+import com.example.sudokugo.data.models.User
+import com.example.sudokugo.supabase
 import com.example.sudokugo.ui.SudokuGORoute
+import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun SudokuListScreen(navController: NavController) {
-    val items = (1..20).map { "Sudoku n°$it" }
+    val sudokuViewModel = koinViewModel<SudokuViewModel>()
+    val sudokuState by sudokuViewModel.state.collectAsStateWithLifecycle()
 
+
+//    val items = (1..20).map { "Sudoku n°$it" }
+    LaunchedEffect(Unit) {
+        sudokuViewModel.allSudokus()
+    }
+
+    val sudokuFromServer by sudokuViewModel.sudokusFromServer.collectAsStateWithLifecycle()
+    val items = sudokuFromServer
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) }
     ) { contentPadding ->
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -58,11 +80,15 @@ fun SudokuListScreen(navController: NavController) {
             modifier =  Modifier.padding(contentPadding)
         ) {
             items(items) { item -> SudokuItem(
-                item,
-                onClick = { navController.navigate(SudokuGORoute.SudokuDetails(item)) }) }
+                item.data,
+                onClick = { navController.navigate(SudokuGORoute.SudokuDetails(item.data)) }) }
+        }
+//            SudokuItem(
+//                item = sudokuFromServer?.toString() ?: "No sudoku found",
+//                onClick = { navController.navigate(SudokuGORoute.SudokuDetails("Sudoku 0")) }
+//            )
         }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

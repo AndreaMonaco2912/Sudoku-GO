@@ -22,6 +22,7 @@ fun HomeScreen(navController: NavController) {
         topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO")},
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
     ) { contentPadding ->
+
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)) {

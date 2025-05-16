@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.8.0"
 androidsvgVersion = "1.4"
 coilCompose = "3.2.0"
 datastorePreferences = "1.1.6"
@@ -24,6 +24,8 @@ material = "1.12.0"
 postgresqlVersion = "42.7.3"
 postgrestKt = "3.1.4"
 supabaseKt = "3.1.4"
+ksp = "2.1.21-2.0.1"
+room = "2.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,9 +60,13 @@ postgresql-v4273 = { module = "org.postgresql:postgresql", version.ref = "postgr
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabase-kt = { module = "io.github.jan-tennert.supabase:supabase-kt", version.ref = "supabaseKt" }
 supabase-postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "postgrestKt" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

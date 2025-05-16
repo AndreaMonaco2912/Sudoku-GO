@@ -107,6 +107,7 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
                 onClick = { navController.navigate(SudokuGORoute.User(userId = fakeUserId)) },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
+
                         Image(
                             painter = painterResource(id = R.drawable.character_icon),
                             contentDescription = null,

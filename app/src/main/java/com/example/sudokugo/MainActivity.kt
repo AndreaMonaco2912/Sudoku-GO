@@ -33,6 +33,7 @@ import org.osmdroid.config.Configuration
 import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.data.models.Theme
 import com.example.sudokugo.ui.SudokuGONavGraph
+import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
@@ -112,6 +113,7 @@ class MainActivity : ComponentActivity() {
             val themeState by settingsViewModel.state.collectAsStateWithLifecycle()
             val loginViewModel = koinViewModel<LoginViewModel>()
             val loginState by loginViewModel.state.collectAsStateWithLifecycle()
+
 
             SudokuGOTheme(
                 darkTheme = when (themeState.theme){

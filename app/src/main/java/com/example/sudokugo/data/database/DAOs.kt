@@ -2,23 +2,28 @@ package com.example.sudokugo.data.database
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SudokuDAO{
-    @Query("SELECT * FROM sudoku")
-    fun getAll(): Flow<List<Sudoku>>
+    @Query("SELECT * FROM serversudoku")
+    fun getAll(): Flow<List<ServerSudoku>>
 
-    @Query("SELECT * FROM sudoku WHERE id = :id")
-    fun getById(id: Int): Flow<Sudoku>
+    @Query("SELECT * FROM serversudoku WHERE id = :id")//TODO: it was flow don't know if now it's right
+    suspend fun getById(id: Long): ServerSudoku
 
-    @Upsert
-    suspend fun upsert(sudoku: Sudoku)
+    @Insert
+    suspend fun insert(sudoku: ServerSudoku): Long
+
+    @Query("UPDATE serversudoku SET currentBoard = :newBoard WHERE id = :id")
+    suspend fun update(id: Long, newBoard: String)
 
     @Delete
-    suspend fun delete(sudoku: Sudoku)
+    suspend fun delete(sudoku: ServerSudoku)
 }
 @Dao
 interface UserDAO{

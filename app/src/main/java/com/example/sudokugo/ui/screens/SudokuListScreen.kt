@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.sudokugo.data.database.Sudoku
 import com.example.sudokugo.data.models.User
 import com.example.sudokugo.supabase
 import com.example.sudokugo.ui.SudokuGORoute

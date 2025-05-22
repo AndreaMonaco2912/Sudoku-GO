@@ -5,9 +5,12 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Sudoku(
-    @PrimaryKey val id: Int,
+data class ServerSudoku(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     @ColumnInfo val data: String,
+    @ColumnInfo val currentBoard: String,
+    @ColumnInfo val difficulty: String,
     @ColumnInfo val solution: String
 )
 

@@ -107,7 +107,7 @@ fun SudokuGrid() {
                             .background(if (isHighlighted) Color(0xFFDDE9F5) else Color.White),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "") // Placeholder for number
+                        Text(text = "[$row,$col]") // Placeholder for number
                     }
                 }
             }

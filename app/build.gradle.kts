@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.kudoku)
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)

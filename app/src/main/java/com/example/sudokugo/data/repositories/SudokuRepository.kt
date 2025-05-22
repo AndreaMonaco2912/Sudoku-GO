@@ -2,9 +2,10 @@ package com.example.sudokugo.data.repositories
 
 import com.example.sudokugo.data.database.Sudoku
 import com.example.sudokugo.data.database.SudokuDAO
+import com.example.sudokugo.data.models.ServerSudoku
 import com.example.sudokugo.supabase
 import io.github.jan.supabase.postgrest.from
-import com.example.sudokugo.data.models.ServerSudoku
+
 class SudokuRepository(
     private val dao: SudokuDAO
 ) {

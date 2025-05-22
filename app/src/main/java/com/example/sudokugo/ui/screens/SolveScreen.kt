@@ -1,5 +1,7 @@
 package com.example.sudokugo.ui.screens
 
+import android.util.Log
+import io.github.ilikeyourhat.kudoku.model.Sudoku
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
+import io.github.ilikeyourhat.kudoku.model.SudokuType
+import io.github.ilikeyourhat.kudoku.rating.Difficulty
+import io.github.ilikeyourhat.kudoku.type.Classic9x9
 
 @Composable
 fun SolveScreen(navController: NavController, sudokuId: String) {
@@ -79,6 +85,9 @@ fun SolveScreen(navController: NavController, sudokuId: String) {
 
 @Composable
 fun SudokuGrid() {
+    val generator = Sudoku.defaultGenerator()
+    val sudoku = generator.generate(type = Classic9x9, difficulty = Difficulty.VERY_HARD)
+    Log.d("cacca", sudoku.toString())
     val gridSize = 9
     val cellSize = 36.dp
     val highlightedCells = listOf(Pair(0, 0), Pair(2, 1), Pair(5, 3)) // Example positions

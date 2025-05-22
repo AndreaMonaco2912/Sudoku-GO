@@ -9,7 +9,7 @@ import com.example.sudokugo.ui.screens.HomeScreen
 import com.example.sudokugo.ui.screens.login.LoginScreen
 import com.example.sudokugo.ui.screens.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
-import com.example.sudokugo.ui.screens.SolveScreen
+import com.example.sudokugo.ui.screens.solve.SolveScreen
 import com.example.sudokugo.ui.screens.SudokuDetailsScreen
 import com.example.sudokugo.ui.screens.SudokuListScreen
 import com.example.sudokugo.ui.screens.UserScreen

@@ -14,6 +14,7 @@ import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
+import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -42,6 +43,7 @@ val appModule = module {
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO())}
 
     viewModel { SettingsViewModel(get()) }
+    viewModel { SolveViewModel(get()) }
     viewModel { LoginViewModel(get()) }
     viewModel { UserPictureViewModel(get()) }
     viewModel { SudokuViewModel(get()) }

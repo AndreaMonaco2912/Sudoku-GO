@@ -1,4 +1,4 @@
-package com.example.sudokugo.ui.screens
+package com.example.sudokugo.ui.screens.solve
 
 import android.util.Log
 import io.github.ilikeyourhat.kudoku.model.Sudoku
@@ -16,42 +16,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.R
+import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
-import io.github.ilikeyourhat.kudoku.model.SudokuType
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import io.github.ilikeyourhat.kudoku.type.Classic9x9
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SolveScreen(navController: NavController, sudokuId: String) {
@@ -85,20 +74,34 @@ fun SolveScreen(navController: NavController, sudokuId: String) {
 
 @Composable
 fun SudokuGrid() {
-    val generator = Sudoku.defaultGenerator()
-    val sudoku = generator.generate(type = Classic9x9, difficulty = Difficulty.VERY_HARD)
-    Log.d("cacca", sudoku.toString())
+    val sudokuViewModel = koinViewModel<SolveViewModel>()
+    sudokuViewModel.addSudoku(Difficulty.EASY)//TODO: only when reached from home
+
+    val current = sudokuViewModel.currentSudoku.collectAsStateWithLifecycle().value
+    val original = sudokuViewModel.originalSudoku.collectAsStateWithLifecycle().value
+
+    if (current == null || original == null) throw NullPointerException("Sudoku non inizializzato")
+
     val gridSize = 9
     val cellSize = 36.dp
+    val paddingSize = 1.dp
     val highlightedCells = listOf(Pair(0, 0), Pair(2, 1), Pair(5, 3)) // Example positions
 
     Column(
         modifier = Modifier
             .border(2.dp, Color.Blue)
+            .padding(paddingSize)
     ) {
         repeat(gridSize) { row ->
             Row {
                 repeat(gridSize) { col ->
+                    val originalVal = original.board.get(col, row).value
+                    val currentVal = current.board.get(col, row).value
+                    val isFixed = originalVal != 0
+
+                    val displayVal = if (currentVal != 0) currentVal.toString() else  ""
+                    val textColor = if (isFixed) Color.Black else Color.Blue
+
                     val isHighlighted = highlightedCells.contains(Pair(row, col))
                     Box(
                         modifier = Modifier
@@ -107,7 +110,7 @@ fun SudokuGrid() {
                             .background(if (isHighlighted) Color(0xFFDDE9F5) else Color.White),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "[$row,$col]") // Placeholder for number
+                        Text(text = displayVal, color = textColor) // Placeholder for number
                     }
                 }
             }

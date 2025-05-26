@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.data.models.Theme
-import com.example.sudokugo.data.models.User
+import com.example.sudokugo.data.models.UserServer
 import com.example.sudokugo.supabase
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
@@ -44,11 +44,11 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController, state: UserState, onUserSetted: (User) -> Unit) {
+fun LoginScreen(navController: NavController, state: String?, onUserSetted: (UserServer) -> Unit) {
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Login") }
     ) { contentPadding ->
-        if(state.email != "") {
+        if(state != null) {
                     navController.navigate(SudokuGORoute.Home){
                         popUpTo(SudokuGORoute.Login) { inclusive = true }
                     }
@@ -78,7 +78,7 @@ fun LoginScreen(navController: NavController, state: UserState, onUserSetted: (U
                                     eq("password", password)
                                 }
                             }
-                            .decodeList<User>()
+                            .decodeList<UserServer>()
 
                         if (result.isNotEmpty()) {
                             // Login riuscito

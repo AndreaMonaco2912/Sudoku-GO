@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,13 +12,14 @@ import com.example.sudokugo.ui.screens.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
 import com.example.sudokugo.ui.screens.solve.SolveScreen
 import com.example.sudokugo.ui.screens.SudokuDetailsScreen
-import com.example.sudokugo.ui.screens.SudokuListScreen
+import com.example.sudokugo.ui.screens.list.SudokuListScreen
 import com.example.sudokugo.ui.screens.UserScreen
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.login.UserState
 import com.example.sudokugo.ui.screens.settings.SettingsState
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
+import kotlin.math.log
 
 sealed interface SudokuGORoute {
     @Serializable data object Home: SudokuGORoute
@@ -34,11 +36,10 @@ sealed interface SudokuGORoute {
 fun SudokuGONavGraph(navController: NavHostController,
                      settingsViewModel: SettingsViewModel,
                      themeState: SettingsState,
-                     loginViewModel: LoginViewModel,
-                     loginState: UserState){
+                     loginViewModel: LoginViewModel){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Solve("1")
+        startDestination = SudokuGORoute.Home
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)
@@ -51,7 +52,8 @@ fun SudokuGONavGraph(navController: NavHostController,
             SudokuDetailsScreen(navController, route.sudokuId)
         }
         composable<SudokuGORoute.Login>{
-            LoginScreen(navController, loginState, loginViewModel::setUser)
+            val state = loginViewModel.userEmail.collectAsStateWithLifecycle().value
+            LoginScreen(navController, state, loginViewModel::loginUser)
         }
         composable<SudokuGORoute.Register> {
             RegisterScreen(navController)

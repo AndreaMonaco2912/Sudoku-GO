@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sudokugo.data.models.Theme
-import com.example.sudokugo.data.models.User
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar

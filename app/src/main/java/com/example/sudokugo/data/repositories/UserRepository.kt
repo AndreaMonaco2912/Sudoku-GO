@@ -1,21 +1,13 @@
 package com.example.sudokugo.data.repositories
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import com.example.sudokugo.data.models.User
-import kotlinx.coroutines.flow.map
+import com.example.sudokugo.data.database.UserDAO
+import com.example.sudokugo.data.database.User
 
-class UserRepository(private val dataStore: DataStore<Preferences>) {
-    companion object {
-        private val EMAIL_KEY =
-            stringPreferencesKey("Email")
-    }
-    val user = dataStore.data.map {it[EMAIL_KEY] ?: ""}
-
-    suspend fun setUser(user: User) =
-        dataStore.edit { it[EMAIL_KEY] = user.email}
-
-    suspend fun logoutUser() = dataStore.edit { it.remove(EMAIL_KEY) }
+class UserRepository(
+    private val dao: UserDAO
+) {
+    suspend fun getAllEmails() = dao.getAllEmails()
+    suspend fun getUserByEmail(email: String) = dao.getByEmail(email)
+    suspend fun upsert(user: User) = dao.upsert(user)
+    suspend fun delete(user: User) = dao.delete(user)
 }

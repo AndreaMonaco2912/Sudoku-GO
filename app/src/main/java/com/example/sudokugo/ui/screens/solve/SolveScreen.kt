@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.R
-import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator

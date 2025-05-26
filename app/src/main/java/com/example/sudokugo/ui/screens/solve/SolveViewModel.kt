@@ -5,10 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
 import com.example.sudokugo.data.repositories.SudokuRepository
-import com.example.sudokugo.ui.SudokuState
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
-import io.github.ilikeyourhat.kudoku.model.Board
-import io.github.ilikeyourhat.kudoku.model.Cell
 import io.github.ilikeyourhat.kudoku.model.Sudoku
 import io.github.ilikeyourhat.kudoku.parsing.createFromString
 import io.github.ilikeyourhat.kudoku.parsing.toSingleLineString

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SudokuDAO{
     @Query("SELECT * FROM serversudoku")
-    fun getAll(): Flow<List<ServerSudoku>>
+    suspend fun getAll(): List<ServerSudoku>
 
     @Query("SELECT * FROM serversudoku WHERE id = :id")//TODO: it was flow don't know if now it's right
     suspend fun getById(id: Long): ServerSudoku
@@ -27,8 +27,11 @@ interface SudokuDAO{
 }
 @Dao
 interface UserDAO{
+    @Query("SELECT email FROM user")
+    suspend fun getAllEmails(): List<String>
+
     @Query("SELECT * FROM user WHERE email = :email")
-    fun getByEmail(email: String): Flow<User>
+    suspend fun getByEmail(email: String): User
 
     @Upsert
     suspend fun upsert(user:User)

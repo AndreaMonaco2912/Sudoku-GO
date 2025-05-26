@@ -8,13 +8,12 @@ import io.github.jan.supabase.postgrest.from
 class SudokuRepository(
     private val dao: SudokuDAO
 ) {
-    val sudokus = dao.getAll()
 
     suspend fun insertSudoku(sudoku: ServerSudoku): Long = dao.insert(sudoku)
     suspend fun deleteSudoku(sudoku: ServerSudoku) = dao.delete(sudoku)
     suspend fun fetchSudokuById(id: Long) = dao.getById(id)
     suspend fun updateCurrentBoard(id: Long, newBoard: String) = dao.update(id.toLong(), newBoard)
-    fun fetchAllSudoku() = dao.getAll()
+    suspend fun fetchAllSudoku() = dao.getAll()
 
 
 //    suspend fun fetchSudokuById(id: Int) : ServerSudoku?{

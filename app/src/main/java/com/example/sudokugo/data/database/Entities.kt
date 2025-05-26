@@ -19,5 +19,6 @@ data class User(
     @PrimaryKey val email: String,
     @ColumnInfo val name: String,
     @ColumnInfo val username: String,
-    @ColumnInfo val password: String
+    @ColumnInfo val password: String,
+    @ColumnInfo val profilePicture: String?
 )

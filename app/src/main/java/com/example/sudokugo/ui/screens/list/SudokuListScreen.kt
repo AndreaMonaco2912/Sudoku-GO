@@ -1,7 +1,6 @@
-package com.example.sudokugo.ui.screens
+package com.example.sudokugo.ui.screens.list
 
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,23 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,32 +32,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.sudokugo.data.models.User
-import com.example.sudokugo.supabase
+
 import com.example.sudokugo.ui.SudokuGORoute
-import com.example.sudokugo.ui.SudokuViewModel
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.launch
+import com.example.sudokugo.ui.screens.solve.SolveViewModel
+import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun SudokuListScreen(navController: NavController) {
-    val sudokuViewModel = koinViewModel<SudokuViewModel>()
-    val sudokuState by sudokuViewModel.state.collectAsStateWithLifecycle()
+    val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
+    sudokuListViewModel.getAllSudokus()
+    val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
 
-
-//    val items = (1..20).map { "Sudoku n°$it" }
-    LaunchedEffect(Unit) {
-        sudokuViewModel.allSudokus()
-    }
-
-    val sudokuFromServer by sudokuViewModel.sudokusFromServer.collectAsStateWithLifecycle()
-    val items = sudokuFromServer
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) }
@@ -78,16 +61,30 @@ fun SudokuListScreen(navController: NavController) {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier =  Modifier.padding(contentPadding)
         ) {
-            items(items) { item -> SudokuItem(
-                item.data,
-                onClick = { navController.navigate(SudokuGORoute.SudokuDetails(item.data)) }) }
+            items(sudokus.size) { index ->
+                val sudoku = sudokus[index]
+                SudokuItem(
+                    item = sudoku.difficulty.toString(), // Make sure difficulty is a String or convert it
+                    onClick = {
+                        navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id.toString()))
+                    }
+                )
+            }
+
+//            sudokus.forEach { sudoku -> {
+//                SudokuItem(
+//                    item = sudoku.difficulty,
+//                    onClick = { navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id.toString())) }
+//                )
+//            }
+
+            }
         }
 //            SudokuItem(
 //                item = sudokuFromServer?.toString() ?: "No sudoku found",
 //                onClick = { navController.navigate(SudokuGORoute.SudokuDetails("Sudoku 0")) }
 //            )
         }
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

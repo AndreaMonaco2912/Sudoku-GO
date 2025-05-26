@@ -8,6 +8,7 @@ import com.example.sudokugo.data.repositories.SudokuRepository
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
 import io.github.ilikeyourhat.kudoku.model.Sudoku
 import io.github.ilikeyourhat.kudoku.parsing.createFromString
+import io.github.ilikeyourhat.kudoku.parsing.fromSingleLineString
 import io.github.ilikeyourhat.kudoku.parsing.toSingleLineString
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import io.github.ilikeyourhat.kudoku.solving.defaultSolver
@@ -19,7 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SolveViewModel (
+class SolveViewModel(
     private val repository: SudokuRepository
 ) : ViewModel() {
 
@@ -35,61 +36,77 @@ class SolveViewModel (
     private val _originalSudoku = MutableStateFlow<Sudoku?>(null)
     val originalSudoku: StateFlow<Sudoku?> = _originalSudoku
 
+    private val _selectedCell = MutableStateFlow<Pair<Int, Int>?>(null)
+    val selectedCell: StateFlow<Pair<Int, Int>?> = _selectedCell
+
+    fun selectCell(row: Int, col: Int) {
+        _selectedCell.value = Pair(row, col)
+    }
 
     fun loadSudoku(id: Long) {
+        if (_currentSudoku.value != null) return
         viewModelScope.launch {
             showedSudoku = repository.fetchSudokuById(id)
-            _currentSudoku.value = Sudoku.createFromString(showedSudoku?.currentBoard ?: throw NullPointerException("Nessun sudoku caricato"))
-            _originalSudoku.value = Sudoku.createFromString(showedSudoku?.data ?: throw NullPointerException("Nessun sudoku caricato"))
+
+            val currentBoard = showedSudoku?.currentBoard
+                ?: throw NullPointerException("Nessun sudoku caricato")
+            val originalBoard = showedSudoku?.data
+                ?: throw NullPointerException("Nessun sudoku caricato")
+
+            _currentSudoku.value = Sudoku.fromSingleLineString(currentBoard)
+            _originalSudoku.value = Sudoku.fromSingleLineString(originalBoard)
         }
     }
 
-    fun addSudoku(difficulty: Difficulty) = viewModelScope.launch {
-        val localSudoku = generator.generate(Classic9x9, difficulty)
-        val solution = solver.solve(localSudoku)
-        val sudokuBoard = localSudoku
-        val sudoku = ServerSudoku(
-            data = sudokuBoard.toSingleLineString(),
-            currentBoard = sudokuBoard.toSingleLineString(),
-            difficulty = difficulty.toString(),
-            solution = solution.toSingleLineString()
-        )
-        _currentSudoku.value = sudokuBoard
-        _originalSudoku.value = sudokuBoard
-        Log.d("board", sudokuBoard.toSingleLineString())
+    fun addSudoku(difficulty: Difficulty) {
+        if (_currentSudoku.value != null) return
+        viewModelScope.launch {
+            val localSudoku = generator.generate(Classic9x9, difficulty)
+            val solution = solver.solve(localSudoku)
 
-        val id = repository.insertSudoku(sudoku)
-        showedSudoku = sudoku.copy(id = id)
+            val boardStr = localSudoku.toSingleLineString()
+            val solutionStr = solution.toSingleLineString()
+
+            val sudoku = ServerSudoku(
+                data = boardStr,
+                currentBoard = boardStr,
+                difficulty = difficulty.toString(),
+                solution = solutionStr
+            )
+            _currentSudoku.value = localSudoku
+            _originalSudoku.value = localSudoku
+
+            val id = repository.insertSudoku(sudoku)
+            showedSudoku = sudoku.copy(id = id)
+        }
     }
 
     fun deleteSudoku(sudoku: ServerSudoku) = viewModelScope.launch {
         repository.deleteSudoku(sudoku)
     }
 
-    fun insertNum(row: Int, col: Int, num: Int) {
+    fun insertNum(num: Int) {
+        val (row, col) = _selectedCell.value ?: return
+        val original = _originalSudoku.value ?: return
+
+        if (original.board.get(col, row).value != 0) return
+
         viewModelScope.launch {
-            val current = _currentSudoku.value ?: throw IllegalStateException("Sudoku non inizializzato")
+            val current =
+                _currentSudoku.value ?: throw IllegalStateException("Sudoku non inizializzato")
             val sudokuId = showedSudoku?.id ?: throw IllegalStateException("Nessun sudoku caricato")
 
             val currentBoardStr = current.toSingleLineString().toMutableList()
             val index = row * 9 + col
-            currentBoardStr[index] = if (num in 0..9) num.digitToChar() else '0'
+            currentBoardStr[index] = if (num in 1..9) num.digitToChar() else '0'
 
             val newBoardString = currentBoardStr.joinToString("")
-            val updatedSudoku = Sudoku.createFromString(newBoardString)
+            val updatedSudoku = Sudoku.fromSingleLineString(newBoardString)
 
             _currentSudoku.value = updatedSudoku
 
             repository.updateCurrentBoard(sudokuId, newBoardString)
         }
-    }
-
-
-    private fun parseBoard(board: String): List<List<Char>> {
-        return board
-            .split("|")
-            .filter { it.isNotEmpty() }
-            .map { row -> row.toList() }
     }
 
 }

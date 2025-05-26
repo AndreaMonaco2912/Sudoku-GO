@@ -5,6 +5,7 @@ import io.github.ilikeyourhat.kudoku.model.Sudoku
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,10 +43,11 @@ import io.github.ilikeyourhat.kudoku.type.Classic9x9
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SolveScreen(navController: NavController, sudokuId: String) {
+fun SolveScreen(navController: NavController, sudokuId: String? = null) {
+    val sudokuViewModel = koinViewModel<SolveViewModel>()
     Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = sudokuId) }
-    ){  contentPadding ->
+        topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO") }
+    ) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -56,12 +58,12 @@ fun SolveScreen(navController: NavController, sudokuId: String) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Sudoku Grid
-            SudokuGrid()
+            SudokuGrid(sudokuId, sudokuViewModel)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Number Pad
-            NumberPad()
+            NumberPad(onNumberClick = { sudokuViewModel.insertNum(it) })
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -72,9 +74,12 @@ fun SolveScreen(navController: NavController, sudokuId: String) {
 }
 
 @Composable
-fun SudokuGrid() {
-    val sudokuViewModel = koinViewModel<SolveViewModel>()
-    sudokuViewModel.addSudoku(Difficulty.EASY)//TODO: only when reached from home
+fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
+    if (sudokuId == null) {
+        sudokuViewModel.addSudoku(Difficulty.EASY)//TODO: only when reached from home
+    } else {
+        sudokuViewModel.loadSudoku(sudokuId.toLong())//TODO: only when reached from list
+    }
 
     val current = sudokuViewModel.currentSudoku.collectAsStateWithLifecycle().value
     val original = sudokuViewModel.originalSudoku.collectAsStateWithLifecycle().value
@@ -98,7 +103,7 @@ fun SudokuGrid() {
                     val currentVal = current.board.get(col, row).value
                     val isFixed = originalVal != 0
 
-                    val displayVal = if (currentVal != 0) currentVal.toString() else  ""
+                    val displayVal = if (currentVal != 0) currentVal.toString() else ""
                     val textColor = if (isFixed) Color.Black else Color.Blue
 
                     val isHighlighted = highlightedCells.contains(Pair(row, col))
@@ -106,9 +111,12 @@ fun SudokuGrid() {
                         modifier = Modifier
                             .size(cellSize)
                             .border(0.5.dp, Color.Gray)
-                            .background(if (isHighlighted) Color(0xFFDDE9F5) else Color.White),
+                            .background(if (isHighlighted) Color(0xFFDDE9F5) else Color.White)
+                            .clickable(enabled = !isFixed) {
+                                sudokuViewModel.selectCell(row, col)
+                            },
                         contentAlignment = Alignment.Center
-                    ) {
+                    ){
                         Text(text = displayVal, color = textColor) // Placeholder for number
                     }
                 }
@@ -118,7 +126,7 @@ fun SudokuGrid() {
 }
 
 @Composable
-fun NumberPad() {
+fun NumberPad(onNumberClick: (Int) -> Unit) {
     val numbers = (1..9).toList()
     Column {
         for (row in 0 until 2) {
@@ -129,9 +137,13 @@ fun NumberPad() {
                 for (i in 0 until 5) {
                     val index = row * 5 + i
                     if (index < numbers.size) {
-                        NumberPadButton(numbers[index].toString())
+                        NumberPadButton(numbers[index].toString()) {
+                            onNumberClick(numbers[index])
+                        }
                     } else if (index == 9) {
-                        NumberPadButton("✏️") // Pencil icon
+                        NumberPadButton("✏️") {
+                            onNumberClick(0)
+                        } // Pencil icon
                     }
                 }
             }
@@ -140,13 +152,14 @@ fun NumberPad() {
 }
 
 @Composable
-fun NumberPadButton(label: String) {
+fun NumberPadButton(label: String, onClick: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(64.dp)
             .padding(4.dp)
             .border(2.dp, Color.Black, CircleShape)
+            .clickable(onClick = onClick)
     ) {
         Text(label)
     }

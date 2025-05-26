@@ -12,8 +12,8 @@ import com.example.sudokugo.ui.screens.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
 import com.example.sudokugo.ui.screens.solve.SolveScreen
 import com.example.sudokugo.ui.screens.SudokuDetailsScreen
-import com.example.sudokugo.ui.screens.list.SudokuListScreen
 import com.example.sudokugo.ui.screens.UserScreen
+import com.example.sudokugo.ui.screens.list.SudokuListScreen
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.login.UserState
 import com.example.sudokugo.ui.screens.settings.SettingsState
@@ -28,7 +28,7 @@ sealed interface SudokuGORoute {
     @Serializable data object Login: SudokuGORoute
     @Serializable data object Register: SudokuGORoute
     @Serializable data class User(val userId: String): SudokuGORoute
-    @Serializable data class Solve(val sudokuId: String): SudokuGORoute
+    @Serializable data class Solve(val sudokuId: String? = null): SudokuGORoute
     @Serializable data class Settings(val userId: String): SudokuGORoute
 }
 
@@ -39,7 +39,7 @@ fun SudokuGONavGraph(navController: NavHostController,
                      loginViewModel: LoginViewModel){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Home
+        startDestination = SudokuGORoute.Solve()
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)

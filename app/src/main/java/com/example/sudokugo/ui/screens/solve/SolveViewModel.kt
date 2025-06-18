@@ -117,7 +117,13 @@ class SolveViewModel(
     }
 
     fun checkSolution(): Boolean {
-        return _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
+        val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
+        if (solved){
+            viewModelScope.launch {
+                repository.solveSudoku(showedSudoku!!.id)
+            }
+        }
+        return solved
     }
 
     fun restart() {

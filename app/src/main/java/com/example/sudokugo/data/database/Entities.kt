@@ -11,7 +11,8 @@ data class ServerSudoku(
     @ColumnInfo val data: String,
     @ColumnInfo val currentBoard: String,
     @ColumnInfo val difficulty: String,
-    @ColumnInfo val solution: String
+    @ColumnInfo val solution: String,
+    @ColumnInfo val solved: Boolean = false
 )
 
 @Entity

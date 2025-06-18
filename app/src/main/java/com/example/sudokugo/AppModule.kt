@@ -22,7 +22,6 @@ import org.koin.dsl.module
 
 val Context.themeDataStore by preferencesDataStore(name = "theme")
 val Context.userDataStore by preferencesDataStore(name = "user")
-//val Context.dataStore by preferencesDataStore("theme")
 
 val appModule = module {
 
@@ -50,8 +49,4 @@ val appModule = module {
     viewModel { RegisterViewModel() }
     viewModel { UserPictureViewModel(get()) }
     viewModel { SudokuListViewModel(get()) }
-//
-//    single { get<Context>().dataStore }
-//    single { ThemeRepository(get()) }
-//    viewModel { SettingsViewModel(get()) }
 }

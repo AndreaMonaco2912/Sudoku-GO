@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
@@ -58,7 +59,13 @@ fun SolveScreen(navController: NavController, sudokuId: String? = null) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            BottomControls(sudokuViewModel)
+            BottomControls(sudokuViewModel, goPhoto = {
+                navController.navigate(SudokuGORoute.Home) {
+                    popUpTo(
+                        SudokuGORoute.Solve
+                    ) { inclusive = true }
+                }
+            })
         }
     }
 }
@@ -120,30 +127,32 @@ fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
 
             drawRect(
                 Color.Black,
-                style = Stroke(thickLine))
+                style = Stroke(thickLine)
+            )
         }
-        Column{
-        repeat(gridSize) { row ->
-            Row {
-                repeat(gridSize) { col ->
-                    val originalVal = original.board.get(col, row).value
-                    val currentVal = current.board.get(col, row).value
-                    val isFixed = originalVal != 0
+        Column {
+            repeat(gridSize) { row ->
+                Row {
+                    repeat(gridSize) { col ->
+                        val originalVal = original.board.get(col, row).value
+                        val currentVal = current.board.get(col, row).value
+                        val isFixed = originalVal != 0
 
-                    val displayVal = if (currentVal != 0) currentVal.toString() else ""
-                    val textColor = if (isFixed) Color.Black else Color.Blue
+                        val displayVal = if (currentVal != 0) currentVal.toString() else ""
+                        val textColor = if (isFixed) Color.Black else Color.Blue
 
-                    Box(
-                        modifier = Modifier
-                            .size(cellSize)
-                            .clickable(enabled = !isFixed) {
-                                sudokuViewModel.selectCell(row, col)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = displayVal, color = textColor)
+                        Box(
+                            modifier = Modifier
+                                .size(cellSize)
+                                .clickable(enabled = !isFixed) {
+                                    sudokuViewModel.selectCell(row, col)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = displayVal, color = textColor)
+                        }
                     }
-                }}
+                }
             }
         }
     }
@@ -168,7 +177,7 @@ fun NumberPad(onNumberClick: (Int) -> Unit) {
                     } else if (index == 9) {
                         NumberPadButton("✏️") {
                             onNumberClick(0)
-                        } // Pencil icon
+                        }
                     }
                 }
             }
@@ -191,7 +200,7 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls(sudokuViewModel: SolveViewModel) {
+fun BottomControls(sudokuViewModel: SolveViewModel, goPhoto: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
@@ -202,8 +211,8 @@ fun BottomControls(sudokuViewModel: SolveViewModel) {
         }
 
         IconButton(onClick = {
-            if(sudokuViewModel.checkSolution())
-                Log.d("Sudoku", "Solved")
+            if (sudokuViewModel.checkSolution())
+                goPhoto
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")
         }

@@ -3,7 +3,7 @@ package com.example.sudokugo.data.repositories
 import com.example.sudokugo.data.database.UserDAO
 import com.example.sudokugo.data.database.User
 
-class UserRepository(
+class UserDAORepository(
     private val dao: UserDAO
 ) {
     suspend fun getAllEmails() = dao.getAllEmails()

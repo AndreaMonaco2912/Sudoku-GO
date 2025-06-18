@@ -44,15 +44,11 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavController, state: String?, onUserSetted: (UserServer) -> Unit) {
+fun LoginScreen(navController: NavController, onUserSetted: (UserServer) -> Unit) {
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Login") }
     ) { contentPadding ->
-        if(state != null) {
-                    navController.navigate(SudokuGORoute.Home){
-                        popUpTo(SudokuGORoute.Login) { inclusive = true }
-                    }
-        }
+
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

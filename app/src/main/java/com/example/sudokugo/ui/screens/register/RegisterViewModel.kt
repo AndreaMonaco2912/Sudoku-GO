@@ -18,29 +18,28 @@ class RegisterViewModel : ViewModel() {
     val registrationSuccess: StateFlow<Boolean> = _registrationSuccess
 
     fun registerUser(email: String, name: String, username: String, password: String) = viewModelScope.launch {
+        // Validazione separata per ogni campo
+        if (email.isBlank()) {
+            _errorMessage.value = "Inserire un'email"
+            return@launch
+        }
+        if (!email.contains("@") || !email.contains(".")) {
+            _errorMessage.value = "Inserire un'email valida"
+            return@launch
+        }
+        if (name.isBlank()) {
+            _errorMessage.value = "Il nome non può essere vuoto"
+            return@launch
+        }
+        if (username.isBlank()) {
+            _errorMessage.value = "Lo username non può essere vuoto"
+            return@launch
+        }
+        if (password.isBlank()) {
+            _errorMessage.value = "La password non può essere vuota"
+            return@launch
+        }
         try {
-            // Validazione separata per ogni campo
-            if (email.isBlank()) {
-                _errorMessage.value = "Inserire un'email"
-                return@launch
-            }
-            if (!email.contains("@") || !email.contains(".")) {
-                _errorMessage.value = "Inserire un'email valida"
-                return@launch
-            }
-            if (name.isBlank()) {
-                _errorMessage.value = "Il nome non può essere vuoto"
-                return@launch
-            }
-            if (username.isBlank()) {
-                _errorMessage.value = "Lo username non può essere vuoto"
-                return@launch
-            }
-            if (password.isBlank()) {
-                _errorMessage.value = "La password non può essere vuota"
-                return@launch
-            }
-
             val result = supabase.from("users")
                 .select {
                     filter {

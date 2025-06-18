@@ -104,7 +104,7 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
             )
             NavigationBarItem(
                 selected = selected == BottomNavSelected.USER,
-                onClick = { navController.navigate(SudokuGORoute.User(userId = fakeUserId)) },
+                onClick = { navController.navigate(SudokuGORoute.User) },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
 

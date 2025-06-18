@@ -36,6 +36,7 @@ import com.example.sudokugo.ui.SudokuGONavGraph
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
+import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
 
 import io.github.jan.supabase.SupabaseClient
@@ -104,27 +105,35 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         Configuration.getInstance().userAgentValue = packageName
 
-        requestPermissionsIfNecessary(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ))
+        requestPermissionsIfNecessary(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        )
 
         setContent {
             val settingsViewModel = koinViewModel<SettingsViewModel>()
             val themeState by settingsViewModel.state.collectAsStateWithLifecycle()
             val loginViewModel = koinViewModel<LoginViewModel>()
             val registerViewModel = koinViewModel<RegisterViewModel>()
-
-
+            val userScreenViewModel = koinViewModel<UserScreenViewModel>()
 
             SudokuGOTheme(
-                darkTheme = when (themeState.theme){
+                darkTheme = when (themeState.theme) {
                     Theme.Dark -> true
                     Theme.Light -> false
                     Theme.System -> isSystemInDarkTheme()
                 }
             ) {
                 val navController = rememberNavController()
-                SudokuGONavGraph(navController, settingsViewModel, themeState, loginViewModel,registerViewModel)
+                SudokuGONavGraph(
+                    navController,
+                    settingsViewModel,
+                    themeState,
+                    loginViewModel,
+                    registerViewModel,
+                    userScreenViewModel
+                )
             }
         }
     }

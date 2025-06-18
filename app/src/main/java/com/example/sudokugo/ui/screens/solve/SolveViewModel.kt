@@ -77,7 +77,9 @@ class SolveViewModel(
                 data = boardStr,
                 currentBoard = boardStr,
                 difficulty = difficulty.toString(),
-                solution = solutionStr
+                solution = solutionStr,
+                userId = null,
+                picture = null
             )
             _currentSudoku.value = localSudoku
             _originalSudoku.value = localSudoku

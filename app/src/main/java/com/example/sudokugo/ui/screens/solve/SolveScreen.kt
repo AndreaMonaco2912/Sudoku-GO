@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui.screens.solve
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -201,6 +203,7 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 
 @Composable
 fun BottomControls(sudokuViewModel: SolveViewModel, goPhoto: () -> Unit) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
@@ -213,6 +216,8 @@ fun BottomControls(sudokuViewModel: SolveViewModel, goPhoto: () -> Unit) {
         IconButton(onClick = {
             if (sudokuViewModel.checkSolution())
                 goPhoto
+            else
+                Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")
         }

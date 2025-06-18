@@ -40,7 +40,7 @@ fun SudokuGONavGraph(navController: NavHostController,
 ){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Home
+        startDestination = SudokuGORoute.Solve()
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)

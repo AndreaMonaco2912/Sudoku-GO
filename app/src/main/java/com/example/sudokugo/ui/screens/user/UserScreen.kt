@@ -42,7 +42,7 @@ import com.example.sudokugo.ui.composables.profilePic.UserChangePicture
 fun UserScreen(navController: NavController, userScreenViewModel: UserScreenViewModel) {
 
     val email by userScreenViewModel.email.collectAsStateWithLifecycle()
-    val points by userScreenViewModel.state.collectAsStateWithLifecycle()
+    val userData by userScreenViewModel.userData.collectAsStateWithLifecycle()
 
     LaunchedEffect(email) {
         if (email == null) {
@@ -63,7 +63,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
     }
 
     Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "QueryPerUsername") },
+        topBar = { TopSudokuGoAppBar(navController, title = userData?.username) },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.USER) }
     ) { contentPadding ->
         Column(
@@ -124,7 +124,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                     "2 Classificato",
                     "3 Classificato",
                     "4 Classificato",
-                    "QueryPerNome"
+                    userData?.username
                 )
 
                 Card(
@@ -147,8 +147,10 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                                     Text("A", color = Color.White)
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(it, modifier = Modifier.weight(1f))
-                                if (it != "Tu") Text("Punti")
+                                if (it != null) {
+                                    Text(it, modifier = Modifier.weight(1f))
+                                }
+                                if (it == userData?.username) Text(userData?.points.toString())
                             }
                         }
                     }

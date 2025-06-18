@@ -21,7 +21,7 @@ fun HomeScreen(navController: NavController) {
 
     val playSudoku = {
         showMap.value = false
-        navController.navigate(SudokuGORoute.Solve)
+        navController.navigate(SudokuGORoute.Solve())
     }
 
     Scaffold(

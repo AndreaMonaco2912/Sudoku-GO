@@ -52,6 +52,16 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
         }
     }
 
+    if (email == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "QueryPerUsername") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.USER) }

@@ -18,7 +18,7 @@ data class ServerSudoku(
 )
 
 @Entity
-data class User(
+data class User( //TODO: remove name, username and password
     @PrimaryKey val email: String,
     @ColumnInfo val name: String,
     @ColumnInfo val username: String,

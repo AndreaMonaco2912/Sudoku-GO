@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
 import com.example.sudokugo.data.repositories.SudokuRepository
+import com.example.sudokugo.data.repositories.UserDSRepository
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
 import io.github.ilikeyourhat.kudoku.model.Sudoku
 import io.github.ilikeyourhat.kudoku.parsing.createFromString
@@ -16,13 +17,15 @@ import io.github.ilikeyourhat.kudoku.type.Classic9x9
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.security.KeyStore
 
 class SolveViewModel(
-    private val repository: SudokuRepository
+    private val repository: SudokuRepository,
+    private val repositoryUser: UserDSRepository
 ) : ViewModel() {
     var startTime: Long = 0L
         private set
@@ -31,6 +34,8 @@ class SolveViewModel(
     private val solver = Sudoku.defaultSolver()
 
     private var showedSudoku: ServerSudoku? = null
+
+    private val _email = MutableStateFlow<String?>(null)
 
     private val _currentSudoku = MutableStateFlow<Sudoku?>(null)
     val currentSudoku: StateFlow<Sudoku?> = _currentSudoku
@@ -45,6 +50,14 @@ class SolveViewModel(
 
     fun selectCell(row: Int, col: Int) {
         _selectedCell.value = Pair(row, col)
+    }
+
+    init {
+        viewModelScope.launch {
+            repositoryUser.email.collect { savedEmail ->
+                _email.value = savedEmail
+            }
+        }
     }
 
     fun loadSudoku(id: Long) {
@@ -81,7 +94,7 @@ class SolveViewModel(
                 currentBoard = boardStr,
                 difficulty = difficulty.toString(),
                 solution = solutionStr,
-                userId = null,
+                userId = _email.value,
                 picture = null
             )
 //            _currentSudoku.value = localSudoku

@@ -8,8 +8,8 @@ import androidx.room.Upsert
 
 @Dao
 interface SudokuDAO{
-    @Query("SELECT * FROM serversudoku")
-    suspend fun getAll(): List<ServerSudoku>
+    @Query("SELECT * FROM serversudoku WHERE userId = :email")
+    suspend fun getAllByUser(email: String?): List<ServerSudoku>
 
     @Query("SELECT * FROM serversudoku WHERE id = :id")//TODO: it was flow don't know if now it's right
     suspend fun getById(id: Long): ServerSudoku

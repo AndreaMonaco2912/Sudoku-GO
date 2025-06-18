@@ -4,13 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
 import com.example.sudokugo.data.repositories.SudokuRepository
+import com.example.sudokugo.data.repositories.UserDSRepository
 import io.github.ilikeyourhat.kudoku.model.Sudoku
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class SudokuListViewModel (
-    private val repository: SudokuRepository
+    private val repository: SudokuRepository,
+    private val repositoryUser: UserDSRepository
 ) : ViewModel() {
 
     private val _sudokuList = MutableStateFlow<List<ServerSudoku>>(ArrayList())
@@ -19,7 +22,7 @@ class SudokuListViewModel (
 
     fun getAllSudokus(){
         viewModelScope.launch {
-            _sudokuList.value = repository.fetchAllSudoku()
+            _sudokuList.value = repository.fetchAllSudokuByUser(repositoryUser.email.firstOrNull())
         }
     }
 

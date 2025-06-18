@@ -10,6 +10,6 @@ class SudokuRepository(
     suspend fun deleteSudoku(sudoku: ServerSudoku) = dao.delete(sudoku)
     suspend fun fetchSudokuById(id: Long) = dao.getById(id)
     suspend fun updateCurrentBoard(id: Long, newBoard: String) = dao.update(id.toLong(), newBoard)
-    suspend fun fetchAllSudoku() = dao.getAll()
+    suspend fun fetchAllSudokuByUser(email: String?) = dao.getAllByUser(email)
     suspend fun solveSudoku(id: Long) = dao.solve(id)
 }

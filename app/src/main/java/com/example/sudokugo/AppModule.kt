@@ -48,10 +48,10 @@ val appModule = module {
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
 
     viewModel { SettingsViewModel(get()) }
-    viewModel { SolveViewModel(get()) }
+    viewModel { SolveViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel() }
     viewModel { UserPictureViewModel(get()) }
-    viewModel { SudokuListViewModel(get()) }
+    viewModel { SudokuListViewModel(get(), get()) }
     viewModel { UserScreenViewModel(get()) }
 }

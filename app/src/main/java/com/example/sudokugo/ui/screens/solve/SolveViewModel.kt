@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.security.KeyStore
 
 class SolveViewModel(
     private val repository: SudokuRepository
@@ -39,6 +40,8 @@ class SolveViewModel(
     private val _selectedCell = MutableStateFlow<Pair<Int, Int>?>(null)
     val selectedCell: StateFlow<Pair<Int, Int>?> = _selectedCell
 
+    private var solutionSudoku: String? = null
+
     fun selectCell(row: Int, col: Int) {
         _selectedCell.value = Pair(row, col)
     }
@@ -52,9 +55,12 @@ class SolveViewModel(
                 ?: throw NullPointerException("Nessun sudoku caricato")
             val originalBoard = showedSudoku?.data
                 ?: throw NullPointerException("Nessun sudoku caricato")
+            val solution = showedSudoku?.solution
+                ?: throw NullPointerException("Nessun sudoku caricato")
 
             _currentSudoku.value = Sudoku.fromSingleLineString(currentBoard)
             _originalSudoku.value = Sudoku.fromSingleLineString(originalBoard)
+            solutionSudoku = solution
         }
     }
 
@@ -75,6 +81,7 @@ class SolveViewModel(
             )
             _currentSudoku.value = localSudoku
             _originalSudoku.value = localSudoku
+            solutionSudoku = solutionStr
 
             val id = repository.insertSudoku(sudoku)
             showedSudoku = sudoku.copy(id = id)
@@ -109,4 +116,11 @@ class SolveViewModel(
         }
     }
 
+    fun checkSolution(): Boolean {
+        return _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
+    }
+
+    fun restart() {
+        _currentSudoku.value = _originalSudoku.value
+    }
 }

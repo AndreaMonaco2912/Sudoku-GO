@@ -1,9 +1,7 @@
 package com.example.sudokugo.ui.screens.solve
 
 import android.util.Log
-import io.github.ilikeyourhat.kudoku.model.Sudoku
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,21 +23,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import com.example.sudokugo.ui.screens.solve.SolveViewModel
-import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
-import io.github.ilikeyourhat.kudoku.type.Classic9x9
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -57,18 +50,15 @@ fun SolveScreen(navController: NavController, sudokuId: String? = null) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Sudoku Grid
             SudokuGrid(sudokuId, sudokuViewModel)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Number Pad
             NumberPad(onNumberClick = { sudokuViewModel.insertNum(it) })
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Bottom Controls
-            BottomControls()
+            BottomControls(sudokuViewModel)
         }
     }
 }
@@ -83,19 +73,56 @@ fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
 
     val current = sudokuViewModel.currentSudoku.collectAsStateWithLifecycle().value
     val original = sudokuViewModel.originalSudoku.collectAsStateWithLifecycle().value
+    val selected = sudokuViewModel.selectedCell.collectAsStateWithLifecycle().value
 
     if (current == null || original == null) throw NullPointerException("Sudoku non inizializzato")
 
     val gridSize = 9
     val cellSize = 36.dp
-    val paddingSize = 1.dp
-    val highlightedCells = listOf(Pair(0, 0), Pair(2, 1), Pair(5, 3)) // Example positions
+    val totalSize = cellSize * gridSize
 
-    Column(
+    Box(
         modifier = Modifier
-            .border(2.dp, Color.Blue)
-            .padding(paddingSize)
+            .size(totalSize)
     ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val cellPx = size.width / gridSize
+            val thinLine = 1.dp.toPx()
+            val thickLine = 3.dp.toPx()
+
+            selected?.let { (selRow, selCol) ->
+                drawRect(
+                    color = Color(0x331976D2),
+                    topLeft = Offset(x = selCol * cellPx, y = selRow * cellPx),
+                    size = androidx.compose.ui.geometry.Size(cellPx, cellPx)
+                )
+            }
+
+            for (i in 1 until gridSize) {
+                val lineWidth = if (i % 3 == 0) thickLine else thinLine
+                drawLine(
+                    color = Color.Black,
+                    start = Offset(i * cellPx, 0f),
+                    end = Offset(i * cellPx, size.height),
+                    strokeWidth = lineWidth
+                )
+            }
+
+            for (i in 1 until gridSize) {
+                val lineWidth = if (i % 3 == 0) thickLine else thinLine
+                drawLine(
+                    color = Color.Black,
+                    start = Offset(0f, i * cellPx),
+                    end = Offset(size.width, i * cellPx),
+                    strokeWidth = lineWidth
+                )
+            }
+
+            drawRect(
+                Color.Black,
+                style = Stroke(thickLine))
+        }
+        Column{
         repeat(gridSize) { row ->
             Row {
                 repeat(gridSize) { col ->
@@ -106,23 +133,21 @@ fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
                     val displayVal = if (currentVal != 0) currentVal.toString() else ""
                     val textColor = if (isFixed) Color.Black else Color.Blue
 
-                    val isHighlighted = highlightedCells.contains(Pair(row, col))
                     Box(
                         modifier = Modifier
                             .size(cellSize)
-                            .border(0.5.dp, Color.Gray)
-                            .background(if (isHighlighted) Color(0xFFDDE9F5) else Color.White)
                             .clickable(enabled = !isFixed) {
                                 sudokuViewModel.selectCell(row, col)
                             },
                         contentAlignment = Alignment.Center
-                    ){
-                        Text(text = displayVal, color = textColor) // Placeholder for number
+                    ) {
+                        Text(text = displayVal, color = textColor)
                     }
-                }
+                }}
             }
         }
     }
+
 }
 
 @Composable
@@ -166,27 +191,20 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls() {
+fun BottomControls(sudokuViewModel: SolveViewModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* Restart */ }) {
+        IconButton(onClick = { sudokuViewModel.restart() }) {
             Icon(Icons.Default.Refresh, contentDescription = "Restart")
         }
 
-        // Placeholder for user avatar
-        Image(
-            painter = painterResource(id = R.drawable.character_icon), // Replace with your avatar
-            contentDescription = "User",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .border(2.dp, Color.Black, CircleShape)
-        )
-
-        IconButton(onClick = { /* Validate */ }) {
+        IconButton(onClick = {
+            if(sudokuViewModel.checkSolution())
+                Log.d("Sudoku", "Solved")
+        }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")
         }
     }

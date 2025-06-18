@@ -18,9 +18,6 @@ class LoginViewModel(
         if(!otherUsers.contains(user.email)){
             val localUser = User(
                 email = user.email,
-                name = user.name,
-                username = user.username,
-                password = user.password,
                 profilePicture = null
             )
             DAOrepository.upsert(localUser)

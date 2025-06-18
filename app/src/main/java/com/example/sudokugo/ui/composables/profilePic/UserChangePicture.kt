@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.composables.profilePic
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,13 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import com.example.sudokugo.R
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
 
@@ -39,6 +33,9 @@ fun UserChangePicture() {
             userPictureViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver)
         }
     )
+    val imgModifier = Modifier
+        .size(120.dp)
+        .clip(CircleShape)
 
     Box(
         modifier = Modifier
@@ -46,26 +43,7 @@ fun UserChangePicture() {
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        if (!userPic.isNullOrEmpty()) {
-            AsyncImage(
-                ImageRequest.Builder(ctx)
-                    .data(userPic)
-                    .crossfade(true)
-                    .build(),
-                "Captured image",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            Image(
-                painter = painterResource(id = R.drawable.default_character_icon), // Usa l'avatar utente reale
-                contentDescription = "User Profile Image",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-            )
-        }
+        UserPicture(userPic, imgModifier)
 
         IconButton(
             onClick = cameraLauncher::captureImage,

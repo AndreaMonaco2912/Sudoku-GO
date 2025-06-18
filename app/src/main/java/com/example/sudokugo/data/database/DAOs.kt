@@ -40,4 +40,9 @@ interface UserDAO{
     @Delete
     suspend fun delete(user:User)
 
+    @Query("UPDATE user SET profilePicture = :pic WHERE email = :email")
+    suspend fun changePic(email: String, pic: String)
+
+    @Query("SELECT profilePicture FROM user WHERE email = :email")
+    suspend fun getPictureByEmail(email: String): String?
 }

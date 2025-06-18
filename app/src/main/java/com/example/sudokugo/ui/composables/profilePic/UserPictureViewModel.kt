@@ -2,10 +2,7 @@ package com.example.sudokugo.ui.composables.profilePic
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.example.sudokugo.data.repositories.UserPictureRepository
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import android.content.ContentResolver
 import android.content.ContentValues
@@ -21,24 +18,41 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.createBitmap
+import com.example.sudokugo.data.repositories.UserDAORepository
+import com.example.sudokugo.data.repositories.UserDSRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 class UserPictureViewModel(
-    private val repository: UserPictureRepository
+    private val userDaoRep: UserDAORepository,
+    private val userDSRepository: UserDSRepository
 ) : ViewModel() {
 
-    val userPic = repository.userPic.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null
-    )
+    private val _userPic = MutableStateFlow<String?>(null)
+    val userPic: StateFlow<String?> = _userPic
 
-    fun processAndSaveUserPic(imageUri: Uri, contentResolver: ContentResolver) = viewModelScope.launch {
-        val bitmap = uriToBitmap(imageUri, contentResolver)
-        val cropped = cropCircleBitmap(bitmap)
-        val savedUri = saveBitmapToStorage(cropped, contentResolver)
-        repository.setUserPic(savedUri.toString())
+    private val _email = MutableStateFlow<String?>(null)
+
+    init {
+        viewModelScope.launch {
+            userDSRepository.email.collect { savedEmail ->
+                _email.value = savedEmail
+                if(savedEmail != null){
+                    _userPic.value = userDaoRep.getPictureByEmail(savedEmail)
+                }
+            }
+        }
     }
+
+    fun processAndSaveUserPic(imageUri: Uri, contentResolver: ContentResolver) =
+        viewModelScope.launch {
+            val bitmap = uriToBitmap(imageUri, contentResolver)
+            val cropped = cropCircleBitmap(bitmap)
+            val savedUri = saveBitmapToStorage(cropped, contentResolver)
+            userDaoRep.changePic(_email.value!!, savedUri.toString())
+            _userPic.value = savedUri.toString()
+        }
 
     private fun uriToBitmap(imageUri: Uri, contentResolver: ContentResolver): Bitmap {
         val source = ImageDecoder.createSource(contentResolver, imageUri)

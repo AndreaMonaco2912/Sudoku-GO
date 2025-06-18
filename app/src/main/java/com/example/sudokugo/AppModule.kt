@@ -51,7 +51,7 @@ val appModule = module {
     viewModel { SolveViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel() }
-    viewModel { UserPictureViewModel(get()) }
+    viewModel { UserPictureViewModel(get(), get()) }
     viewModel { SudokuListViewModel(get(), get()) }
     viewModel { UserScreenViewModel(get()) }
 }

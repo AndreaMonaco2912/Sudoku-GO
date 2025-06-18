@@ -37,14 +37,16 @@ import com.example.sudokugo.ui.SudokuGORoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopSudokuGoAppBar(navController: NavController, title: String) {
+fun TopSudokuGoAppBar(navController: NavController, title: String?) {
     val fakeUserId = "1"
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                title,
-                fontWeight = FontWeight.Medium,
-            )
+            if (title != null) {
+                Text(
+                    title,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
         },
         navigationIcon = {
             if (title == "Sudoku Details" || title == "Settings") {

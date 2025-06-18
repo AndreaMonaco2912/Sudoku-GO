@@ -27,28 +27,44 @@ class UserScreenViewModel(
     private val _state = MutableStateFlow<Int?>(null)
     val state : StateFlow<Int?> = _state
 
+    private val _userData = MutableStateFlow<UserServer?>(null)
+    val userData: StateFlow<UserServer?> = _userData
+
     init {
         viewModelScope.launch {
             userDSRepository.email.collect { savedEmail ->
                 _email.value = savedEmail
                 if (savedEmail != null) {
-                    getUserPoints(savedEmail)
+                    getUserData(savedEmail)
                 }
             }
         }
     }
-
-    private suspend fun getUserPoints(email: String) {
+    private suspend fun getUserData(email: String) {
         try {
-            val points = supabase.from("users")
-                .select(columns = Columns.raw("points")) {
+            val user = supabase.from("users")
+                .select {
                     filter { eq("email", email) }
                 }
-                .decodeSingle<Map<String, Int>>()["points"]
-            _state.value = points
+                .decodeSingle<UserServer>()
+            _userData.value = user
 
         } catch (e: Exception) {
-            Log.e("GetPoints", "Errore durante la ricezione dei punti", e)
+            Log.e("GetUserData", "Errore durante la ricezione dei dati utente", e)
         }
     }
+
+//    private suspend fun getUserPoints(email: String) {
+//        try {
+//            val points = supabase.from("users")
+//                .select(columns = Columns.raw("points")) {
+//                    filter { eq("email", email) }
+//                }
+//                .decodeSingle<Map<String, Int>>()["points"]
+//            _state.value = points
+//
+//        } catch (e: Exception) {
+//            Log.e("GetPoints", "Errore durante la ricezione dei punti", e)
+//        }
+//    }
 }

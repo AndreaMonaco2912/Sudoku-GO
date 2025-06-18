@@ -8,18 +8,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.sudokugo.ui.screens.HomeScreen
 import com.example.sudokugo.ui.screens.login.LoginScreen
-import com.example.sudokugo.ui.screens.RegisterScreen
+import com.example.sudokugo.ui.screens.register.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
 import com.example.sudokugo.ui.screens.solve.SolveScreen
 import com.example.sudokugo.ui.screens.SudokuDetailsScreen
 import com.example.sudokugo.ui.screens.UserScreen
 import com.example.sudokugo.ui.screens.list.SudokuListScreen
 import com.example.sudokugo.ui.screens.login.LoginViewModel
-import com.example.sudokugo.ui.screens.login.UserState
+import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsState
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
-import kotlin.math.log
 
 sealed interface SudokuGORoute {
     @Serializable data object Home: SudokuGORoute
@@ -36,10 +35,12 @@ sealed interface SudokuGORoute {
 fun SudokuGONavGraph(navController: NavHostController,
                      settingsViewModel: SettingsViewModel,
                      themeState: SettingsState,
-                     loginViewModel: LoginViewModel){
+                     loginViewModel: LoginViewModel,
+                     registerViewModel: RegisterViewModel
+){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Solve()
+        startDestination = SudokuGORoute.Home
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)
@@ -56,7 +57,7 @@ fun SudokuGONavGraph(navController: NavHostController,
             LoginScreen(navController, state, loginViewModel::loginUser)
         }
         composable<SudokuGORoute.Register> {
-            RegisterScreen(navController)
+            RegisterScreen(navController, registerViewModel)
         }
         composable<SudokuGORoute.User> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.User>()

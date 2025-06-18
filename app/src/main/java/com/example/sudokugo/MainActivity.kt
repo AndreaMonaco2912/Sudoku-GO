@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.data.models.Theme
 import com.example.sudokugo.ui.SudokuGONavGraph
 import com.example.sudokugo.ui.screens.login.LoginViewModel
+import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
 
@@ -111,6 +112,7 @@ class MainActivity : ComponentActivity() {
             val settingsViewModel = koinViewModel<SettingsViewModel>()
             val themeState by settingsViewModel.state.collectAsStateWithLifecycle()
             val loginViewModel = koinViewModel<LoginViewModel>()
+            val registerViewModel = koinViewModel<RegisterViewModel>()
 
 
 
@@ -122,7 +124,7 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 val navController = rememberNavController()
-                SudokuGONavGraph(navController, settingsViewModel, themeState, loginViewModel)
+                SudokuGONavGraph(navController, settingsViewModel, themeState, loginViewModel,registerViewModel)
             }
         }
     }

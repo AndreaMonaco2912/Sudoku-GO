@@ -16,8 +16,6 @@ import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    val fakeSudokuId = "Sudoku 12"
-    val fakeUserId = "Pippo"
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO")},
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }

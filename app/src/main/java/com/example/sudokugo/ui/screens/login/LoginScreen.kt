@@ -68,38 +68,6 @@ fun LoginScreen(navController: NavController, state: String?, onUserSetted: (Use
             var passwordVisibility by remember { mutableStateOf(false)}
             var email by rememberSaveable { mutableStateOf("") }
 
-            Button(onClick = {
-                scope.launch {
-                    try {
-                        val result = supabase.from("users")
-                            .select(){
-                                filter {
-                                    eq("email", email)
-                                    eq("password", password)
-                                }
-                            }
-                            .decodeList<UserServer>()
-
-                        if (result.isNotEmpty()) {
-                            // Login riuscito
-                            onUserSetted(result[0])
-                            navController.navigate(SudokuGORoute.Home) {
-                                popUpTo(SudokuGORoute.Login) { inclusive = true }
-                            }
-
-                        } else {
-                            // Credenziali sbagliate
-                            Log.d("Login", "Credenziali non valide")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("Login", "Errore durante il login", e)
-                    }
-                }
-            }) {
-                Text("Login")
-            }
-
-
             val icon = if(passwordVisibility)
                 painterResource(id = R.drawable.visibility)
             else
@@ -134,7 +102,7 @@ fun LoginScreen(navController: NavController, state: String?, onUserSetted: (Use
             )
             {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = { navController.navigate(SudokuGORoute.Register) },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
@@ -142,11 +110,34 @@ fun LoginScreen(navController: NavController, state: String?, onUserSetted: (Use
                     Text("Register")
                 }
                 Spacer(Modifier.size(24.dp))
-                Button(
-                    onClick = { /*TODO*/ },
-                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-                ) {
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Button(onClick = {
+                    scope.launch {
+                        try {
+                            val result = supabase.from("users")
+                                .select(){
+                                    filter {
+                                        eq("email", email)
+                                        eq("password", password)
+                                    }
+                                }
+                                .decodeList<UserServer>()
+
+                            if (result.isNotEmpty()) {
+                                // Login riuscito
+                                onUserSetted(result[0])
+                                navController.navigate(SudokuGORoute.Home) {
+                                    popUpTo(SudokuGORoute.Login) { inclusive = true }
+                                }
+
+                            } else {
+                                // Credenziali sbagliate
+                                Log.d("Login", "Credenziali non valide")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("Login", "Errore durante il login", e)
+                        }
+                    }
+                }) {
                     Text("Login")
                 }
             }

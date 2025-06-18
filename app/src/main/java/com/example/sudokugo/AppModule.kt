@@ -28,10 +28,11 @@ val appModule = module {
 
     single {
         databaseBuilder(
-            get(),
-            SudokuGODatabase::class.java,
-            "sudoku-go-database"
-        ).build()
+                get(),
+                SudokuGODatabase::class.java,
+                "sudoku-go-database"
+            ).fallbackToDestructiveMigration(true) //TODO: remove
+        .build()
     }
 
     single { get<Context>().themeDataStore }

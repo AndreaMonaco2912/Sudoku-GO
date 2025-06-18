@@ -10,11 +10,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.compose.material3.NavigationBar
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.map.functions.haversineDistance
+import com.example.sudokugo.ui.SudokuGORoute
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
@@ -22,7 +25,7 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
 
-class PoiManager(private val context: Context, private val mapView: MapView) {
+class PoiManager(private val context: Context, private val mapView: MapView, private val playSudoku: () -> Unit) {
 
     data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
 
@@ -72,9 +75,9 @@ class PoiManager(private val context: Context, private val mapView: MapView) {
                     if (item != null && userLocation != null) {
                         val distance = haversineDistance(userLocation, item.point)
                         if (distance <= minDistance) {
-                            Toast.makeText(context, "Cliccato: ${item.title}", Toast.LENGTH_SHORT)
-                                .show()
-                            // Aggiungi qui eventuale logica per avviare un'activity di gioco
+                            Handler(Looper.getMainLooper()).post {
+                                playSudoku()
+                            }
                         } else {
                             Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT)
                                 .show()

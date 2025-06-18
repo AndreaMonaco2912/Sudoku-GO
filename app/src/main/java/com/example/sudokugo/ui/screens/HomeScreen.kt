@@ -7,24 +7,25 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.Map
-
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-
 
 @Composable
 fun HomeScreen(navController: NavController) {
     Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO")},
+        topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
     ) { contentPadding ->
 
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding)) {
-            Map()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+        ) {
+            Map(playSudoku = { navController.navigate(SudokuGORoute.Solve()) })
         }
     }
 }

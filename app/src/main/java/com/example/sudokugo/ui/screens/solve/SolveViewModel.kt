@@ -14,6 +14,7 @@ import io.github.ilikeyourhat.kudoku.parsing.toSingleLineString
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import io.github.ilikeyourhat.kudoku.solving.defaultSolver
 import io.github.ilikeyourhat.kudoku.type.Classic9x9
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.security.KeyStore
+
 
 class SolveViewModel(
     private val repository: SudokuRepository,
@@ -82,28 +85,61 @@ class SolveViewModel(
     fun addSudoku(difficulty: Difficulty) {
         startTime = System.currentTimeMillis()
         if (_currentSudoku.value != null) return
+
         viewModelScope.launch {
-            val localSudoku = generator.generate(Classic9x9, difficulty)
-            val solution = solver.solve(localSudoku)
+            val email = _email.value ?: repositoryUser.email.firstOrNull()
+            if (email == null) {
+                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
+                return@launch
+            }
+            val result = withContext(Dispatchers.Default) {
+                val localSudoku = generator.generate(Classic9x9, difficulty)
+                val solution = solver.solve(localSudoku)
 
-            val boardStr = localSudoku.toSingleLineString()
-            val solutionStr = solution.toSingleLineString()
+                val boardStr = localSudoku.toSingleLineString()
+                val solutionStr = solution.toSingleLineString()
 
-            val sudoku = ServerSudoku(
-                data = boardStr,
-                currentBoard = boardStr,
-                difficulty = difficulty.toString(),
-                solution = solutionStr,
-                userId = _email.value,
-                picture = null
-            )
-//            _currentSudoku.value = localSudoku
+                val sudoku = ServerSudoku(
+                    data = boardStr,
+                    currentBoard = boardStr,
+                    difficulty = difficulty.toString(),
+                    solution = solutionStr,
+                    userId = email,
+                    picture = null
+                )
+
+                val id = repository.insertSudoku(sudoku)
+                Triple(solution, localSudoku to sudoku.copy(id = id), solutionStr)
+            }
+
+            val (solution, pair, solutionStr) = result
+            val (original, stored) = pair
+
             _currentSudoku.value = solution
-            _originalSudoku.value = localSudoku
+            _originalSudoku.value = original
             solutionSudoku = solutionStr
-
-            val id = repository.insertSudoku(sudoku)
-            showedSudoku = sudoku.copy(id = id)
+            showedSudoku = stored
+//            val localSudoku = generator.generate(Classic9x9, difficulty)
+//            val solution = solver.solve(localSudoku)
+//
+//            val boardStr = localSudoku.toSingleLineString()
+//            val solutionStr = solution.toSingleLineString()
+//
+//            val sudoku = ServerSudoku(
+//                data = boardStr,
+//                currentBoard = boardStr,
+//                difficulty = difficulty.toString(),
+//                solution = solutionStr,
+//                userId = email,
+//                picture = null
+//            )
+//
+//            _currentSudoku.value = solution
+//            _originalSudoku.value = localSudoku
+//            solutionSudoku = solutionStr
+//
+//            val id = repository.insertSudoku(sudoku)
+//            showedSudoku = sudoku.copy(id = id)
         }
     }
 

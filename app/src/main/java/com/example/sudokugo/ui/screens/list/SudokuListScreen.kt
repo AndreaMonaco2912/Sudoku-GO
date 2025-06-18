@@ -46,7 +46,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
-    sudokuListViewModel.getAllSudokus()
     val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
 
     Scaffold(

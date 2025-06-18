@@ -1,5 +1,6 @@
 package com.example.sudokugo.ui.screens.list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
@@ -19,12 +20,34 @@ class SudokuListViewModel (
     private val _sudokuList = MutableStateFlow<List<ServerSudoku>>(ArrayList())
     val sudokuList: StateFlow<List<ServerSudoku>> = _sudokuList
 
+    private val _email = MutableStateFlow<String?>(null)
 
-    fun getAllSudokus(){
+//   init {
+//        viewModelScope.launch {
+//            repositoryUser.email.collect { savedEmail ->
+//                _email.value = savedEmail
+//            }
+//        }
+//    }
+
+    init {
         viewModelScope.launch {
-            _sudokuList.value = repository.fetchAllSudokuByUser(repositoryUser.email.firstOrNull())
+            repositoryUser.email.collect { savedEmail ->
+                _email.value = savedEmail
+                if (savedEmail != null) {
+                    _sudokuList.value = repository.fetchAllSudokuByUser(savedEmail)
+                }
+            }
         }
     }
+
+
+//    fun getAllSudokus(){
+//        Log.d("SudokuListViewModel", _email.value!!)
+//        viewModelScope.launch {
+//            _sudokuList.value = repository.fetchAllSudokuByUser(_email.value)
+//        }
+//    }
 
 }
 

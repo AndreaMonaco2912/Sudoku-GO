@@ -44,7 +44,7 @@ fun SudokuGONavGraph(navController: NavHostController,
 ){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Congrats(100,19)
+        startDestination = SudokuGORoute.Home
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)

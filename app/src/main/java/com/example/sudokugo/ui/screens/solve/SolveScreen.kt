@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,9 +22,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -80,21 +84,39 @@ fun SolveScreen(navController: NavController, sudokuId: String? = null) {
 
 @Composable
 fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
-    if (sudokuId == null) {
-        sudokuViewModel.addSudoku(Difficulty.EASY)//TODO: only when reached from home
-    } else {
-        sudokuViewModel.loadSudoku(sudokuId.toLong())//TODO: only when reached from list
+    LaunchedEffect(sudokuId) {
+        if (sudokuId == null) {
+            sudokuViewModel.addSudoku(Difficulty.EASY)
+        } else {
+            sudokuViewModel.loadSudoku(sudokuId.toLong())
+        }
     }
 
     val current = sudokuViewModel.currentSudoku.collectAsStateWithLifecycle().value
     val original = sudokuViewModel.originalSudoku.collectAsStateWithLifecycle().value
     val selected = sudokuViewModel.selectedCell.collectAsStateWithLifecycle().value
 
-    if (current == null || original == null) throw NullPointerException("Sudoku non inizializzato")
+    if (current == null || original == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 6.dp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Caricamento Sudoku...", color = Color.Black)
+            }
+        }
+        return
+    }
 
-    val gridSize = 9
-    val cellSize = 36.dp
-    val totalSize = cellSize * gridSize
+    val gridSize = remember{9}
+    val cellSize = remember{36.dp}
+    val totalSize = remember{cellSize * gridSize}
 
     Box(
         modifier = Modifier

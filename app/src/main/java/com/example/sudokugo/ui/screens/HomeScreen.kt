@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
@@ -15,6 +17,13 @@ import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val showMap = remember { mutableStateOf(true) }
+
+    val playSudoku = {
+        showMap.value = false
+        navController.navigate(SudokuGORoute.Solve)
+    }
+
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
@@ -25,7 +34,9 @@ fun HomeScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            Map(playSudoku = { navController.navigate(SudokuGORoute.Solve()) })
+            if (showMap.value) {
+                Map(playSudoku = playSudoku)
+            }
         }
     }
 }

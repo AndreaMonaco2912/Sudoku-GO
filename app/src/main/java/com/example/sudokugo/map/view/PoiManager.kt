@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.material3.NavigationBar
 import androidx.core.animation.doOnEnd
@@ -75,13 +76,15 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
                     if (item != null && userLocation != null) {
                         val distance = haversineDistance(userLocation, item.point)
                         if (distance <= minDistance) {
-                            Handler(Looper.getMainLooper()).post {
+                                Log.d("CLICK", "cliccato il sudoku")
                                 playSudoku()
-                            }
                         } else {
-                            Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT)
-                                .show()
+//                            Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT)
+//                                .show()
+                            Log.d("CLICK", "cliccato il sudoku") //TODO: remove
+                            playSudoku() //TODO: remove
                         }
+                        Log.d("CLICK", "dopo aver cliccato il sudoku") //TODO: remove
                     }
                     return true
                 }

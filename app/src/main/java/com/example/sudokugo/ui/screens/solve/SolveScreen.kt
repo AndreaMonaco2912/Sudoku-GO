@@ -61,16 +61,22 @@ fun SolveScreen(navController: NavController, sudokuId: String? = null) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            BottomControls(sudokuViewModel, goPhoto = {
-                navController.navigate(SudokuGORoute.Home) {
-                    popUpTo(
-                        SudokuGORoute.Solve
-                    ) { inclusive = true }
+            BottomControls(sudokuViewModel, goCongrats = {
+                navController.navigate(
+                    SudokuGORoute.Congrats(
+                        100,
+                        System.currentTimeMillis() - sudokuViewModel.startTime
+                    )
+                )
+                {
+
+                    popUpTo("solve") { inclusive = true }
                 }
             })
         }
     }
 }
+
 
 @Composable
 fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
@@ -202,7 +208,7 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls(sudokuViewModel: SolveViewModel, goPhoto: () -> Unit) {
+fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit) {
     val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -214,10 +220,12 @@ fun BottomControls(sudokuViewModel: SolveViewModel, goPhoto: () -> Unit) {
         }
 
         IconButton(onClick = {
-            if (sudokuViewModel.checkSolution())
-                goPhoto
-            else
+            if (sudokuViewModel.checkSolution()) {
+                goCongrats()
+                // Naviga alla schermata di congratulazioni
+            } else {
                 Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
+            }
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")
         }

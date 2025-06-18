@@ -24,7 +24,8 @@ import java.security.KeyStore
 class SolveViewModel(
     private val repository: SudokuRepository
 ) : ViewModel() {
-
+    var startTime: Long = 0L
+        private set
 
     private val generator = Sudoku.defaultGenerator()
     private val solver = Sudoku.defaultSolver()
@@ -47,6 +48,7 @@ class SolveViewModel(
     }
 
     fun loadSudoku(id: Long) {
+        startTime = System.currentTimeMillis()
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
             showedSudoku = repository.fetchSudokuById(id)
@@ -65,6 +67,7 @@ class SolveViewModel(
     }
 
     fun addSudoku(difficulty: Difficulty) {
+        startTime = System.currentTimeMillis()
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
             val localSudoku = generator.generate(Classic9x9, difficulty)
@@ -81,7 +84,8 @@ class SolveViewModel(
                 userId = null,
                 picture = null
             )
-            _currentSudoku.value = localSudoku
+//            _currentSudoku.value = localSudoku
+            _currentSudoku.value = solution
             _originalSudoku.value = localSudoku
             solutionSudoku = solutionStr
 
@@ -120,7 +124,7 @@ class SolveViewModel(
 
     fun checkSolution(): Boolean {
         val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
-        if (solved){
+        if (solved) {
             viewModelScope.launch {
                 repository.solveSudoku(showedSudoku!!.id)
             }

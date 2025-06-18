@@ -18,6 +18,7 @@ import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsState
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
+import com.example.sudokugo.ui.screens.solve.CongratsScreen
 import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import kotlinx.serialization.Serializable
 
@@ -30,6 +31,7 @@ sealed interface SudokuGORoute {
     @Serializable data object User: SudokuGORoute
     @Serializable data class Solve(val sudokuId: String? = null): SudokuGORoute
     @Serializable data class Settings(val userId: String): SudokuGORoute
+    @Serializable data class Congrats(val points: Int, val duration: Long): SudokuGORoute
 }
 
 @Composable
@@ -42,7 +44,7 @@ fun SudokuGONavGraph(navController: NavHostController,
 ){
     NavHost(
         navController = navController,
-        startDestination = SudokuGORoute.Home
+        startDestination = SudokuGORoute.Congrats(100,19)
     ){
         composable<SudokuGORoute.Home>{
             HomeScreen(navController)
@@ -72,6 +74,16 @@ fun SudokuGONavGraph(navController: NavHostController,
             val route = backStackEntry.toRoute<SudokuGORoute.Settings>()
             SettingsScreen(navController, route.userId, themeState, settingsViewModel::changeTheme, loginViewModel::logoutUser)
         }
+        composable<SudokuGORoute.Congrats> { backStackEntry ->
+            val route = backStackEntry.toRoute<SudokuGORoute.Congrats>()
+            CongratsScreen(
+                navController, route.points, route.duration,
+                onTakePhoto = {
+                    // TODO: Implementa la logica quando necessario
+                }
+            )
+        }
+
 
     }
 }

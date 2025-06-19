@@ -54,9 +54,9 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
 
     LaunchedEffect(userData) {
         if (userData == null) {
-            navController.navigate(SudokuGORoute.Login) {
-                popUpTo(SudokuGORoute.User) { inclusive = true }
-            }
+//            navController.navigate(SudokuGORoute.Login) {
+//                popUpTo(SudokuGORoute.User) { inclusive = true }
+//            }
         }else{
             userScreenViewModel.getUserPoints(email!!)
         }

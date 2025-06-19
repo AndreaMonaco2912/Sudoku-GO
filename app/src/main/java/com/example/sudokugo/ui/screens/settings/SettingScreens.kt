@@ -67,7 +67,9 @@ fun SettingsScreen(navController: NavController, userId: String, state: Settings
 
             Button(onClick = {
                 onLogout()
-                navController.navigate(SudokuGORoute.Home)
+                navController.navigate(SudokuGORoute.Home){
+                    popUpTo(0) { inclusive = true }
+                }
             }) {
                 Text("Logout")
             }

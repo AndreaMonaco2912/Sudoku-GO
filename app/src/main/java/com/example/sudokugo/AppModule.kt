@@ -51,7 +51,7 @@ val appModule = module {
     single { UserPictureRepository(get(named("userPicture"))) }
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
 
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
     viewModel { SolveViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel { RegisterViewModel() }

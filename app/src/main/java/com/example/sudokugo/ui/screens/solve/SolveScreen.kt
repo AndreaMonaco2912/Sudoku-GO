@@ -52,15 +52,24 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
     val timeDiff by sudokuViewModel.timeDiff.collectAsStateWithLifecycle()
     val shouldNavigate = remember { mutableStateOf(false) }
 
+    val difficulties = Difficulty.entries.filter { it != Difficulty.UNSOLVABLE }
+    val randomDifficulty = difficulties.random()
+
     LaunchedEffect(shouldNavigate.value) {
         if (shouldNavigate.value) {
             val diff = timeDiff
             if (diff != null) {
-                navController.navigate(SudokuGORoute.Congrats(100, diff)) {
+                navController.navigate(
+                    SudokuGORoute.Congrats(
+                        sudokuViewModel.getPointsForDifficulty(randomDifficulty),
+                        diff
+                    )
+                )
+                {
                     popUpTo("solve") { inclusive = true }
                 }
             }
-            shouldNavigate.value = false // reset
+            shouldNavigate.value = false
         }
     }
 
@@ -76,7 +85,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SudokuGrid(sudokuId, sudokuViewModel)
+            SudokuGrid(sudokuId, sudokuViewModel, randomDifficulty)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -85,21 +94,11 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
             Spacer(modifier = Modifier.height(16.dp))
 
             BottomControls(
-                sudokuViewModel, goCongrats = {
-                    val diff = timeDiff
-                    if (diff != null) {
-                        navController.navigate(
-                            SudokuGORoute.Congrats(
-                                100,
-                                diff,
-
-                            )
-                        ) {
-                            popUpTo("solve") { inclusive = true }
-                        }
-                    }
-                },
+                sudokuViewModel,
                 shouldNavigate
+            )
+            Text(
+                text = "Difficoltà: $randomDifficulty"
             )
         }
     }
@@ -107,10 +106,10 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
 
 
 @Composable
-fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
+fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel, randomDifficulty: Difficulty) {
     LaunchedEffect(sudokuId) {
         if (sudokuId == null) {
-            sudokuViewModel.addSudoku(Difficulty.EASY)
+            sudokuViewModel.addSudoku(randomDifficulty)
         } else {
             sudokuViewModel.loadSudoku(sudokuId)
         }
@@ -138,9 +137,9 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
         return
     }
 
-    val gridSize = remember{9}
-    val cellSize = remember{36.dp}
-    val totalSize = remember{cellSize * gridSize}
+    val gridSize = remember { 9 }
+    val cellSize = remember { 36.dp }
+    val totalSize = remember { cellSize * gridSize }
 
     Box(
         modifier = Modifier
@@ -254,7 +253,7 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit, shouldNavigate: MutableState<Boolean>) {
+fun BottomControls(sudokuViewModel: SolveViewModel, shouldNavigate: MutableState<Boolean>) {
 
     val context = LocalContext.current
     Row(
@@ -267,8 +266,8 @@ fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit, shou
         }
 
         IconButton(onClick = {
-                if (sudokuViewModel.checkSolution()) shouldNavigate.value = true
-                else Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
+            if (sudokuViewModel.checkSolution()) shouldNavigate.value = true
+            else Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
 
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")

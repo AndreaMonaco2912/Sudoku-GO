@@ -20,7 +20,7 @@ import com.example.sudokugo.ui.SudokuGORoute
 @Composable
 fun CongratsScreen(
     navController: NavController,
-    points: Int = 100,
+    points: Int,
     duration: Long,
     onTakePhoto: () -> Unit
 ) {

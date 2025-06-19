@@ -112,7 +112,7 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             Spacer(Modifier.size(8.dp))
             Text(
                 if(sudoku!=null){
-                    "Hai risolto questo sudoku di difficolta`: " + sudoku.difficulty
+                    "Hai risolto questo sudoku di difficoltà: " + sudoku.difficulty
                 }else ""
                 ,
                 style = MaterialTheme.typography.bodyMedium

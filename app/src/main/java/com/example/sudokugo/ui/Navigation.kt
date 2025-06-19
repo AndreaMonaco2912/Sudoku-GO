@@ -29,7 +29,7 @@ sealed interface SudokuGORoute {
     @Serializable data object Register: SudokuGORoute
     @Serializable data object User: SudokuGORoute
     @Serializable data class Solve(val sudokuId: Long? = null): SudokuGORoute
-    @Serializable data class Settings(val userId: String): SudokuGORoute
+    @Serializable data class Settings(val userId: String? = null): SudokuGORoute
     @Serializable data class Congrats(val points: Int, val duration: Long): SudokuGORoute
 }
 
@@ -71,7 +71,7 @@ fun SudokuGONavGraph(navController: NavHostController,
         }
         composable<SudokuGORoute.Settings> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Settings>()
-            SettingsScreen(navController, route.userId, themeState, settingsViewModel::changeTheme, loginViewModel::logoutUser)
+            SettingsScreen(navController, themeState, settingsViewModel::changeTheme, loginViewModel::logoutUser)
         }
         composable<SudokuGORoute.Congrats> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Congrats>()

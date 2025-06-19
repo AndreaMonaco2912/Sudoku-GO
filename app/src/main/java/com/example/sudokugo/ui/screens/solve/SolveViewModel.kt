@@ -27,8 +27,8 @@ class SolveViewModel(
     private val repository: SudokuRepository,
     private val repositoryUser: UserDSRepository
 ) : ViewModel() {
-
     private lateinit var initialTime: Date
+    private lateinit var sudokuDiff: Difficulty
 
     private val _timeDiff = MutableStateFlow<Long?>(null)
     val timeDiff: StateFlow<Long?> = _timeDiff
@@ -68,6 +68,7 @@ class SolveViewModel(
         viewModelScope.launch {
             showedSudoku = repository.fetchSudokuById(id)
             initialTime = repository.fetchSudokuById(id).initTime
+            sudokuDiff = Difficulty.valueOf(repository.fetchSudokuById(id).difficulty)
 
             val currentBoard = showedSudoku?.currentBoard
                 ?: throw NullPointerException("Nessun sudoku caricato")
@@ -91,6 +92,7 @@ class SolveViewModel(
 //                return@launch
 //            }
             val result = withContext(Dispatchers.Default) {
+                sudokuDiff = difficulty
                 val localSudoku = generator.generate(Classic9x9, difficulty)
                 val solution = solver.solve(localSudoku)
 
@@ -181,14 +183,22 @@ class SolveViewModel(
 //            val timeDiff = Duration.between(initialTime, LocalDateTime.now()).seconds
             viewModelScope.launch {
                 if(_email.value!=null){
-                    repositoryUser.incrementScore(_email.value!!, 100)
+                    repositoryUser.incrementScore(_email.value!!, getPointsForDifficulty(sudokuDiff))
                 }
                 repository.solveSudoku(showedSudoku!!.id, Calendar.getInstance().time, timeDiff)
             }
         }
         return solved
     }
-
+    fun getPointsForDifficulty(difficulty: Difficulty): Int {
+        return when (difficulty) {
+            Difficulty.EASY -> 50
+            Difficulty.MEDIUM -> 100
+            Difficulty.HARD -> 150
+            Difficulty.VERY_HARD -> 200
+            Difficulty.UNSOLVABLE -> 1000
+        }
+    }
     fun restart() {
         _currentSudoku.value = _originalSudoku.value
     }

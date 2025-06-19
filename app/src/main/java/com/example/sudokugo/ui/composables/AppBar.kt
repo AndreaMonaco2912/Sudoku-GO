@@ -33,7 +33,6 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopSudokuGoAppBar(navController: NavController, title: String?) {
-    val fakeUserId = "1"
     CenterAlignedTopAppBar(
         title = {
         if (title != null) {
@@ -43,14 +42,14 @@ fun TopSudokuGoAppBar(navController: NavController, title: String?) {
             )
         }
     }, navigationIcon = {
-        if (title == "Sudoku Details" || title == "Settings" || title == "Sudoku") {
+        if (title == "Sudoku Details" || title == "Settings") {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Go Back")
             }
         }
     }, actions = {
-        if (title != "Settings" && title != "Login" && title != "Register") {
-            IconButton(onClick = { navController.navigate(SudokuGORoute.Settings(fakeUserId)) }) {
+        if (title != "Settings" && title != "Login" && title != "Register" && title != "Sudoku") {
+            IconButton(onClick = { navController.navigate(SudokuGORoute.Settings()) }) {
                 Icon(Icons.Outlined.Settings, "Settings")
             }
         }

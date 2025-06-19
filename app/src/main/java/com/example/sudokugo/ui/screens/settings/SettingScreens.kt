@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -24,17 +26,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.data.models.Theme
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.screens.list.SudokuListViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SettingsScreen(navController: NavController, userId: String, state: SettingsState, onThemeSelected: (Theme) -> Unit, onLogout: () -> Unit) {
+fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSelected: (Theme) -> Unit, onLogout: () -> Unit) {
+    val settingsViwModel = koinViewModel<SettingsViewModel>()
+    val email by settingsViwModel.email.collectAsStateWithLifecycle()
+    val userData by settingsViwModel.userData.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) }
@@ -43,35 +54,92 @@ fun SettingsScreen(navController: NavController, userId: String, state: Settings
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(contentPadding).padding(12.dp).fillMaxSize()
         ) {
-            var username by rememberSaveable { mutableStateOf(userId) }
-
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.size(36.dp))
-            Text(
-                text = username,
-                style = MaterialTheme.typography.bodyLarge
-            )
 
             var showDialog by remember { mutableStateOf(false) }
             var selected by remember { mutableStateOf(state.theme) }
             val options = Theme.entries
 
-            Button(onClick = { showDialog = true }) {
-                Text("Change theme")
-            }
-
-            Button(onClick = {
-                onLogout()
-                navController.navigate(SudokuGORoute.Home){
-                    popUpTo(0) { inclusive = true }
+            Column {
+                if (email != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Name: ${userData?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                    }
+                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Username: ${userData?.username ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                    }
+                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Email: ${userData?.email ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                    }
+                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Points: ${userData?.points ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                    }
+                    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onLogout()
+                                navController.navigate(SudokuGORoute.Home) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            "Logout",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = Bold
+                        )
+                    }
+                }else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onLogout()
+                                navController.navigate(SudokuGORoute.Login)
+                            }
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            "Login",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = Bold
+                        )
+                    }
                 }
-            }) {
-                Text("Logout")
+                HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDialog = true }
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Change theme",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = Bold
+                    )
+                }
             }
 
             if (showDialog) {

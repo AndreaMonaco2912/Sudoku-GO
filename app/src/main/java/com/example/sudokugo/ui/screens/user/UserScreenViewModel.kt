@@ -36,6 +36,8 @@ class UserScreenViewModel(
                 _email.value = savedEmail
                 if (savedEmail != null) {
                     getUserData(savedEmail)
+                }else{
+                    _userData.value = null
                 }
             }
         }

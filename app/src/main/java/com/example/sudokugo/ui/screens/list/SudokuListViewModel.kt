@@ -9,6 +9,7 @@ import com.example.sudokugo.data.repositories.UserDSRepository
 import io.github.ilikeyourhat.kudoku.model.Sudoku
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -21,7 +22,7 @@ class SudokuListViewModel (
     val sudokuList: StateFlow<List<ServerSudoku>> = _sudokuList
 
     private val _email = MutableStateFlow<String?>(null)
-
+    val email: StateFlow<String?> = _email
 //   init {
 //        viewModelScope.launch {
 //            repositoryUser.email.collect { savedEmail ->
@@ -32,11 +33,13 @@ class SudokuListViewModel (
 
     init {
         viewModelScope.launch {
-            repositoryUser.email.collect { savedEmail ->
+            repositoryUser.email
+                .filterNotNull()
+                .collect { savedEmail ->
                 _email.value = savedEmail
-                if (savedEmail != null) {
+//                if (savedEmail != null) {
                     _sudokuList.value = repository.fetchAllSudokuByUser(savedEmail)
-                }
+//                }
             }
         }
     }

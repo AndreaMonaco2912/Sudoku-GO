@@ -23,6 +23,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +44,7 @@ import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import java.util.Date
 
@@ -50,7 +53,16 @@ import java.util.Date
 fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
     val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
+    val email by sudokuListViewModel.email.collectAsStateWithLifecycle()
 
+    LaunchedEffect(email) {
+        delay(100)
+        if (email == null) {
+            navController.navigate(SudokuGORoute.Login) {
+                popUpTo(SudokuGORoute.SudokuList) { inclusive = true }
+            }
+        }
+    }
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) }

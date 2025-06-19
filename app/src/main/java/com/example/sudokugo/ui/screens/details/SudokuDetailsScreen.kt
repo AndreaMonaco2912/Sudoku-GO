@@ -43,18 +43,18 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
 
     val sudoku = viewModel.sudoku.collectAsState().value
 
+
     LaunchedEffect(sudokuId) {
         viewModel.loadSudoku(sudokuId)
     }
 
     val ctx = LocalContext.current
     fun shareDetails() {
-
         val sendIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             if(sudoku!=null){
                 val minutes = sudoku.time!! / 60000
-                val seconds = (sudoku.time!! % 60000) / 1000
+                val seconds = (sudoku.time % 60000) / 1000
                 putExtra(Intent.EXTRA_TEXT, "Il "+  sudoku.solveDate.orEmpty() +
                         " ho risolto questo bellissimo sudoku! Ci ho messo solo "
                         +minutes
@@ -101,6 +101,7 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                     .padding(36.dp)
             )
             Text(
+                "Sudoku " +
                 sudokuId.toString(),
                 style = MaterialTheme.typography.titleLarge
             )
@@ -110,7 +111,23 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             )
             Spacer(Modifier.size(8.dp))
             Text(
-                "Description",
+                if(sudoku!=null){
+                    "Hai risolto questo sudoku di difficolta`: " + sudoku.difficulty
+                }else ""
+                ,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                if(sudoku!=null){
+                    val minutes = sudoku.time!! / 60000
+                    val seconds = (sudoku.time % 60000) / 1000
+                    "Ci hai messo: " +
+                            minutes +
+                            " minuti e " +
+                            seconds +
+                    " secondi"
+                }else ""
+                ,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

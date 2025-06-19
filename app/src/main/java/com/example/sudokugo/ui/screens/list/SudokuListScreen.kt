@@ -63,9 +63,9 @@ fun SudokuListScreen(navController: NavController) {
             items(sudokus.size) { index ->
                 val sudoku = sudokus[index]
                 SudokuItem(
-                    item = sudoku.difficulty.toString(), // Make sure difficulty is a String or convert it
+                    item = sudoku.solveDate.orEmpty(), // Make sure difficulty is a String or convert it
                     onClick = {
-                        navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id.toString()))
+                        navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
                     }
                 )
             }

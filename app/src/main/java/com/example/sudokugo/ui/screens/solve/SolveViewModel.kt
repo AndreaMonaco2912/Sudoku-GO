@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.KeyStore
+import java.time.LocalDate
 
 
 class SolveViewModel(
@@ -105,7 +106,9 @@ class SolveViewModel(
                     difficulty = difficulty.toString(),
                     solution = solutionStr,
                     userId = email,
-                    picture = null
+                    picture = null,
+                    solveDate = null,
+                    time = null
                 )
 
                 val id = repository.insertSudoku(sudoku)
@@ -174,11 +177,12 @@ class SolveViewModel(
     fun checkSolution(): Boolean {
         val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
         if (solved) {
+            val date = LocalDate.now().toString()
             viewModelScope.launch {
                 if(_email.value!=null){
                     repositoryUser.incrementScore(_email.value!!, 100)
                 }
-                repository.solveSudoku(showedSudoku!!.id)
+                repository.solveSudoku(showedSudoku!!.id, date, System.currentTimeMillis() - startTime)
             }
         }
         return solved

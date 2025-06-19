@@ -14,7 +14,9 @@ data class ServerSudoku(
     @ColumnInfo val solution: String,
     @ColumnInfo val solved: Boolean = false,
     @ColumnInfo val userId: String?, // User no access
-    @ColumnInfo val picture: String?
+    @ColumnInfo val picture: String?,
+    @ColumnInfo val solveDate: String?,
+    @ColumnInfo val time: Long?
 )
 
 @Entity

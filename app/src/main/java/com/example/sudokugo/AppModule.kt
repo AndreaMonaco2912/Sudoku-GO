@@ -12,6 +12,7 @@ import com.example.sudokugo.data.repositories.UserPictureRepository
 import com.example.sudokugo.data.repositories.UserDAORepository
 import com.example.sudokugo.data.repositories.UserDSRepository
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
+import com.example.sudokugo.ui.screens.details.SudokuDetailsViewModel
 import com.example.sudokugo.ui.screens.list.SudokuListViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.register.RegisterViewModel
@@ -54,4 +55,5 @@ val appModule = module {
     viewModel { UserPictureViewModel(get(), get()) }
     viewModel { SudokuListViewModel(get(), get()) }
     viewModel { UserScreenViewModel(get()) }
+    viewModel {SudokuDetailsViewModel(get())}
 }

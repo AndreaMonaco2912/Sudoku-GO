@@ -23,8 +23,8 @@ interface SudokuDAO{
     @Delete
     suspend fun delete(sudoku: ServerSudoku)
 
-    @Query("UPDATE serversudoku SET solved = 1 WHERE id = :id")
-    suspend fun solve(id: Long)
+    @Query("UPDATE serversudoku SET solved = 1, solveDate = :solveDate, time = :time WHERE id = :id")
+    suspend fun solve(id: Long, solveDate: String, time: Long)
 }
 @Dao
 interface UserDAO{

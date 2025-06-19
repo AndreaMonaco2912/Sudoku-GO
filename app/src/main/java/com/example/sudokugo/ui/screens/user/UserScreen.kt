@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.screens.user
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,22 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -43,6 +41,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
 
     val email by userScreenViewModel.email.collectAsStateWithLifecycle()
     val userData by userScreenViewModel.userData.collectAsStateWithLifecycle()
+    val topUsers by userScreenViewModel.topUsers.collectAsStateWithLifecycle()
 
     LaunchedEffect(email) {
         if (email == null) {
@@ -53,8 +52,13 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
     }
 
     LaunchedEffect(userData) {
-        if (userData != null) userScreenViewModel.getUserPoints(email!!)
+        if (userData != null) {
+            userScreenViewModel.getUserPoints(email!!)
+            userScreenViewModel.getTopUsers()
+        }
     }
+
+
 
     if (email == null) {
         Box(
@@ -73,7 +77,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(contentPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -121,48 +125,37 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
             Column {
                 Text(
                     "Classifica", modifier = Modifier
-                        .background(Color(0xFFFDF6FF))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(8.dp)
                 )
-
-                val rankings = listOf(
-                    "1 Classificato",
-                    "2 Classificato",
-                    "3 Classificato",
-                    "4 Classificato",
-                    userData?.username
-                )
-
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        rankings.forEach {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .background(Color(0xFFE3D3FD), shape = CircleShape)
-                                ) {
-                                    Text("A", color = Color.White)
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                if (it != null) {
-                                    Text(it, modifier = Modifier.weight(1f))
-                                }
-
-                                if (it == userData?.username) Text(userData?.points.toString())
-                            }
+                Column(modifier = Modifier.padding(8.dp)) {
+                    topUsers?.map { Pair<String, Long>(it.username, it.points) }?.forEach {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                it.first,
+                                modifier = Modifier.weight(1f),
+                                fontWeight = if (it.first == userData?.username) FontWeight.Bold
+                                else FontWeight.Normal
+                            )
+                            Text(
+                                it.second.toString(),
+                                modifier = Modifier.weight(1f),
+                                fontWeight = if (it.first == userData?.username) FontWeight.Bold
+                                else FontWeight.Normal,
+                                textAlign = TextAlign.End
+                            )
                         }
+                        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     }
+
                 }
             }
         }
     }
 }
+

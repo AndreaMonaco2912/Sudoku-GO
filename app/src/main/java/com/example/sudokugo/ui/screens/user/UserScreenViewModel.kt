@@ -10,6 +10,7 @@ import com.example.sudokugo.supabase
 import com.example.sudokugo.util.UserState
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -30,6 +31,8 @@ class UserScreenViewModel(
     private val _userData = MutableStateFlow<UserServer?>(null)
     val userData: StateFlow<UserServer?> = _userData
 
+    private val _topUsers = MutableStateFlow<List<UserServer>?>(null)
+    val topUsers: StateFlow<List<UserServer>?> = _topUsers
     init {
         viewModelScope.launch {
             userDSRepository.email.collect { savedEmail ->
@@ -66,8 +69,25 @@ class UserScreenViewModel(
             _state.value = points
 
         } catch (e: Exception) {
-            Log.e("GetPoints", "Errore durante la ricezione dei punti", e)
+            Log.e("Query", "Errore durante la ricezione dei punti", e)
         }
         getUserData(email)
+    }
+
+    suspend fun getTopUsers(){
+        try {
+            val topUsers = supabase.from("users")
+                .select{
+                    order(column = "points", order = Order.DESCENDING)
+                    limit(5)
+                }
+                .decodeList<UserServer>()
+
+            _topUsers.value = topUsers
+
+        } catch (e: Exception) {
+            Log.e("Query", "Errore durante la ricezione degli utenti", e)
+        }
+
     }
 }

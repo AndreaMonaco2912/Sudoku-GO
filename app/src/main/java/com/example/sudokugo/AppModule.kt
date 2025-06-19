@@ -43,6 +43,7 @@ val appModule = module {
     single(named("userDS")) { get<Context>().userDataStore }
     single { get<Context>().themeDataStore }
     single(named("userPicture")) { get<Context>().userDataStore }
+    single { MapDSRepository(get<Context>().mapPrefsDataStore) }
 
     single { get<SudokuGODatabase>().userDAO() }
     single { ThemeRepository(get()) }

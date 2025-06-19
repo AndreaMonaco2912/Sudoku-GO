@@ -54,17 +54,18 @@ class UserScreenViewModel(
         }
     }
 
-//    private suspend fun getUserPoints(email: String) {
-//        try {
-//            val points = supabase.from("users")
-//                .select(columns = Columns.raw("points")) {
-//                    filter { eq("email", email) }
-//                }
-//                .decodeSingle<Map<String, Int>>()["points"]
-//            _state.value = points
-//
-//        } catch (e: Exception) {
-//            Log.e("GetPoints", "Errore durante la ricezione dei punti", e)
-//        }
-//    }
+    suspend fun getUserPoints(email: String) {
+        try {
+            val points = supabase.from("users")
+                .select(columns = Columns.raw("points")) {
+                    filter { eq("email", email) }
+                }
+                .decodeSingle<Map<String, Int>>()["points"]
+            _state.value = points
+
+        } catch (e: Exception) {
+            Log.e("GetPoints", "Errore durante la ricezione dei punti", e)
+        }
+        getUserData(email)
+    }
 }

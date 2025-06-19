@@ -88,10 +88,10 @@ class SolveViewModel(
 
         viewModelScope.launch {
             val email = _email.value ?: repositoryUser.email.firstOrNull()
-            if (email == null) {
-                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
-                return@launch
-            }
+//            if (email == null) {
+//                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
+//                return@launch
+//            }
             val result = withContext(Dispatchers.Default) {
                 val localSudoku = generator.generate(Classic9x9, difficulty)
                 val solution = solver.solve(localSudoku)
@@ -175,6 +175,9 @@ class SolveViewModel(
         val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
         if (solved) {
             viewModelScope.launch {
+                if(_email.value!=null){
+                    repositoryUser.incrementScore(_email.value!!, 100)
+                }
                 repository.solveSudoku(showedSudoku!!.id)
             }
         }

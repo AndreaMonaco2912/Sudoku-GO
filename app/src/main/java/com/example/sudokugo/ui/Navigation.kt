@@ -28,7 +28,7 @@ sealed interface SudokuGORoute {
     @Serializable data object Login: SudokuGORoute
     @Serializable data object Register: SudokuGORoute
     @Serializable data object User: SudokuGORoute
-    @Serializable data class Solve(val sudokuId: String? = null): SudokuGORoute
+    @Serializable data class Solve(val sudokuId: Long? = null): SudokuGORoute
     @Serializable data class Settings(val userId: String): SudokuGORoute
     @Serializable data class Congrats(val points: Int, val duration: Long): SudokuGORoute
 }

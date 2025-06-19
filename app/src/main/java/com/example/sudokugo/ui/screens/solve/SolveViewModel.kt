@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.screens.solve
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
@@ -8,7 +7,6 @@ import com.example.sudokugo.data.repositories.SudokuRepository
 import com.example.sudokugo.data.repositories.UserDSRepository
 import io.github.ilikeyourhat.kudoku.generating.defaultGenerator
 import io.github.ilikeyourhat.kudoku.model.Sudoku
-import io.github.ilikeyourhat.kudoku.parsing.createFromString
 import io.github.ilikeyourhat.kudoku.parsing.fromSingleLineString
 import io.github.ilikeyourhat.kudoku.parsing.toSingleLineString
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
@@ -16,23 +14,24 @@ import io.github.ilikeyourhat.kudoku.solving.defaultSolver
 import io.github.ilikeyourhat.kudoku.type.Classic9x9
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.security.KeyStore
-import java.time.LocalDate
+import java.time.Duration
+import java.util.Calendar
+import java.util.Date
 
 
 class SolveViewModel(
     private val repository: SudokuRepository,
     private val repositoryUser: UserDSRepository
 ) : ViewModel() {
-    var startTime: Long = 0L
-        private set
+
+    private lateinit var initialTime: Date
+
+    private val _timeDiff = MutableStateFlow<Long?>(null)
+    val timeDiff: StateFlow<Long?> = _timeDiff
 
     private val generator = Sudoku.defaultGenerator()
     private val solver = Sudoku.defaultSolver()
@@ -65,10 +64,10 @@ class SolveViewModel(
     }
 
     fun loadSudoku(id: Long) {
-        startTime = System.currentTimeMillis()
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
             showedSudoku = repository.fetchSudokuById(id)
+            initialTime = repository.fetchSudokuById(id).initTime
 
             val currentBoard = showedSudoku?.currentBoard
                 ?: throw NullPointerException("Nessun sudoku caricato")
@@ -84,9 +83,7 @@ class SolveViewModel(
     }
 
     fun addSudoku(difficulty: Difficulty) {
-        startTime = System.currentTimeMillis()
         if (_currentSudoku.value != null) return
-
         viewModelScope.launch {
             val email = _email.value ?: repositoryUser.email.firstOrNull()
 //            if (email == null) {
@@ -100,6 +97,7 @@ class SolveViewModel(
                 val boardStr = localSudoku.toSingleLineString()
                 val solutionStr = solution.toSingleLineString()
 
+                initialTime = Calendar.getInstance().time
                 val sudoku = ServerSudoku(
                     data = boardStr,
                     currentBoard = boardStr,
@@ -108,7 +106,8 @@ class SolveViewModel(
                     userId = email,
                     picture = null,
                     solveDate = null,
-                    time = null
+                    initTime = initialTime,
+                    finishTime = null
                 )
 
                 val id = repository.insertSudoku(sudoku)
@@ -177,12 +176,14 @@ class SolveViewModel(
     fun checkSolution(): Boolean {
         val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
         if (solved) {
-            val date = LocalDate.now().toString()
+            val timeDiff = Calendar.getInstance().time.time - initialTime.time
+            _timeDiff.value = timeDiff
+//            val timeDiff = Duration.between(initialTime, LocalDateTime.now()).seconds
             viewModelScope.launch {
                 if(_email.value!=null){
                     repositoryUser.incrementScore(_email.value!!, 100)
                 }
-                repository.solveSudoku(showedSudoku!!.id, date, System.currentTimeMillis() - startTime)
+                repository.solveSudoku(showedSudoku!!.id, Calendar.getInstance().time, timeDiff)
             }
         }
         return solved

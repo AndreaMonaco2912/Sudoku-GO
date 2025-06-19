@@ -5,6 +5,8 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
+import java.time.LocalDateTime
+import java.util.Date
 
 @Dao
 interface SudokuDAO{
@@ -23,8 +25,8 @@ interface SudokuDAO{
     @Delete
     suspend fun delete(sudoku: ServerSudoku)
 
-    @Query("UPDATE serversudoku SET solved = 1, solveDate = :solveDate, time = :time WHERE id = :id")
-    suspend fun solve(id: Long, solveDate: String, time: Long)
+    @Query("UPDATE serversudoku SET solved = 1, solveDate = :solveDate,  finishTime= :finishTime WHERE id = :id")
+    suspend fun solve(id: Long, solveDate: Date, finishTime: Long)
 }
 @Dao
 interface UserDAO{

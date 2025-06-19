@@ -27,10 +27,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
@@ -43,10 +47,25 @@ import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SolveScreen(navController: NavController, sudokuId: String? = null) {
+fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
     val sudokuViewModel = koinViewModel<SolveViewModel>()
+    val timeDiff by sudokuViewModel.timeDiff.collectAsStateWithLifecycle()
+    val shouldNavigate = remember { mutableStateOf(false) }
+
+    LaunchedEffect(shouldNavigate.value) {
+        if (shouldNavigate.value) {
+            val diff = timeDiff
+            if (diff != null) {
+                navController.navigate(SudokuGORoute.Congrats(100, diff)) {
+                    popUpTo("solve") { inclusive = true }
+                }
+            }
+            shouldNavigate.value = false // reset
+        }
+    }
+
     Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO") }
+        topBar = { TopSudokuGoAppBar(navController, title = "Sudoku") }
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -65,30 +84,35 @@ fun SolveScreen(navController: NavController, sudokuId: String? = null) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            BottomControls(sudokuViewModel, goCongrats = {
-                navController.navigate(
-                    SudokuGORoute.Congrats(
-                        100,
-                        System.currentTimeMillis() - sudokuViewModel.startTime
-                    )
-                )
-                {
+            BottomControls(
+                sudokuViewModel, goCongrats = {
+                    val diff = timeDiff
+                    if (diff != null) {
+                        navController.navigate(
+                            SudokuGORoute.Congrats(
+                                100,
+                                diff,
 
-                    popUpTo("solve") { inclusive = true }
-                }
-            })
+                            )
+                        ) {
+                            popUpTo("solve") { inclusive = true }
+                        }
+                    }
+                },
+                shouldNavigate
+            )
         }
     }
 }
 
 
 @Composable
-fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
+fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
     LaunchedEffect(sudokuId) {
         if (sudokuId == null) {
             sudokuViewModel.addSudoku(Difficulty.EASY)
         } else {
-            sudokuViewModel.loadSudoku(sudokuId.toLong())
+            sudokuViewModel.loadSudoku(sudokuId)
         }
     }
 
@@ -131,7 +155,7 @@ fun SudokuGrid(sudokuId: String?, sudokuViewModel: SolveViewModel) {
                 drawRect(
                     color = Color(0x331976D2),
                     topLeft = Offset(x = selCol * cellPx, y = selRow * cellPx),
-                    size = androidx.compose.ui.geometry.Size(cellPx, cellPx)
+                    size = Size(cellPx, cellPx)
                 )
             }
 
@@ -230,7 +254,8 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit) {
+fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit, shouldNavigate: MutableState<Boolean>) {
+
     val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -242,12 +267,9 @@ fun BottomControls(sudokuViewModel: SolveViewModel, goCongrats: () -> Unit) {
         }
 
         IconButton(onClick = {
-            if (sudokuViewModel.checkSolution()) {
-                goCongrats()
-                // Naviga alla schermata di congratulazioni
-            } else {
-                Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
-            }
+                if (sudokuViewModel.checkSolution()) shouldNavigate.value = true
+                else Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
+
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")
         }

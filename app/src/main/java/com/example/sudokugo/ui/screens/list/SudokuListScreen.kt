@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.sudokugo.data.database.ServerSudoku
+import com.example.sudokugo.data.database.SudokuDAO
 
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
@@ -41,6 +43,7 @@ import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
+import java.util.Date
 
 
 @Composable
@@ -63,9 +66,11 @@ fun SudokuListScreen(navController: NavController) {
             items(sudokus.size) { index ->
                 val sudoku = sudokus[index]
                 SudokuItem(
-                    item = sudoku.solveDate.orEmpty(), // Make sure difficulty is a String or convert it
+                    item = sudoku, // Make sure difficulty is a String or convert it
                     onClick = {
+                        if(sudoku.solved)
                         navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
+                        else navController.navigate(SudokuGORoute.Solve(sudoku.id))
                     }
                 )
             }
@@ -87,7 +92,7 @@ fun SudokuListScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SudokuItem(item: String, onClick: () -> Unit) {
+fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -108,7 +113,7 @@ fun SudokuItem(item: String, onClick: () -> Unit) {
                 Icons.Outlined.Image,
                 "Sudoku picture",
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                colorFilter = ColorFilter.tint(color = if(item.solved) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant),
                 modifier = Modifier
                     .size(72.dp)
                     .clip(CircleShape)
@@ -117,7 +122,7 @@ fun SudokuItem(item: String, onClick: () -> Unit) {
             )
             Spacer(Modifier.size(8.dp))
             Text(
-                item,
+                if(item.solveDate!=null) "Finito il ${item.solveDate}" else "Iniziato il ${item.initTime}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center

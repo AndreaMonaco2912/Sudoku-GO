@@ -3,6 +3,8 @@ package com.example.sudokugo.data.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
+import java.util.Date
 
 @Entity
 data class ServerSudoku(
@@ -13,10 +15,11 @@ data class ServerSudoku(
     @ColumnInfo val difficulty: String,
     @ColumnInfo val solution: String,
     @ColumnInfo val solved: Boolean = false,
-    @ColumnInfo val userId: String?, // User no access
+    @ColumnInfo val userId: String?,
     @ColumnInfo val picture: String?,
-    @ColumnInfo val solveDate: String?,
-    @ColumnInfo val time: Long?
+    @ColumnInfo val solveDate: Date?,
+    @ColumnInfo val initTime: Date,
+    @ColumnInfo val finishTime: Long?
 )
 
 @Entity

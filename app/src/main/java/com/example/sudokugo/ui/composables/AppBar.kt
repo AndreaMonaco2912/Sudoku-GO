@@ -43,17 +43,12 @@ fun TopSudokuGoAppBar(navController: NavController, title: String?) {
             )
         }
     }, navigationIcon = {
-        if (title == "Sudoku Details" || title == "Settings") {
+        if (title == "Sudoku Details" || title == "Settings" || title == "Sudoku") {
             IconButton(onClick = { navController.navigateUp() }) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Go Back")
             }
         }
     }, actions = {
-        if (title == "Sudoku List") {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(Icons.Outlined.Search, contentDescription = "Search")
-            }
-        }
         if (title != "Settings" && title != "Login" && title != "Register") {
             IconButton(onClick = { navController.navigate(SudokuGORoute.Settings(fakeUserId)) }) {
                 Icon(Icons.Outlined.Settings, "Settings")

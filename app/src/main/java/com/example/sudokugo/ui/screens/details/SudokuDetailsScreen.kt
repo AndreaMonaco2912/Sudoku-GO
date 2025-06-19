@@ -53,9 +53,9 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
         val sendIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             if(sudoku!=null){
-                val minutes = sudoku.time!! / 60000
-                val seconds = (sudoku.time % 60000) / 1000
-                putExtra(Intent.EXTRA_TEXT, "Il "+  sudoku.solveDate.orEmpty() +
+                val minutes = sudoku.finishTime!! / 60000
+                val seconds = (sudoku.finishTime % 60000) / 1000
+                putExtra(Intent.EXTRA_TEXT, "Il "+  sudoku.solveDate +
                         " ho risolto questo bellissimo sudoku! Ci ho messo solo "
                         +minutes
                         + " minuti e "
@@ -106,7 +106,7 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                if(sudoku!=null) sudoku.solveDate!! else "",
+                sudoku?.solveDate?.toString() ?: "",
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(Modifier.size(8.dp))
@@ -119,8 +119,8 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             )
             Text(
                 if(sudoku!=null){
-                    val minutes = sudoku.time!! / 60000
-                    val seconds = (sudoku.time % 60000) / 1000
+                    val minutes = sudoku.finishTime!! / 60000
+                    val seconds = (sudoku.finishTime % 60000) / 1000
                     "Ci hai messo: " +
                             minutes +
                             " minuti e " +

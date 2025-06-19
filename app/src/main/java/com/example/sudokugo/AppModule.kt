@@ -60,4 +60,5 @@ val appModule = module {
     viewModel { UserScreenViewModel(get()) }
     viewModel { MapViewModel(get()) }
     viewModel { SudokuDetailsViewModel(get())}
+    viewModel { MapViewModel(get()) }
 }

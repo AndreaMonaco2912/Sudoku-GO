@@ -14,6 +14,7 @@ import com.example.sudokugo.data.repositories.UserDSRepository
 import com.example.sudokugo.data.repositories.MapDSRepository
 import com.example.sudokugo.map.classes.MapViewModel
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
+import com.example.sudokugo.ui.screens.details.SudokuDetailsViewModel
 import com.example.sudokugo.ui.screens.list.SudokuListViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.register.RegisterViewModel
@@ -49,7 +50,6 @@ val appModule = module {
     single { UserDSRepository(get(named("userDS"))) }
     single { UserPictureRepository(get(named("userPicture"))) }
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
-    single { MapDSRepository(get<Context>().mapPrefsDataStore) }
 
     viewModel { SettingsViewModel(get()) }
     viewModel { SolveViewModel(get(), get()) }
@@ -59,4 +59,5 @@ val appModule = module {
     viewModel { SudokuListViewModel(get(), get()) }
     viewModel { UserScreenViewModel(get()) }
     viewModel { MapViewModel(get()) }
+    viewModel { SudokuDetailsViewModel(get())}
 }

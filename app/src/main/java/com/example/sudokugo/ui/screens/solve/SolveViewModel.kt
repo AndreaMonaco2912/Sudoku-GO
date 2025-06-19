@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.security.KeyStore
+import java.time.LocalDate
 
 
 class SolveViewModel(
@@ -88,10 +89,10 @@ class SolveViewModel(
 
         viewModelScope.launch {
             val email = _email.value ?: repositoryUser.email.firstOrNull()
-            if (email == null) {
-                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
-                return@launch
-            }
+//            if (email == null) {
+//                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
+//                return@launch
+//            }
             val result = withContext(Dispatchers.Default) {
                 val localSudoku = generator.generate(Classic9x9, difficulty)
                 val solution = solver.solve(localSudoku)
@@ -105,7 +106,9 @@ class SolveViewModel(
                     difficulty = difficulty.toString(),
                     solution = solutionStr,
                     userId = email,
-                    picture = null
+                    picture = null,
+                    solveDate = null,
+                    time = null
                 )
 
                 val id = repository.insertSudoku(sudoku)
@@ -174,8 +177,12 @@ class SolveViewModel(
     fun checkSolution(): Boolean {
         val solved = _currentSudoku.value!!.toSingleLineString() == solutionSudoku!!
         if (solved) {
+            val date = LocalDate.now().toString()
             viewModelScope.launch {
-                repository.solveSudoku(showedSudoku!!.id)
+                if(_email.value!=null){
+                    repositoryUser.incrementScore(_email.value!!, 100)
+                }
+                repository.solveSudoku(showedSudoku!!.id, date, System.currentTimeMillis() - startTime)
             }
         }
         return solved

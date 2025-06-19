@@ -1,7 +1,6 @@
 package com.example.sudokugo.ui
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,7 +10,7 @@ import com.example.sudokugo.ui.screens.login.LoginScreen
 import com.example.sudokugo.ui.screens.register.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
 import com.example.sudokugo.ui.screens.solve.SolveScreen
-import com.example.sudokugo.ui.screens.SudokuDetailsScreen
+import com.example.sudokugo.ui.screens.details.SudokuDetailsScreen
 import com.example.sudokugo.ui.screens.user.UserScreen
 import com.example.sudokugo.ui.screens.list.SudokuListScreen
 import com.example.sudokugo.ui.screens.login.LoginViewModel
@@ -25,7 +24,7 @@ import kotlinx.serialization.Serializable
 sealed interface SudokuGORoute {
     @Serializable data object Home: SudokuGORoute
     @Serializable data object SudokuList: SudokuGORoute
-    @Serializable data class SudokuDetails(val sudokuId: String): SudokuGORoute
+    @Serializable data class SudokuDetails(val sudokuId: Long): SudokuGORoute
     @Serializable data object Login: SudokuGORoute
     @Serializable data object Register: SudokuGORoute
     @Serializable data object User: SudokuGORoute

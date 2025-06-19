@@ -1,19 +1,8 @@
 package com.example.sudokugo.map.functions
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
-import android.view.ScaleGestureDetector
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
-import com.example.sudokugo.R
 import org.osmdroid.api.IGeoPoint
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -24,29 +13,6 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-
-fun getCircularBitmap(bitmap: Bitmap): Bitmap {
-    val size = minOf(bitmap.width, bitmap.height)
-    val output = createBitmap(size, size)
-
-    val canvas = Canvas(output)
-    val paint = Paint().apply { isAntiAlias = true }
-
-    val radius = size / 2f
-    canvas.drawCircle(radius, radius, radius, paint)
-
-    paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-    val srcRect = Rect(
-        (bitmap.width - size) / 2,
-        (bitmap.height - size) / 2,
-        (bitmap.width + size) / 2,
-        (bitmap.height + size) / 2
-    )
-    val destRect = Rect(0, 0, size, size)
-    canvas.drawBitmap(bitmap, srcRect, destRect, paint)
-
-    return output
-}
 
 fun haversineDistance(p1: IGeoPoint, p2: IGeoPoint): Double {
     val R = 6371000.0 // raggio Terra in metri
@@ -89,24 +55,5 @@ fun createLocationOverlay(context: Context, mapView: MapView): MyLocationNewOver
         isDrawAccuracyEnabled = false
         enableMyLocation()
         enableFollowLocation()
-        setPersonAnchor(0.5f, 0.5f)
-        setDirectionAnchor(0.5f, 0.5f)
-
-        val drawable = ContextCompat.getDrawable(context, R.drawable.character_icon) as BitmapDrawable
-        val scaled = getCircularBitmap(drawable.bitmap).scale(100, 100)
-        setPersonIcon(scaled)
-        setDirectionIcon(scaled)
     }
-}
-
-fun createScaleGestureDetector(context: Context, mapView: MapView): ScaleGestureDetector {
-    return ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        override fun onScale(detector: ScaleGestureDetector): Boolean {
-            val currentZoom = mapView.zoomLevelDouble
-            val scale = detector.scaleFactor
-            val newZoom = if (scale > 1) currentZoom + 0.1 else currentZoom - 0.1
-            mapView.controller.setZoom(newZoom.coerceIn(mapView.minZoomLevel, mapView.maxZoomLevel))
-            return true
-        }
-    })
 }

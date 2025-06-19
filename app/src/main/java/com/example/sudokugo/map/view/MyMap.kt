@@ -3,8 +3,6 @@ package com.example.sudokugo.map.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
-import androidx.compose.runtime.State
-import androidx.navigation.NavController
 import com.example.sudokugo.map.classes.InertiaAnimation
 import com.example.sudokugo.map.functions.createLocationOverlay
 import com.example.sudokugo.map.functions.drawUserCenteredCircle
@@ -16,12 +14,12 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 
 @SuppressLint("ClickableViewAccessibility")
-class MyMap(private val context: Context, mapCenter: State<GeoPoint>, zoomLevel: State<Double>, playSudoku: () -> Unit) {
+class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double, playSudoku: () -> Unit) {
     private val mapView: MapView = MapView(this.context).apply {
         configureMapView(this)
-        val center = mapCenter.value
+        val center = mapCenter
         controller.setCenter(center)
-        controller.setZoom(zoomLevel.value)
+        controller.setZoom(zoomLevel)
     }
     private val poiManager: PoiManager = PoiManager(this.context, mapView, playSudoku)
     private val locationOverlay: MyLocationNewOverlay = createLocationOverlay(this.context, mapView)

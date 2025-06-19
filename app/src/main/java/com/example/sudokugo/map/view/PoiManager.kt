@@ -10,15 +10,11 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.material3.NavigationBar
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
-import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.map.functions.haversineDistance
-import com.example.sudokugo.ui.SudokuGORoute
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay

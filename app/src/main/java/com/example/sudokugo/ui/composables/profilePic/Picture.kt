@@ -1,8 +1,10 @@
 package com.example.sudokugo.ui.composables.profilePic
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
@@ -11,7 +13,7 @@ import coil3.request.crossfade
 import com.example.sudokugo.R
 
 @Composable
-fun UserPicture(userPic: String?, modifier: Modifier) {
+fun UserPicture(userPic: String?, modifier: Modifier, defaultPic: Int = R.drawable.default_character_icon) {
     val ctx = LocalContext.current
 
     if (!userPic.isNullOrEmpty()) {
@@ -21,11 +23,11 @@ fun UserPicture(userPic: String?, modifier: Modifier) {
                 .crossfade(true)
                 .build(),
             "Captured image",
-            modifier = modifier
+            modifier = modifier.clip(CircleShape)
         )
     } else {
         Image(
-            painter = painterResource(id = R.drawable.default_character_icon), // Usa l'avatar utente reale
+            painter = painterResource(id = defaultPic), // Usa l'avatar utente reale
             contentDescription = "User Profile Image",
             modifier = modifier
         )

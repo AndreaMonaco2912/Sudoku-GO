@@ -1,28 +1,19 @@
 package com.example.sudokugo.map.classes
 
-import android.app.Application
-import android.content.Context
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.sudokugo.map.functions.drawUserCenteredCircle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import com.example.sudokugo.data.repositories.MapDSRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
-class MapViewModel (
-    application: Application
-) : AndroidViewModel(application) {
-
-    private val appContext: Context by lazy {
-        getApplication<Application>().applicationContext
-    }
+class MapViewModel(
+    private val mapRepo: MapDSRepository
+) : ViewModel() {
 
     private val _mapCenter = mutableStateOf(GeoPoint(0.0, 0.0))
     val mapCenter: State<GeoPoint> = _mapCenter
@@ -30,29 +21,38 @@ class MapViewModel (
     private val _zoomLevel = mutableDoubleStateOf(18.0)
     val zoomLevel: State<Double> = _zoomLevel
 
-//    private var backgroundJob: Job? = null
+    private val _isMapDataLoaded = MutableStateFlow<Boolean>(false)
+    val isMapDataLoaded: StateFlow<Boolean> = _isMapDataLoaded
+
+    private val _hasRealLocation = mutableStateOf(false)
+    val hasRealLocation: State<Boolean> = _hasRealLocation
+
+    fun updateLocationStatus(location: GeoPoint?) {
+        if (location != null && !_hasRealLocation.value) {
+            _hasRealLocation.value = true
+        }
+    }
 
     init {
         loadMapInfo()
     }
 
     fun loadMapInfo() {
-        val prefs = appContext.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
-        val lat = prefs.getFloat("latitude", 45.4642f)
-        val lon = prefs.getFloat("longitude", 9.1900f)
-        val zoom = prefs.getFloat("zoom", 18f)
-
-        _mapCenter.value = GeoPoint(lat.toDouble(), lon.toDouble())
-        _zoomLevel.doubleValue = zoom.toDouble()
+        viewModelScope.launch {
+            mapRepo.mapData.collect { mapInfo ->
+                if (mapInfo != null) {
+                    val (lat, lon, zoom) = mapInfo
+                    _mapCenter.value = GeoPoint(lat, lon)
+                    _zoomLevel.doubleValue = zoom
+                    _isMapDataLoaded.value = true
+                }
+            }
+        }
     }
 
     fun saveMapInfo(lat: Double, lon: Double, zoom: Double) {
-        val prefs = appContext.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putFloat("latitude", lat.toFloat())
-            putFloat("longitude", lon.toFloat())
-            putFloat("zoom", zoom.toFloat())
-            apply()
+        viewModelScope.launch {
+            mapRepo.save(lat, lon, zoom)
         }
     }
 }

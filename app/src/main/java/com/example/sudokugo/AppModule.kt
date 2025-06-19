@@ -11,6 +11,8 @@ import com.example.sudokugo.data.repositories.ThemeRepository
 import com.example.sudokugo.data.repositories.UserPictureRepository
 import com.example.sudokugo.data.repositories.UserDAORepository
 import com.example.sudokugo.data.repositories.UserDSRepository
+import com.example.sudokugo.data.repositories.MapDSRepository
+import com.example.sudokugo.map.classes.MapViewModel
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
 import com.example.sudokugo.ui.screens.list.SudokuListViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
@@ -24,6 +26,7 @@ import org.koin.dsl.module
 
 val Context.themeDataStore by preferencesDataStore(name = "theme")
 val Context.userDataStore by preferencesDataStore(name = "user")
+val Context.mapPrefsDataStore by preferencesDataStore(name = "map_prefs")
 
 val appModule = module {
 
@@ -46,6 +49,7 @@ val appModule = module {
     single { UserDSRepository(get(named("userDS"))) }
     single { UserPictureRepository(get(named("userPicture"))) }
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
+    single { MapDSRepository(get<Context>().mapPrefsDataStore) }
 
     viewModel { SettingsViewModel(get()) }
     viewModel { SolveViewModel(get(), get()) }
@@ -54,4 +58,5 @@ val appModule = module {
     viewModel { UserPictureViewModel(get(), get()) }
     viewModel { SudokuListViewModel(get(), get()) }
     viewModel { UserScreenViewModel(get()) }
+    viewModel { MapViewModel(get()) }
 }

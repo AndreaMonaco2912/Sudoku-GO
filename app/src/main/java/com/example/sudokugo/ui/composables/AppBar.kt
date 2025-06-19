@@ -1,5 +1,6 @@
 package com.example.sudokugo.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.profilePic.UserPicture
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
@@ -63,12 +65,16 @@ fun TopSudokuGoAppBar(navController: NavController, title: String?) {
 fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelected) {
     val userPictureViewModel = koinViewModel<UserPictureViewModel>()
     val userPic by userPictureViewModel.userPic.collectAsStateWithLifecycle()
-
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     BottomAppBar(
         actions = {
             NavigationBarItem(
                 selected = selected == BottomNavSelected.PLAY,
-                onClick = { navController.navigate(SudokuGORoute.Home) },
+                onClick = {
+                    Log.d("BottomNav", currentRoute!!)
+                    if(currentRoute != "com.example.sudokugo.ui.SudokuGORoute.Home") navController.navigate(SudokuGORoute.Home)
+                          },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
                         Icon(Icons.Outlined.Place, contentDescription = null)

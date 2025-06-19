@@ -53,13 +53,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
     }
 
     LaunchedEffect(userData) {
-        if (userData == null) {
-//            navController.navigate(SudokuGORoute.Login) {
-//                popUpTo(SudokuGORoute.User) { inclusive = true }
-//            }
-        }else{
-            userScreenViewModel.getUserPoints(email!!)
-        }
+        if (userData != null) userScreenViewModel.getUserPoints(email!!)
     }
 
     if (email == null) {
@@ -125,9 +119,11 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
 
             // Ranking Section
             Column {
-                Text("Classifica", modifier = Modifier
-                    .background(Color(0xFFFDF6FF))
-                    .padding(8.dp))
+                Text(
+                    "Classifica", modifier = Modifier
+                        .background(Color(0xFFFDF6FF))
+                        .padding(8.dp)
+                )
 
                 val rankings = listOf(
                     "1 Classificato",

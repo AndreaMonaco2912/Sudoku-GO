@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,8 +41,9 @@ import com.example.sudokugo.data.database.SudokuDAO
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
-
+import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.composables.profilePic.UserPicture
 import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import kotlinx.coroutines.delay
@@ -73,15 +75,15 @@ fun SudokuListScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
-            modifier =  Modifier.padding(contentPadding)
+            modifier = Modifier.padding(contentPadding)
         ) {
             items(sudokus.size) { index ->
                 val sudoku = sudokus[index]
                 SudokuItem(
                     item = sudoku, // Make sure difficulty is a String or convert it
                     onClick = {
-                        if(sudoku.solved)
-                        navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
+                        if (sudoku.solved)
+                            navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
                         else navController.navigate(SudokuGORoute.Solve(sudoku.id))
                     }
                 )
@@ -94,13 +96,13 @@ fun SudokuListScreen(navController: NavController) {
 //                )
 //            }
 
-            }
         }
+    }
 //            SudokuItem(
 //                item = sudokuFromServer?.toString() ?: "No sudoku found",
 //                onClick = { navController.navigate(SudokuGORoute.SudokuDetails("Sudoku 0")) }
 //            )
-        }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +113,7 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             .size(150.dp)
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor =  MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
@@ -121,20 +123,29 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                Icons.Outlined.Image,
-                "Sudoku picture",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(color = if(item.solved) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant),
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(20.dp)
-            )
+//            Image(
+//                Icons.Outlined.Image,
+//                "Sudoku picture",
+//                contentScale = ContentScale.Fit,
+//                colorFilter = ColorFilter.tint(color = if (item.solved) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant),
+//                modifier = Modifier
+//                    .size(72.dp)
+//                    .clip(CircleShape)
+//                    .background(MaterialTheme.colorScheme.primaryContainer)
+//                    .padding(20.dp)
+//            )
+            if(!item.solved){
+                Image(
+                    painter = painterResource(id = R.drawable.todo), // Usa l'avatar utente reale
+                    contentDescription = "User Profile Image",
+                    modifier = Modifier.size(72.dp)
+                )
+            }else{
+                UserPicture(item.picture, Modifier.size(72.dp), R.drawable.done)
+            }
             Spacer(Modifier.size(8.dp))
             Text(
-                if(item.solveDate!=null) "Finito il ${item.solveDate}" else "Iniziato il ${item.initTime}",
+                if (item.solveDate != null) "Finito il ${item.solveDate}" else "Iniziato il ${item.initTime}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center

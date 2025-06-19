@@ -153,6 +153,30 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     }
 
+                    if (userData?.let {
+                            topUsers?.any { user -> user.username == it.username }
+                        } == false) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                userData!!.username,
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+
+                            )
+                            Text(
+                                userData!!.points.toString(),
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.End
+                            )
+                        }
+                        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                    }
                 }
             }
         }

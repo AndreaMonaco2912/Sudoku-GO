@@ -22,40 +22,58 @@ import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import kotlinx.serialization.Serializable
 
 sealed interface SudokuGORoute {
-    @Serializable data object Home: SudokuGORoute
-    @Serializable data object SudokuList: SudokuGORoute
-    @Serializable data class SudokuDetails(val sudokuId: Long): SudokuGORoute
-    @Serializable data object Login: SudokuGORoute
-    @Serializable data object Register: SudokuGORoute
-    @Serializable data object User: SudokuGORoute
-    @Serializable data class Solve(val sudokuId: Long? = null): SudokuGORoute
-    @Serializable data class Settings(val userId: String? = null): SudokuGORoute
-    @Serializable data class Congrats(val points: Int, val duration: Long): SudokuGORoute
+    @Serializable
+    data object Home : SudokuGORoute
+
+    @Serializable
+    data object SudokuList : SudokuGORoute
+
+    @Serializable
+    data class SudokuDetails(val sudokuId: Long) : SudokuGORoute
+
+    @Serializable
+    data object Login : SudokuGORoute
+
+    @Serializable
+    data object Register : SudokuGORoute
+
+    @Serializable
+    data object User : SudokuGORoute
+
+    @Serializable
+    data class Solve(val sudokuId: Long? = null) : SudokuGORoute
+
+    @Serializable
+    data class Settings(val userId: String? = null) : SudokuGORoute
+
+    @Serializable
+    data class Congrats(val points: Int, val duration: Long, val sudokuId: Long) : SudokuGORoute
 }
 
 @Composable
-fun SudokuGONavGraph(navController: NavHostController,
-                     settingsViewModel: SettingsViewModel,
-                     themeState: SettingsState,
-                     loginViewModel: LoginViewModel,
-                     registerViewModel: RegisterViewModel,
-                     userScreenViewModel: UserScreenViewModel
-){
+fun SudokuGONavGraph(
+    navController: NavHostController,
+    settingsViewModel: SettingsViewModel,
+    themeState: SettingsState,
+    loginViewModel: LoginViewModel,
+    registerViewModel: RegisterViewModel,
+    userScreenViewModel: UserScreenViewModel
+) {
     NavHost(
         navController = navController,
         startDestination = SudokuGORoute.Home
-    ){
-        composable<SudokuGORoute.Home>{
+    ) {
+        composable<SudokuGORoute.Home> {
             HomeScreen(navController)
         }
-        composable<SudokuGORoute.SudokuList>{
+        composable<SudokuGORoute.SudokuList> {
             SudokuListScreen(navController)
         }
-        composable<SudokuGORoute.SudokuDetails>{ backStackEntry ->
+        composable<SudokuGORoute.SudokuDetails> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.SudokuDetails>()
             SudokuDetailsScreen(navController, route.sudokuId)
         }
-        composable<SudokuGORoute.Login>{
+        composable<SudokuGORoute.Login> {
             LoginScreen(navController, loginViewModel::loginUser)
         }
         composable<SudokuGORoute.Register> {
@@ -63,7 +81,7 @@ fun SudokuGONavGraph(navController: NavHostController,
         }
         composable<SudokuGORoute.User> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.User>()
-            UserScreen(navController,  userScreenViewModel)
+            UserScreen(navController, userScreenViewModel)
         }
         composable<SudokuGORoute.Solve> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Solve>()
@@ -71,18 +89,18 @@ fun SudokuGONavGraph(navController: NavHostController,
         }
         composable<SudokuGORoute.Settings> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Settings>()
-            SettingsScreen(navController, themeState, settingsViewModel::changeTheme, loginViewModel::logoutUser)
+            SettingsScreen(
+                navController,
+                themeState,
+                settingsViewModel::changeTheme,
+                loginViewModel::logoutUser
+            )
         }
         composable<SudokuGORoute.Congrats> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Congrats>()
             CongratsScreen(
-                navController, route.points, route.duration,
-                onTakePhoto = {
-                    // TODO: Implementa la logica quando necessario
-                }
+                navController, route.points, route.duration, route.sudokuId
             )
         }
-
-
     }
 }

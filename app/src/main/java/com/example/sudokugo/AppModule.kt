@@ -18,6 +18,7 @@ import com.example.sudokugo.ui.screens.list.SudokuListViewModel
 import com.example.sudokugo.ui.screens.login.LoginViewModel
 import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
+import com.example.sudokugo.ui.screens.solve.CongratsScreenViewModel
 import com.example.sudokugo.ui.screens.solve.SolveViewModel
 import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import org.koin.core.module.dsl.viewModel
@@ -61,4 +62,5 @@ val appModule = module {
     viewModel { MapViewModel(get()) }
     viewModel { SudokuDetailsViewModel(get())}
     viewModel { MapViewModel(get()) }
+    viewModel { CongratsScreenViewModel(get()) }
 }

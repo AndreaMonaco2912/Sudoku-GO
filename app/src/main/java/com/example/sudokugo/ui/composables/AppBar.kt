@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,7 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.sudokugo.ui.SudokuGORoute
-import com.example.sudokugo.ui.composables.profilePic.UserPicture
+import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -103,7 +102,7 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
                 onClick = { navController.navigate(SudokuGORoute.User) },
                 icon = {
                     Box(Modifier.padding(8.dp)) {
-                        UserPicture(userPic, Modifier.size(24.dp))
+                        PictureOrDefault(userPic, Modifier.size(24.dp))
                     }
                 },
                 label = {

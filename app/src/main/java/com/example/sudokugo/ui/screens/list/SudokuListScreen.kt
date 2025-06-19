@@ -2,7 +2,6 @@ package com.example.sudokugo.ui.screens.list
 
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,28 +23,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.data.database.ServerSudoku
-import com.example.sudokugo.data.database.SudokuDAO
 
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import com.example.sudokugo.ui.composables.profilePic.UserPicture
-import com.example.sudokugo.ui.screens.solve.SolveViewModel
-import io.github.ilikeyourhat.kudoku.rating.Difficulty
+import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
-import java.util.Date
 
 
 @Composable
@@ -141,7 +130,7 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
                     modifier = Modifier.size(72.dp)
                 )
             }else{
-                UserPicture(item.picture, Modifier.size(72.dp), R.drawable.done)
+                PictureOrDefault(item.picture, Modifier.size(72.dp), R.drawable.done)
             }
             Spacer(Modifier.size(8.dp))
             Text(

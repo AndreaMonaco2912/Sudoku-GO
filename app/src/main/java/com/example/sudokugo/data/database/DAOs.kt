@@ -27,6 +27,9 @@ interface SudokuDAO{
 
     @Query("UPDATE serversudoku SET solved = 1, solveDate = :solveDate,  finishTime= :finishTime WHERE id = :id")
     suspend fun solve(id: Long, solveDate: Date, finishTime: Long)
+
+    @Query("UPDATE serversudoku SET picture = :newPic WHERE id = :id")
+    suspend fun changePic(id: Long, newPic: String)
 }
 @Dao
 interface UserDAO{

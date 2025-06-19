@@ -1,5 +1,12 @@
 package com.example.sudokugo.ui.screens.solve
 
+import android.content.ContentResolver
+import android.content.ContentValues
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.SystemClock
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
@@ -18,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.FileNotFoundException
 import java.time.Duration
 import java.util.Calendar
 import java.util.Date
@@ -37,6 +45,9 @@ class SolveViewModel(
     private val solver = Sudoku.defaultSolver()
 
     private var showedSudoku: ServerSudoku? = null
+
+    private val _id = MutableStateFlow<Long>(-1)
+    val id: StateFlow<Long> = _id
 
     private val _email = MutableStateFlow<String?>(null)
 
@@ -76,9 +87,12 @@ class SolveViewModel(
                 ?: throw NullPointerException("Nessun sudoku caricato")
             val solution = showedSudoku?.solution
                 ?: throw NullPointerException("Nessun sudoku caricato")
+            val identifier = showedSudoku?.id
+                ?: throw NullPointerException("Nessun sudoku caricato")
 
             _currentSudoku.value = Sudoku.fromSingleLineString(currentBoard)
             _originalSudoku.value = Sudoku.fromSingleLineString(originalBoard)
+            _id.value = identifier
             solutionSudoku = solution
         }
     }
@@ -87,10 +101,6 @@ class SolveViewModel(
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
             val email = _email.value ?: repositoryUser.email.firstOrNull()
-//            if (email == null) {
-//                Log.e("SolveViewModel", "Email non disponibile. Impossibile creare sudoku.")
-//                return@launch
-//            }
             val result = withContext(Dispatchers.Default) {
                 sudokuDiff = difficulty
                 val localSudoku = generator.generate(Classic9x9, difficulty)
@@ -121,6 +131,7 @@ class SolveViewModel(
 
             _currentSudoku.value = solution
             _originalSudoku.value = original
+            _id.value = stored.id
             solutionSudoku = solutionStr
             showedSudoku = stored
 //            val localSudoku = generator.generate(Classic9x9, difficulty)

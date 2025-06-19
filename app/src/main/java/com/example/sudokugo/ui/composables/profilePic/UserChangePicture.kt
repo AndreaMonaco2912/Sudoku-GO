@@ -41,7 +41,7 @@ fun UserChangePicture() {
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        UserPicture(userPic, imgModifier)
+        PictureOrDefault(userPic, imgModifier)
 
         IconButton(
             onClick = cameraLauncher::captureImage,

@@ -1,57 +1,27 @@
-package com.example.sudokugo.ui.composables.profilePic
+package com.example.sudokugo.ui.screens.solve
 
-import android.net.Uri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.SystemClock
 import android.provider.MediaStore
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.sudokugo.data.repositories.SudokuRepository
+import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
-import android.graphics.Canvas
-import android.graphics.ImageDecoder
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.RectF
-import androidx.core.graphics.createBitmap
-import com.example.sudokugo.data.repositories.UserDAORepository
-import com.example.sudokugo.data.repositories.UserDSRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
-
-class UserPictureViewModel(
-    private val userDaoRep: UserDAORepository,
-    private val userDSRepository: UserDSRepository
-) : ViewModel() {
-
-    private val _userPic = MutableStateFlow<String?>(null)
-    val userPic: StateFlow<String?> = _userPic
-
-    private val _email = MutableStateFlow<String?>(null)
-
-    init {
-        viewModelScope.launch {
-            userDSRepository.email.collect { savedEmail ->
-                _email.value = savedEmail
-                if(savedEmail != null){
-                    _userPic.value = userDaoRep.getPictureByEmail(savedEmail)
-                }
-            }
-        }
-    }
-
-    fun processAndSaveUserPic(imageUri: Uri, contentResolver: ContentResolver) =
+class CongratsScreenViewModel(
+    private val sudokuRepository: SudokuRepository
+): ViewModel() {
+    fun processAndSaveUserPic(imageUri: Uri, contentResolver: ContentResolver, sudokuId: Long) =
         viewModelScope.launch {
             val bitmap = uriToBitmap(imageUri, contentResolver)
             val cropped = cropSquareBitmap(bitmap)
             val savedUri = saveBitmapToStorage(cropped, contentResolver)
-            userDaoRep.changePic(_email.value!!, savedUri.toString())
-            _userPic.value = savedUri.toString()
+            sudokuRepository.changePic(sudokuId, savedUri.toString())
         }
 
     private fun uriToBitmap(imageUri: Uri, contentResolver: ContentResolver): Bitmap {
@@ -71,7 +41,6 @@ class UserPictureViewModel(
 
         return Bitmap.createBitmap(bitmap, xOffset, yOffset, size, size)
     }
-
 
     private fun saveBitmapToStorage(
         bitmap: Bitmap,

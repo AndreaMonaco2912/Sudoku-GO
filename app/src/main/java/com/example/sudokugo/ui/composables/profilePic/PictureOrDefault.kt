@@ -13,13 +13,13 @@ import coil3.request.crossfade
 import com.example.sudokugo.R
 
 @Composable
-fun UserPicture(userPic: String?, modifier: Modifier, defaultPic: Int = R.drawable.default_character_icon) {
+fun PictureOrDefault(takenPic: String?, modifier: Modifier, defaultPic: Int = R.drawable.default_character_icon) {
     val ctx = LocalContext.current
 
-    if (!userPic.isNullOrEmpty()) {
+    if (!takenPic.isNullOrEmpty()) {
         AsyncImage(
             ImageRequest.Builder(ctx)
-                .data(userPic)
+                .data(takenPic)
                 .crossfade(true)
                 .build(),
             "Captured image",
@@ -27,8 +27,8 @@ fun UserPicture(userPic: String?, modifier: Modifier, defaultPic: Int = R.drawab
         )
     } else {
         Image(
-            painter = painterResource(id = defaultPic), // Usa l'avatar utente reale
-            contentDescription = "User Profile Image",
+            painter = painterResource(id = defaultPic),
+            contentDescription = "Default Image",
             modifier = modifier
         )
     }

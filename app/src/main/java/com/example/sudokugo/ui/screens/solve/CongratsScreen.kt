@@ -15,17 +15,29 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
+import androidx.compose.ui.platform.LocalContext
 import com.example.sudokugo.ui.SudokuGORoute
+import com.example.sudokugo.ui.composables.profilePic.rememberCameraLauncher
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CongratsScreen(
     navController: NavController,
     points: Int,
     duration: Long,
-    onTakePhoto: () -> Unit
+    sudokuId: Long
 ) {
     val minutes = duration / 60000
     val seconds = (duration % 60000) / 1000
+
+    val congratsViewModel = koinViewModel<CongratsScreenViewModel>()
+    val ctx = LocalContext.current
+
+    val cameraLauncher = rememberCameraLauncher(
+        onPictureTaken = { imageUri ->
+            congratsViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver, sudokuId)
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -42,7 +54,7 @@ fun CongratsScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = onTakePhoto) {
+            Button(onClick = cameraLauncher::captureImage) {
                 Text("📸 Scatta una foto")
             }
             Button(onClick = {

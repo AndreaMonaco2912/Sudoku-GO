@@ -41,6 +41,7 @@ fun CongratsScreen(
     val cameraLauncher = rememberCameraLauncher(
         onPictureTaken = { imageUri ->
             congratsViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver, sudokuId)
+            navController.navigate(SudokuGORoute.Home)
         }
     )
 
@@ -72,9 +73,7 @@ fun CongratsScreen(
                         Text("Scatta una foto")
                     }
                     Button(onClick = {
-                        navController.navigate(SudokuGORoute.Home) {
-                            popUpTo("solve") { inclusive = true }
-                        }
+                        navController.navigate(SudokuGORoute.Home)
                     }) {
                         Text("Continua")
                     }
@@ -84,9 +83,7 @@ fun CongratsScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(onClick = {
-                        navController.navigate(SudokuGORoute.Home) {
-                            popUpTo("solve") { inclusive = true }
-                        }
+                        navController.navigate(SudokuGORoute.Home)
                     }) {
                         Text("Continua")
                     }

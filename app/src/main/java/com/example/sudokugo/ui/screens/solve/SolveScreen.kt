@@ -65,9 +65,6 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
                         id
                     )
                 )
-                {
-                    popUpTo("solve") { inclusive = true }
-                }
             }
             shouldNavigate.value = false
         }

@@ -1,25 +1,17 @@
 package com.example.sudokugo.ui.composables
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -29,52 +21,52 @@ import com.example.sudokugo.map.classes.MapViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
 import com.example.sudokugo.map.view.MyMap
-import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun Map(playSudoku: () -> Unit) {
     val viewModelMap = koinViewModel<MapViewModel>()
-    val userPictureViewModel = koinViewModel<UserPictureViewModel>()
-    val userPic by userPictureViewModel.userPic.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val hasLocation = viewModelMap.hasRealLocation.value
-    val isLoaded = viewModelMap.isMapDataLoaded.collectAsStateWithLifecycle().value
-    val map = if (isLoaded) {
-        Log.d("MAP_USER_PIC", "userPic = $userPic")
-        MyMap(context, viewModelMap.mapCenter.value, viewModelMap.zoomLevel.value, playSudoku)
-    } else null
+    val hasLocation by viewModelMap.hasRealLocation
+    val isLoaded by viewModelMap.isMapDataLoaded.collectAsStateWithLifecycle()
+    var wasEverLoaded by rememberSaveable { mutableStateOf(false) }
 
+    val mapDataHasBeenRead by viewModelMap.mapDataHasBeenRead.collectAsStateWithLifecycle()
 
-    when {
-        map != null -> {
-            AndroidView(
-                factory = { map.getMapView() }, modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        !hasLocation -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 6.dp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Trying to load the position...", color = MaterialTheme.colorScheme.onBackground)
-                }
-            }
-        }
+    if (!mapDataHasBeenRead) {
+        Loading("Loading Map...")
+        return
     }
 
+    if (isLoaded) {
+        wasEverLoaded = true
+    }
+
+    val map = remember(context, isLoaded) {
+        if (isLoaded || !wasEverLoaded) {
+            MyMap(context, viewModelMap.mapCenter.value, viewModelMap.zoomLevel.value, playSudoku)
+        } else null
+    }
+
+    val alpha = when {
+        !wasEverLoaded && !hasLocation -> 0f
+        else -> 1f
+    }
+
+    if (!hasLocation && !isLoaded || map == null) {
+        Loading("Trying to access fine position...")
+    }
 
     if (map != null) {
+        AndroidView(
+            factory = { map.getMapView() },
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(alpha)
+        )
+
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 when (event) {

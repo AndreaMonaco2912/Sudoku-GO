@@ -15,13 +15,15 @@ class MapDSRepository(private val dataStore: DataStore<Preferences>) {
     }
 
     val mapData: Flow<Triple<Double, Double, Double>?> = dataStore.data.map { prefs ->
-        Triple(
-            prefs[LATITUDE] ?: 0.0,
-            prefs[LONGITUDE] ?: 0.0,
-            prefs[ZOOM] ?: 5.0
-        )
+        val lat = prefs[LATITUDE]
+        val lon = prefs[LONGITUDE]
+        val zoom = prefs[ZOOM]
+        if (lat != null && lon != null && zoom != null) {
+            Triple(lat, lon, zoom)
+        } else {
+            null
+        }
     }
-
 
     suspend fun save(lat: Double, lon: Double, zoom: Double) {
         dataStore.edit { prefs ->

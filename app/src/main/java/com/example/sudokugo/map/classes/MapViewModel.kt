@@ -27,6 +27,9 @@ class MapViewModel(
     private val _hasRealLocation = mutableStateOf(false)
     val hasRealLocation: State<Boolean> = _hasRealLocation
 
+    private val _mapDataHasBeenRead = MutableStateFlow(false)
+    val mapDataHasBeenRead: StateFlow<Boolean> = _mapDataHasBeenRead
+
     fun updateLocationStatus(location: GeoPoint?) {
         if (location != null && !_hasRealLocation.value) {
             _hasRealLocation.value = true
@@ -46,9 +49,11 @@ class MapViewModel(
                     _zoomLevel.doubleValue = zoom
                     _isMapDataLoaded.value = true
                 }
+                _mapDataHasBeenRead.value = true
             }
         }
     }
+
 
     fun saveMapInfo(lat: Double, lon: Double, zoom: Double) {
         viewModelScope.launch {

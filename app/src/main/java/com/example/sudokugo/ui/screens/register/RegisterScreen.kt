@@ -59,7 +59,7 @@ fun RegisterScreen(navController: NavController,
 
             LaunchedEffect(success) {
                 if (success) {
-                    Toast.makeText(context, "Registrazione eseguita!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "User successful registered!", Toast.LENGTH_SHORT).show()
                     navController.navigate(SudokuGORoute.Login) {
                         popUpTo(SudokuGORoute.Register) { inclusive = true }
                     }

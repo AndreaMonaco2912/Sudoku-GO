@@ -47,7 +47,7 @@ fun CongratsScreen(
 
     BackHandler() {
         navController.navigate(SudokuGORoute.Home) {
-            popUpTo("solve") { inclusive = true }
+            popUpTo(0) { inclusive = true }
         }
     }
 
@@ -60,32 +60,34 @@ fun CongratsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Complimenti!", style = MaterialTheme.typography.headlineLarge)
+            Text("Congratulations!", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
             if(email != null){
-                Text("Hai guadagnato $points punti!")
-                Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
+                Text("You  earned $points punts!")
+                Text("Time to solve: ${minutes}m ${seconds}s")
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(onClick = cameraLauncher::captureImage) {
-                        Text("Scatta una foto")
+                        Text("Take a memory picture")
                     }
                     Button(onClick = {
                         navController.navigate(SudokuGORoute.Home)
                     }) {
-                        Text("Continua")
+                        Text("Continue")
                     }
                 }
             }else{
-                Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
+                Text("Time to solve: ${minutes}m ${seconds}s")
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(onClick = {
-                        navController.navigate(SudokuGORoute.Home)
+                        navController.navigate(SudokuGORoute.Home){
+                            popUpTo(0) { inclusive = true }
+                        }
                     }) {
-                        Text("Continua")
+                        Text("Continue")
                     }
                 }
             }

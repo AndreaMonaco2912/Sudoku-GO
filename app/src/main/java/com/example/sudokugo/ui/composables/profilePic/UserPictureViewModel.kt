@@ -65,7 +65,6 @@ class UserPictureViewModel(
     private fun cropSquareBitmap(bitmap: Bitmap): Bitmap {
         val size = minOf(bitmap.width, bitmap.height)
 
-        // Calcola gli offset per centrare il crop
         val xOffset = (bitmap.width - size) / 2
         val yOffset = (bitmap.height - size) / 2
 

@@ -64,8 +64,8 @@ class LoginViewModel(
                 return@launch
             }
         } catch (e: Exception) {
-            Log.e("Login", "Errore durante il login", e)
-            _errorMessage.value = "Errore imprevisto: ${e.localizedMessage}"
+            Log.e("Login", "Error during login", e)
+            _errorMessage.value = "Unexpected error: ${e.localizedMessage}"
         }
 
     }

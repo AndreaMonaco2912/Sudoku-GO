@@ -55,7 +55,7 @@ class UserScreenViewModel(
             _userData.value = user
 
         } catch (e: Exception) {
-            Log.e("GetUserData", "Errore durante la ricezione dei dati utente", e)
+            Log.e("GetUserData", "Error on getting data", e)
         }
     }
 
@@ -69,7 +69,7 @@ class UserScreenViewModel(
             _state.value = points
 
         } catch (e: Exception) {
-            Log.e("Query", "Errore durante la ricezione dei punti", e)
+            Log.e("Query", "Error on getting data", e)
         }
         getUserData(email)
     }
@@ -86,7 +86,7 @@ class UserScreenViewModel(
             _topUsers.value = topUsers
 
         } catch (e: Exception) {
-            Log.e("Query", "Errore durante la ricezione degli utenti", e)
+            Log.e("Query", "Error on getting data", e)
         }
 
     }

@@ -60,8 +60,8 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             val seconds = (sudoku.finishTime % 60000) / 1000
             val date = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(0)
             val time = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(1)
-            val text = "Il $date alle ore $time ho risolto questo bellissimo sudoku! " +
-                    "Ci ho messo solo $minutes minuti e $seconds secondi!"
+            val text = "On $date at $time I solved a sudoku! " +
+                    "It takes me only $minutes minutes and $seconds seconds!"
 
             val intent = Intent(Intent.ACTION_SEND).apply {
                 sudoku.picture?.let { uriString ->
@@ -88,29 +88,6 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
         }
     }
 
-
-    //    fun shareDetails() {
-    //        val sendIntent = Intent(Intent.ACTION_SEND).apply {
-    //            type = "text/plain"
-    //            if(sudoku!=null){
-    //                val minutes = sudoku.finishTime!! / 60000
-    //                val seconds = (sudoku.finishTime % 60000) / 1000
-    //                putExtra(Intent.EXTRA_TEXT, "Il "+  sudoku.solveDate +
-    //                        " ho risolto questo bellissimo sudoku! Ci ho messo solo "
-    //                        +minutes
-    //                        + " minuti e "
-    //                        + seconds
-    //                        + " secondi!"
-    //                )
-    //            }
-    //        }
-    //        val shareIntent = Intent.createChooser(sendIntent, "Share Sudoku")
-    //        if (shareIntent.resolveActivity(ctx.packageManager) != null) {
-    //            ctx.startActivity(shareIntent)
-    //        }
-    //    }
-
-
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku Details") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) },
@@ -131,7 +108,7 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                             if(!sudoku.favourite)
                                 Icons.Outlined.FavoriteBorder
                             else Icons.Outlined.Favorite,
-                            contentDescription = "Aggiungi ai preferiti")
+                            contentDescription = "Add to favorite")
                     }
             }
                 FloatingActionButton(
@@ -168,7 +145,7 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             Spacer(Modifier.size(8.dp))
             Text(
                 if (sudoku != null) {
-                    "Hai risolto questo sudoku di difficoltà: " + sudoku.difficulty
+                    "You caught a sudoku with difficulty: " + sudoku.difficulty
                 } else "",
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -176,11 +153,11 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                 if (sudoku != null) {
                     val minutes = sudoku.finishTime!! / 60000
                     val seconds = (sudoku.finishTime % 60000) / 1000
-                    "Ci hai messo: " +
+                    "It took you: " +
                             minutes +
-                            " minuti e " +
+                            " minutes and " +
                             seconds +
-                            " secondi"
+                            " seconds"
                 } else "",
                 style = MaterialTheme.typography.bodyMedium
             )

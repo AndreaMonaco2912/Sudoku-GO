@@ -52,7 +52,7 @@ fun UserChangePicture() {
         ) {
             Icon(
                 imageVector = Icons.Outlined.PhotoCamera,
-                contentDescription = "Cambia immagine",
+                contentDescription = "Change image",
                 tint = MaterialTheme.colorScheme.primary
             )
         }

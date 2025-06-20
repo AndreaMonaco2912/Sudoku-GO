@@ -19,23 +19,23 @@ class RegisterViewModel : ViewModel() {
 
     fun registerUser(email: String, name: String, username: String, password: String) = viewModelScope.launch {
         if (email.isBlank()) {
-            _errorMessage.value = "Inserire un'email"
+            _errorMessage.value = "Insert an email"
             return@launch
         }
         if (!email.contains("@") || !email.contains(".")) {
-            _errorMessage.value = "Inserire un'email valida"
+            _errorMessage.value = "Insert a valid email"
             return@launch
         }
         if (name.isBlank()) {
-            _errorMessage.value = "Il nome non può essere vuoto"
+            _errorMessage.value = "Insert a name"
             return@launch
         }
         if (username.isBlank()) {
-            _errorMessage.value = "Lo username non può essere vuoto"
+            _errorMessage.value = "Insert a username"
             return@launch
         }
         if (password.isBlank()) {
-            _errorMessage.value = "La password non può essere vuota"
+            _errorMessage.value = "Insert a password"
             return@launch
         }
         try {
@@ -48,22 +48,21 @@ class RegisterViewModel : ViewModel() {
                 .decodeList<UserServer>()
 
             if (result.isNotEmpty()) {
-                _errorMessage.value = "Utente con questa mail già inserita, cambiare mail"
+                _errorMessage.value = "Email already in use. Register with another email"
                 return@launch
             }
 
-            // Nessun errore: registra l'utente
             val newUser = UserServer(email = email, name = name, username = username, password = password, points = 0)
             supabase.from("users").insert(newUser)
 
-            _errorMessage.value = null // Tutto ok
-            Log.d("Register", "Utente registrato con successo")
+            _errorMessage.value = null
+            Log.d("Register", "User registered successfully")
 
             _registrationSuccess.value = true
 
         } catch (e: Exception) {
-            Log.e("Register", "Errore durante la registrazione", e)
-            _errorMessage.value = "Errore imprevisto: ${e.localizedMessage}"
+            Log.e("Register", "Error during registration", e)
+            _errorMessage.value = "Unexpected error: ${e.localizedMessage}"
         }
 
     }

@@ -86,46 +86,10 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
             Spacer(Modifier.size(8.dp))
 
             UserChangePicture()
-//
-//            // Stats Card
-//            Card(
-//                colors = CardDefaults.cardColors(
-//                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-//                ),
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Column(modifier = Modifier.padding(16.dp)) {
-//                    Text("Statistiche varie")
-//                    Text("Sudoku risolti")
-//                    Text("Miglior tempo")
-//                    Text("Sudoku creati")
-//                    Text("Punteggio")
-//                    Text("Rank globale")
-//                }
-//            }
-//
-//            // Trophies Section
-//            Column {
-//                Text("Trofei", modifier = Modifier.background(Color(0xFFFDF6FF)).padding(8.dp))
-//                Row(
-//                    modifier = Modifier.padding(start = 8.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    repeat(3) {
-//                        Icon(
-//                            imageVector = Icons.Default.Star,
-//                            contentDescription = null,
-//                            tint = if (it == 0) Color.Black else Color.Black.copy(alpha = 0.3f),
-//                            modifier = Modifier.size(32.dp)
-//                        )
-//                    }
-//                }
-//            }
 
-            // Ranking Section
             Column {
                 Text(
-                    "Classifica",
+                    "Leaderboard",
                     modifier = Modifier.padding(8.dp),
                     fontWeight = FontWeight.Bold,
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
@@ -186,7 +150,7 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                                 textAlign = TextAlign.End
                             )
                             Text(
-                                "   Tu",
+                                "   You",
                                 textAlign = TextAlign.End,
                                 color = MaterialTheme.colorScheme.secondary,
                                 fontWeight = FontWeight.Bold

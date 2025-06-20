@@ -77,13 +77,13 @@ class SolveViewModel(
             _sudokuDifficulty.value = Difficulty.valueOf(repository.fetchSudokuById(id).difficulty)
 
             val currentBoard = showedSudoku?.currentBoard
-                ?: throw NullPointerException("Nessun sudoku caricato")
+                ?: throw NullPointerException("No sudoku loaded")
             val originalBoard = showedSudoku?.data
-                ?: throw NullPointerException("Nessun sudoku caricato")
+                ?: throw NullPointerException("No sudoku loaded")
             val solution = showedSudoku?.solution
-                ?: throw NullPointerException("Nessun sudoku caricato")
+                ?: throw NullPointerException("No sudoku loaded")
             val identifier = showedSudoku?.id
-                ?: throw NullPointerException("Nessun sudoku caricato")
+                ?: throw NullPointerException("No sudoku loaded")
 
             _currentSudoku.value = Sudoku.fromSingleLineString(currentBoard)
             _originalSudoku.value = Sudoku.fromSingleLineString(originalBoard)
@@ -143,8 +143,8 @@ class SolveViewModel(
 
         viewModelScope.launch {
             val current =
-                _currentSudoku.value ?: throw IllegalStateException("Sudoku non inizializzato")
-            val sudokuId = showedSudoku?.id ?: throw IllegalStateException("Nessun sudoku caricato")
+                _currentSudoku.value ?: throw IllegalStateException("Sudoku not initialized")
+            val sudokuId = showedSudoku?.id ?: throw IllegalStateException("No sudoku loaded")
 
             val currentBoardStr = current.toSingleLineString().toMutableList()
             val index = row * 9 + col

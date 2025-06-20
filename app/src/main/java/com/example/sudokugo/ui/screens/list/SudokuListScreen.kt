@@ -69,25 +69,18 @@ fun SudokuListScreen(navController: NavController) {
             }
         }
     }
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) },
         floatingActionButton = {
-            FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                onClick = {
-                    fav.value = !fav.value
-                }
-            ) {
+            FloatingActionButton(containerColor = MaterialTheme.colorScheme.secondary, onClick = {
+                fav.value = !fav.value
+            }) {
                 Icon(
-                    if (!fav.value)
-                        Icons.Outlined.FavoriteBorder
-                    else Icons.Outlined.Favorite,
-                    contentDescription = "Show favourites"
+                    if (!fav.value) Icons.Outlined.FavoriteBorder
+                    else Icons.Outlined.Favorite, contentDescription = "Show favorites"
                 )
             }
-        }
-    ) { contentPadding ->
+        }) { contentPadding ->
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -96,7 +89,7 @@ fun SudokuListScreen(navController: NavController) {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
-            if(sudokus.isEmpty()){
+            if (sudokus.isEmpty()) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
                         modifier = Modifier
@@ -106,10 +99,11 @@ fun SudokuListScreen(navController: NavController) {
                                 MaterialTheme.colorScheme.surfaceVariant,
                                 shape = MaterialTheme.shapes.medium
                             )
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("No sudoku caught (yet)!", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "No sudoku caught (yet)!", style = MaterialTheme.typography.titleMedium
+                        )
                         Spacer(Modifier.size(4.dp))
                         Text(
                             "Click on Explore and catch 'em all!",
@@ -129,8 +123,7 @@ fun SudokuListScreen(navController: NavController) {
                                 MaterialTheme.colorScheme.surfaceVariant,
                                 shape = MaterialTheme.shapes.medium
                             )
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("No favourites!", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.size(4.dp))
@@ -150,29 +143,13 @@ fun SudokuListScreen(navController: NavController) {
             }
             items(filteredSudokus.size) { index ->
                 val sudoku = filteredSudokus[index]
-                SudokuItem(
-                    item = sudoku, // Make sure difficulty is a String or convert it
-                    onClick = {
-                        if (sudoku.solved)
-                            navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
-                        else navController.navigate(SudokuGORoute.Solve(sudoku.id))
-                    }
-                )
+                SudokuItem(item = sudoku, onClick = {
+                    if (sudoku.solved) navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
+                    else navController.navigate(SudokuGORoute.Solve(sudoku.id))
+                })
             }
-
-//            sudokus.forEach { sudoku -> {
-//                SudokuItem(
-//                    item = sudoku.difficulty,
-//                    onClick = { navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id.toString())) }
-//                )
-//            }
-
         }
     }
-//            SudokuItem(
-//                item = sudokuFromServer?.toString() ?: "No sudoku found",
-//                onClick = { navController.navigate(SudokuGORoute.SudokuDetails("Sudoku 0")) }
-//            )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,29 +171,17 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            Image(
-//                Icons.Outlined.Image,
-//                "Sudoku picture",
-//                contentScale = ContentScale.Fit,
-//                colorFilter = ColorFilter.tint(color = if (item.solved) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant),
-//                modifier = Modifier
-//                    .size(72.dp)
-//                    .clip(CircleShape)
-//                    .background(MaterialTheme.colorScheme.primaryContainer)
-//                    .padding(20.dp)
-//            )
             if (!item.solved) {
                 Image(
-                    painter = painterResource(id = R.drawable.todo), // Usa l'avatar utente reale
-                    contentDescription = "Sudoku to be resolved",
-                    modifier = Modifier.size(72.dp)
+                    painter = painterResource(id = R.drawable.todo),
+                    contentDescription = "Sudoku to be resolved", modifier = Modifier.size(72.dp)
                 )
             } else {
                 PictureOrDefault(item.picture, Modifier.size(72.dp), R.drawable.done)
             }
             Spacer(Modifier.size(8.dp))
             Text(
-                "Sudoku ${item.id.toString()}",
+                "Sudoku ${item.id}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center

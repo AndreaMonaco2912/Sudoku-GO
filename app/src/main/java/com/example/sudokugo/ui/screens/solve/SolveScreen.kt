@@ -95,7 +95,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
                 shouldNavigate
             )
             Text(
-                text = "Difficoltà: $sudokuDifficulty"
+                text = "Difficulty: $sudokuDifficulty"
             )
         }
     }
@@ -128,7 +128,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
                     strokeWidth = 6.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Caricamento Sudoku...", color = MaterialTheme.colorScheme.onBackground)
+                Text("Loading Sudoku...", color = MaterialTheme.colorScheme.onBackground)
             }
         }
         return
@@ -266,7 +266,7 @@ fun BottomControls(sudokuViewModel: SolveViewModel, shouldNavigate: MutableState
 
         IconButton(onClick = {
             if (sudokuViewModel.checkSolution()) shouldNavigate.value = true
-            else Toast.makeText(context, "Il sudoku non è corretto!", Toast.LENGTH_SHORT).show()
+            else Toast.makeText(context, "Sudoku not solved!", Toast.LENGTH_SHORT).show()
 
         }) {
             Icon(Icons.Default.Check, contentDescription = "Validate")

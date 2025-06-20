@@ -126,7 +126,7 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             if(!item.solved){
                 Image(
                     painter = painterResource(id = R.drawable.todo), // Usa l'avatar utente reale
-                    contentDescription = "User Profile Image",
+                    contentDescription = "Sudoku to be resolved",
                     modifier = Modifier.size(72.dp)
                 )
             }else{

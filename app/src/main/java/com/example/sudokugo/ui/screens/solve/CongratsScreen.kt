@@ -1,5 +1,6 @@
 package com.example.sudokugo.ui.screens.solve
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,13 @@ fun CongratsScreen(
             congratsViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver, sudokuId)
         }
     )
+
+    BackHandler() {
+        navController.navigate(SudokuGORoute.Home) {
+            popUpTo("solve") { inclusive = true }
+        }
+    }
+
     Scaffold { contentPadding ->
         Column(
             modifier = Modifier
@@ -75,7 +83,6 @@ fun CongratsScreen(
                 Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-
                     Button(onClick = {
                         navController.navigate(SudokuGORoute.Home) {
                             popUpTo("solve") { inclusive = true }

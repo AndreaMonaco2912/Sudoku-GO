@@ -1,6 +1,7 @@
 package com.example.sudokugo.ui.screens.login
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,11 +30,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.data.models.Theme
@@ -42,13 +47,14 @@ import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.screens.settings.SettingsState
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun LoginScreen(navController: NavController, onUserSetted: (UserServer) -> Unit) {
+fun LoginScreen(navController: NavController) {
+    val loginViewModel = koinViewModel<LoginViewModel>()
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Login") }
     ) { contentPadding ->
-
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -57,8 +63,26 @@ fun LoginScreen(navController: NavController, onUserSetted: (UserServer) -> Unit
                 .padding(12.dp)
                 .fillMaxSize()
         ) {
+            val context = LocalContext.current
+            val errorMessage by loginViewModel.errorMessage.collectAsStateWithLifecycle()
+            val success by loginViewModel.loginSucces.collectAsStateWithLifecycle()
 
-            val scope = rememberCoroutineScope()
+            LaunchedEffect(success) {
+                if (success) {
+                    Toast.makeText(context, "Successful login!", Toast.LENGTH_SHORT).show()
+                    navController.navigate(SudokuGORoute.Home) {
+                        popUpTo(SudokuGORoute.Login) { inclusive = true }
+                    }
+                    loginViewModel.clearSuccess()
+                }
+            }
+
+            LaunchedEffect(errorMessage) {
+                errorMessage?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                    loginViewModel.clearError()
+                }
+            }
 
             var password by rememberSaveable { mutableStateOf("") }
             var passwordVisibility by remember { mutableStateOf(false)}
@@ -106,34 +130,7 @@ fun LoginScreen(navController: NavController, onUserSetted: (UserServer) -> Unit
                     Text("Register")
                 }
                 Spacer(Modifier.size(24.dp))
-                Button(onClick = {
-                    scope.launch {
-                        try {
-                            val result = supabase.from("users")
-                                .select(){
-                                    filter {
-                                        eq("email", email)
-                                        eq("password", password)
-                                    }
-                                }
-                                .decodeList<UserServer>()
-
-                            if (result.isNotEmpty()) {
-                                // Login riuscito
-                                onUserSetted(result[0])
-                                navController.navigate(SudokuGORoute.Home) {
-                                    popUpTo(SudokuGORoute.Login) { inclusive = true }
-                                }
-
-                            } else {
-                                // Credenziali sbagliate
-                                Log.d("Login", "Credenziali non valide")
-                            }
-                        } catch (e: Exception) {
-                            Log.e("Login", "Errore durante il login", e)
-                        }
-                    }
-                }) {
+                Button(onClick = {loginViewModel.loginUser(email,password)}) {
                     Text("Login")
                 }
             }

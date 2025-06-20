@@ -213,7 +213,6 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
 
 @Composable
 fun NumberPad(onNumberClick: (Int) -> Unit) {
-
     val numbers = (1..9).toList()
     Column {
         for (row in 0 until 2) {
@@ -228,7 +227,7 @@ fun NumberPad(onNumberClick: (Int) -> Unit) {
                             onNumberClick(numbers[index])
                         }
                     } else if (index == 9) {
-                        NumberPadButton("✏️") {
+                        NumberPadButton("🧼") {
                             onNumberClick(0)
                         }
                     }

@@ -18,7 +18,6 @@ class RegisterViewModel : ViewModel() {
     val registrationSuccess: StateFlow<Boolean> = _registrationSuccess
 
     fun registerUser(email: String, name: String, username: String, password: String) = viewModelScope.launch {
-        // Validazione separata per ogni campo
         if (email.isBlank()) {
             _errorMessage.value = "Inserire un'email"
             return@launch

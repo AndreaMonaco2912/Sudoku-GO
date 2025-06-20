@@ -74,7 +74,7 @@ fun SudokuGONavGraph(
             SudokuDetailsScreen(navController, route.sudokuId)
         }
         composable<SudokuGORoute.Login> {
-            LoginScreen(navController, loginViewModel::loginUser)
+            LoginScreen(navController)
         }
         composable<SudokuGORoute.Register> {
             RegisterScreen(navController, registerViewModel)

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.ui.SudokuGORoute
@@ -53,8 +54,8 @@ fun RegisterScreen(navController: NavController,
                 .fillMaxSize()
         ) {
             val context = LocalContext.current
-            val errorMessage by viewModel.errorMessage.collectAsState()
-            val success by viewModel.registrationSuccess.collectAsState()
+            val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+            val success by viewModel.registrationSuccess.collectAsStateWithLifecycle()
 
             LaunchedEffect(success) {
                 if (success) {
@@ -65,6 +66,7 @@ fun RegisterScreen(navController: NavController,
                     viewModel.clearSuccess()
                 }
             }
+
             LaunchedEffect(errorMessage) {
                 errorMessage?.let {
                     Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -85,19 +87,19 @@ fun RegisterScreen(navController: NavController,
 
             OutlinedTextField(
                 value = name,
-                onValueChange = { name=it },
+                onValueChange = { name=it.trim() },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = username,
-                onValueChange = { username=it },
+                onValueChange = { username=it.trim() },
                 label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { email=it },
+                onValueChange = { email=it.trim() },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )

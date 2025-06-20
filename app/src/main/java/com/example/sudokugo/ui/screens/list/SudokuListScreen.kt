@@ -2,6 +2,7 @@ package com.example.sudokugo.ui.screens.list
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
@@ -52,8 +54,8 @@ fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
     val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
     val email by sudokuListViewModel.email.collectAsStateWithLifecycle()
-    val fav = remember{mutableStateOf(false)}
-    val filteredSudokus = if (fav.value) sudokus.filter { it.favourite  } else sudokus
+    val fav = remember { mutableStateOf(false) }
+    val filteredSudokus = if (fav.value) sudokus.filter { it.favourite } else sudokus
 
     LaunchedEffect(Unit) {
         sudokuListViewModel.refreshList()
@@ -78,10 +80,11 @@ fun SudokuListScreen(navController: NavController) {
                 }
             ) {
                 Icon(
-                    if(!fav.value)
+                    if (!fav.value)
                         Icons.Outlined.FavoriteBorder
                     else Icons.Outlined.Favorite,
-                    contentDescription = "Show favourites")
+                    contentDescription = "Show favourites"
+                )
             }
         }
     ) { contentPadding ->
@@ -93,7 +96,58 @@ fun SudokuListScreen(navController: NavController) {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
-
+            if(sudokus.isEmpty()){
+                item(span = { GridItemSpan(2) }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("No sudoku caught (yet)!", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.size(4.dp))
+                        Text(
+                            "Click on Explore and catch 'em all!",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            if (filteredSudokus.isEmpty() && fav.value) {
+                item(span = { GridItemSpan(2) }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("No favourites!", style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.size(4.dp))
+                        Text(
+                            "Add sudoku favourites to see them here.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.size(4.dp))
+                        Text(
+                            "Use the like button in the sudoku details to add it to your favourites.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
             items(filteredSudokus.size) { index ->
                 val sudoku = filteredSudokus[index]
                 SudokuItem(
@@ -151,13 +205,13 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
 //                    .background(MaterialTheme.colorScheme.primaryContainer)
 //                    .padding(20.dp)
 //            )
-            if(!item.solved){
+            if (!item.solved) {
                 Image(
                     painter = painterResource(id = R.drawable.todo), // Usa l'avatar utente reale
                     contentDescription = "Sudoku to be resolved",
                     modifier = Modifier.size(72.dp)
                 )
-            }else{
+            } else {
                 PictureOrDefault(item.picture, Modifier.size(72.dp), R.drawable.done)
             }
             Spacer(Modifier.size(8.dp))

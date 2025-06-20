@@ -1,12 +1,5 @@
 package com.example.sudokugo.ui.screens.solve
 
-import android.content.ContentResolver
-import android.content.ContentValues
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.net.Uri
-import android.os.SystemClock
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,8 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
-import java.time.Duration
 import java.util.Calendar
 import java.util.Date
 
@@ -38,7 +29,6 @@ class SolveViewModel(
     private val repositoryUser: UserDSRepository
 ) : ViewModel() {
     private lateinit var initialTime: Date
-//    private lateinit var sudokuDiff: Difficulty
 
     private val _sudokuDifficulty = MutableStateFlow<Difficulty>(Difficulty.EASY)
     val sudokuDifficulty: StateFlow<Difficulty?> = _sudokuDifficulty
@@ -109,36 +99,29 @@ class SolveViewModel(
             val email = _email.value ?: repositoryUser.email.firstOrNull()
 
             val result = withContext(Dispatchers.Default) {
-//                val initTime = Calendar.getInstance().time.time
-//                Log.d("inizio generazione", (Calendar.getInstance().time.time -
-//                initTime).toString())
                 val localSudoku = generator.generate(Classic9x9)
-//                Log.d("fine generazione", (Calendar.getInstance().time.time -
-//                initTime).toString())
-
                 _sudokuDifficulty.value = rater.rate(localSudoku)
-//                Log.d("fine rating`", (Calendar.getInstance().time.time -
-//                initTime).toString())
                 val solution = solver.solve(localSudoku)
-
                 val boardStr = localSudoku.toSingleLineString()
                 val solutionStr = solution.toSingleLineString()
 
                 initialTime = Calendar.getInstance().time
+
                 val sudoku = ServerSudoku(
                     data = boardStr,
                     currentBoard = boardStr,
                     difficulty = _sudokuDifficulty.value.toString(),
                     solution = solutionStr,
-                    userId = email,
+                    userId = email ?: "default",
                     picture = null,
                     solveDate = null,
                     initTime = initialTime,
                     finishTime = null
                 )
 
-                val id = repository.insertSudoku(sudoku)
+                val id = if (email != null) repository.insertSudoku(sudoku) else -1
                 Triple(solution, localSudoku to sudoku.copy(id = id), solutionStr)
+
             }
 
             val (solution, pair, solutionStr) = result
@@ -149,32 +132,7 @@ class SolveViewModel(
             _id.value = stored.id
             solutionSudoku = solutionStr
             showedSudoku = stored
-//            val localSudoku = generator.generate(Classic9x9, difficulty)
-//            val solution = solver.solve(localSudoku)
-//
-//            val boardStr = localSudoku.toSingleLineString()
-//            val solutionStr = solution.toSingleLineString()
-//
-//            val sudoku = ServerSudoku(
-//                data = boardStr,
-//                currentBoard = boardStr,
-//                difficulty = difficulty.toString(),
-//                solution = solutionStr,
-//                userId = email,
-//                picture = null
-//            )
-//
-//            _currentSudoku.value = solution
-//            _originalSudoku.value = localSudoku
-//            solutionSudoku = solutionStr
-//
-//            val id = repository.insertSudoku(sudoku)
-//            showedSudoku = sudoku.copy(id = id)
         }
-    }
-
-    fun deleteSudoku(sudoku: ServerSudoku) = viewModelScope.launch {
-        repository.deleteSudoku(sudoku)
     }
 
     fun insertNum(num: Int) {
@@ -206,10 +164,12 @@ class SolveViewModel(
         if (solved) {
             val timeDiff = Calendar.getInstance().time.time - initialTime.time
             _timeDiff.value = timeDiff
-//            val timeDiff = Duration.between(initialTime, LocalDateTime.now()).seconds
             viewModelScope.launch {
-                if(_email.value!=null){
-                    repositoryUser.incrementScore(_email.value!!, getPointsForDifficulty(_sudokuDifficulty.value))
+                if (_email.value != null) {
+                    repositoryUser.incrementScore(
+                        _email.value!!,
+                        getPointsForDifficulty(_sudokuDifficulty.value)
+                    )
                 }
                 repository.solveSudoku(showedSudoku!!.id, Calendar.getInstance().time, timeDiff)
             }

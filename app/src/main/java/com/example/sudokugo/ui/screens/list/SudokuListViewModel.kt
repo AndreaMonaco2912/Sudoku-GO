@@ -31,5 +31,11 @@ class SudokuListViewModel(
                 }
         }
     }
+
+    fun refreshList() {
+        viewModelScope.launch {
+            _sudokuList.value = repository.fetchAllSudokuByUser(_email.value)
+        }
+    }
 }
 

@@ -18,7 +18,8 @@ data class ServerSudoku(
     @ColumnInfo val picture: String?,
     @ColumnInfo val solveDate: Date?,
     @ColumnInfo val initTime: Date,
-    @ColumnInfo val finishTime: Long?
+    @ColumnInfo val finishTime: Long?,
+    @ColumnInfo val favourite: Boolean = false
 )
 
 @Entity

@@ -12,15 +12,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -45,6 +52,12 @@ fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
     val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
     val email by sudokuListViewModel.email.collectAsStateWithLifecycle()
+    val fav = remember{mutableStateOf(false)}
+    val filteredSudokus = if (fav.value) sudokus.filter { it.favourite  } else sudokus
+
+    LaunchedEffect(Unit) {
+        sudokuListViewModel.refreshList()
+    }
 
     LaunchedEffect(email) {
         delay(100)
@@ -56,7 +69,21 @@ fun SudokuListScreen(navController: NavController) {
     }
     Scaffold(
         topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
-        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) }
+        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) },
+        floatingActionButton = {
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                onClick = {
+                    fav.value = !fav.value
+                }
+            ) {
+                Icon(
+                    if(!fav.value)
+                        Icons.Outlined.FavoriteBorder
+                    else Icons.Outlined.Favorite,
+                    contentDescription = "Show favourites")
+            }
+        }
     ) { contentPadding ->
 
         LazyVerticalGrid(
@@ -66,8 +93,9 @@ fun SudokuListScreen(navController: NavController) {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
-            items(sudokus.size) { index ->
-                val sudoku = sudokus[index]
+
+            items(filteredSudokus.size) { index ->
+                val sudoku = filteredSudokus[index]
                 SudokuItem(
                     item = sudoku, // Make sure difficulty is a String or convert it
                     onClick = {

@@ -25,7 +25,14 @@ class SudokuDetailsViewModel(
             _sudoku.value = result
         }
     }
-
+    fun changeFav() {
+        viewModelScope.launch {
+            _sudoku.value?.let {
+                repository.changeFav(it.id, !it.favourite)
+                _sudoku.value = repository.fetchSudokuById(it.id)
+            }
+        }
+    }
 }
 
 

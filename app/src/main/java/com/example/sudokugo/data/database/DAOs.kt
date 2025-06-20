@@ -30,6 +30,9 @@ interface SudokuDAO{
 
     @Query("UPDATE serversudoku SET picture = :newPic WHERE id = :id")
     suspend fun changePic(id: Long, newPic: String)
+
+    @Query("UPDATE serversudoku SET favourite = :fav WHERE id = :id")
+    suspend fun changeFav(id: Long, fav: Boolean)
 }
 @Dao
 interface UserDAO{

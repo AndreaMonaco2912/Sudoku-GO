@@ -134,7 +134,7 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             }
             Spacer(Modifier.size(8.dp))
             Text(
-                if (item.solveDate != null) "Finito il ${item.solveDate}" else "Iniziato il ${item.initTime}",
+                "Sudoku ${item.id.toString()}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center

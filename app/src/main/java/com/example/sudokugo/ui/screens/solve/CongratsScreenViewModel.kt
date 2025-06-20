@@ -10,12 +10,27 @@ import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.repositories.SudokuRepository
+import com.example.sudokugo.data.repositories.UserDSRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 
 class CongratsScreenViewModel(
-    private val sudokuRepository: SudokuRepository
+    private val sudokuRepository: SudokuRepository,
+    private val  repositoryUser: UserDSRepository
 ): ViewModel() {
+
+    private val _email = MutableStateFlow<String?>(null)
+    val email: MutableStateFlow<String?> = _email
+
+    init {
+        viewModelScope.launch {
+            repositoryUser.email.collect { savedEmail ->
+                _email.value = savedEmail
+            }
+        }
+    }
+
     fun processAndSaveUserPic(imageUri: Uri, contentResolver: ContentResolver, sudokuId: Long) =
         viewModelScope.launch {
             val bitmap = uriToBitmap(imageUri, contentResolver)

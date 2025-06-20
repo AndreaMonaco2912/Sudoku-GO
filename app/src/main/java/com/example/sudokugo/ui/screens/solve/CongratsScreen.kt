@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.profilePic.rememberCameraLauncher
@@ -31,6 +34,7 @@ fun CongratsScreen(
     val seconds = (duration % 60000) / 1000
 
     val congratsViewModel = koinViewModel<CongratsScreenViewModel>()
+    val email by congratsViewModel.email.collectAsState()
     val ctx = LocalContext.current
 
     val cameraLauncher = rememberCameraLauncher(
@@ -38,32 +42,51 @@ fun CongratsScreen(
             congratsViewModel.processAndSaveUserPic(imageUri, ctx.contentResolver, sudokuId)
         }
     )
+    Scaffold { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+            ,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Complimenti!", style = MaterialTheme.typography.headlineLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            if(email != null){
+                Text("Hai guadagnato $points punti!")
+                Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("🎉 Complimenti! 🎉", style = MaterialTheme.typography.headlineLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Hai guadagnato $points punti!")
-        Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
+                Spacer(modifier = Modifier.height(32.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = cameraLauncher::captureImage) {
-                Text("📸 Scatta una foto")
-            }
-            Button(onClick = {
-                navController.navigate(SudokuGORoute.Home) {
-                    popUpTo("solve") { inclusive = true }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Button(onClick = cameraLauncher::captureImage) {
+                        Text("Scatta una foto")
+                    }
+                    Button(onClick = {
+                        navController.navigate(SudokuGORoute.Home) {
+                            popUpTo("solve") { inclusive = true }
+                        }
+                    }) {
+                        Text("Continua")
+                    }
                 }
-            }) {
-                Text("Continua")
+            }else{
+                Text("Tempo di risoluzione: ${minutes}m ${seconds}s")
+                Spacer(modifier = Modifier.height(32.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+
+                    Button(onClick = {
+                        navController.navigate(SudokuGORoute.Home) {
+                            popUpTo("solve") { inclusive = true }
+                        }
+                    }) {
+                        Text("Continua")
+                    }
+                }
             }
+
         }
     }
+
 }

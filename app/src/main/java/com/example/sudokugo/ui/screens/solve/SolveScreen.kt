@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -132,7 +131,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
                     strokeWidth = 6.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Caricamento Sudoku...", color = Color.Black)
+                Text("Caricamento Sudoku...", color = MaterialTheme.colorScheme.onBackground)
             }
         }
         return
@@ -141,7 +140,9 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
     val gridSize = remember { 9 }
     val cellSize = remember { 36.dp }
     val totalSize = remember { cellSize * gridSize }
-
+    val onBack = MaterialTheme.colorScheme.onBackground
+    val primary = MaterialTheme.colorScheme.primary
+    val onPrimary = MaterialTheme.colorScheme.primaryContainer
     Box(
         modifier = Modifier
             .size(totalSize)
@@ -153,7 +154,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
 
             selected?.let { (selRow, selCol) ->
                 drawRect(
-                    color = Color(0x331976D2),
+                    color = Color(onPrimary.value),
                     topLeft = Offset(x = selCol * cellPx, y = selRow * cellPx),
                     size = Size(cellPx, cellPx)
                 )
@@ -162,7 +163,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
             for (i in 1 until gridSize) {
                 val lineWidth = if (i % 3 == 0) thickLine else thinLine
                 drawLine(
-                    color = Color.Black,
+                    color = onBack,
                     start = Offset(i * cellPx, 0f),
                     end = Offset(i * cellPx, size.height),
                     strokeWidth = lineWidth
@@ -172,7 +173,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
             for (i in 1 until gridSize) {
                 val lineWidth = if (i % 3 == 0) thickLine else thinLine
                 drawLine(
-                    color = Color.Black,
+                    color = onBack,
                     start = Offset(0f, i * cellPx),
                     end = Offset(size.width, i * cellPx),
                     strokeWidth = lineWidth
@@ -180,7 +181,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
             }
 
             drawRect(
-                Color.Black,
+                onBack,
                 style = Stroke(thickLine)
             )
         }
@@ -193,7 +194,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
                         val isFixed = originalVal != 0
 
                         val displayVal = if (currentVal != 0) currentVal.toString() else ""
-                        val textColor = if (isFixed) Color.Black else Color.Blue
+                        val textColor = if (isFixed) onBack else primary
 
                         Box(
                             modifier = Modifier
@@ -215,6 +216,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
 
 @Composable
 fun NumberPad(onNumberClick: (Int) -> Unit) {
+
     val numbers = (1..9).toList()
     Column {
         for (row in 0 until 2) {
@@ -246,10 +248,10 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
         modifier = Modifier
             .size(64.dp)
             .padding(4.dp)
-            .border(2.dp, Color.Black, CircleShape)
+            .border(2.dp, MaterialTheme.colorScheme.onBackground, CircleShape)
             .clickable(onClick = onClick)
     ) {
-        Text(label)
+        Text(label, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 

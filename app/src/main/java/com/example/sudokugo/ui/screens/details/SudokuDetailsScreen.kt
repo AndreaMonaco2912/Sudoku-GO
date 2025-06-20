@@ -30,9 +30,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -88,18 +90,9 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(contentPadding).padding(12.dp).fillMaxSize()
         ) {
-            Image(
-                Icons.Outlined.Image,
-                "Sudoku picture",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .size(128.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(36.dp)
-            )
+            if (sudoku != null) {
+                PictureOrDefault(sudoku.picture, Modifier.size(200.dp), R.drawable.done)
+            }
             Text(
                 "Sudoku " +
                 sudokuId.toString(),

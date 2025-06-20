@@ -62,24 +62,25 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
 
     if (email == null) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
         return
     }
 
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = userData?.username) },
-        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.USER) }
-    ) { contentPadding ->
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = userData?.username) },
+        bottomBar = {
+            BottomSudokuGoAppBar(
+                navController,
+                selected = BottomNavSelected.USER
+            )
+        }) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(contentPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(contentPadding), verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             Spacer(Modifier.size(8.dp))
@@ -124,12 +125,14 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
             // Ranking Section
             Column {
                 Text(
-                    "Classifica", modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(8.dp)
+                    "Classifica",
+                    modifier = Modifier.padding(8.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize
+
                 )
                 Column(modifier = Modifier.padding(8.dp)) {
-                    topUsers?.map { Pair<String, Long>(it.username, it.points) }?.forEach {
+                    topUsers?.map { Pair(it.username, it.points) }?.forEachIndexed { i, it ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -149,6 +152,15 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                                 else FontWeight.Normal,
                                 textAlign = TextAlign.End
                             )
+                            Text(
+                                "   ${i + 1}^",
+                                textAlign = TextAlign.End,
+                                color = if (it.first == userData?.username) MaterialTheme.colorScheme.secondary
+                                else MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+
+
                         }
                         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     }
@@ -166,13 +178,18 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
                                 userData!!.username,
                                 modifier = Modifier.weight(1f),
                                 fontWeight = FontWeight.Bold
-
                             )
                             Text(
                                 userData!!.points.toString(),
                                 modifier = Modifier.weight(1f),
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.End
+                            )
+                            Text(
+                                "   Tu",
+                                textAlign = TextAlign.End,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)

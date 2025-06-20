@@ -62,5 +62,5 @@ val appModule = module {
     viewModel { MapViewModel(get()) }
     viewModel { SudokuDetailsViewModel(get())}
     viewModel { MapViewModel(get()) }
-    viewModel { CongratsScreenViewModel(get()) }
+    viewModel { CongratsScreenViewModel(get(), get()) }
 }

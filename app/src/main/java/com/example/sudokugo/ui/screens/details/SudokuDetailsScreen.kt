@@ -36,6 +36,7 @@
     import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
     import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
     import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
+    import com.example.sudokugo.util.formatDate
     import org.koin.androidx.compose.koinViewModel
 
 
@@ -54,7 +55,9 @@
             if (sudoku != null) {
                 val minutes = sudoku.finishTime!! / 60000
                 val seconds = (sudoku.finishTime % 60000) / 1000
-                val text = "Il ${sudoku.solveDate} ho risolto questo bellissimo sudoku! Ci ho messo solo $minutes minuti e $seconds secondi!"
+                val date = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(0)
+                val time = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(1)
+                val text = "Il $date alle ore $time ho risolto questo bellissimo sudoku! Ci ho messo solo $minutes minuti e $seconds secondi!"
 
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     sudoku.picture?.let { uriString ->
@@ -133,7 +136,7 @@
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    sudoku?.solveDate?.toString() ?: "",
+                    sudoku?.solveDate?.let { formatDate(it) } ?: "",
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(Modifier.size(8.dp))

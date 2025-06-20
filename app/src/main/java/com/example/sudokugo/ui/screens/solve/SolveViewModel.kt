@@ -18,6 +18,7 @@ import io.github.ilikeyourhat.kudoku.model.Sudoku
 import io.github.ilikeyourhat.kudoku.parsing.fromSingleLineString
 import io.github.ilikeyourhat.kudoku.parsing.toSingleLineString
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
+import io.github.ilikeyourhat.kudoku.rating.defaultRater
 import io.github.ilikeyourhat.kudoku.solving.defaultSolver
 import io.github.ilikeyourhat.kudoku.type.Classic9x9
 import kotlinx.coroutines.Dispatchers
@@ -37,14 +38,17 @@ class SolveViewModel(
     private val repositoryUser: UserDSRepository
 ) : ViewModel() {
     private lateinit var initialTime: Date
-    private lateinit var sudokuDiff: Difficulty
+//    private lateinit var sudokuDiff: Difficulty
+
+    private val _sudokuDifficulty = MutableStateFlow<Difficulty>(Difficulty.EASY)
+    val sudokuDifficulty: StateFlow<Difficulty?> = _sudokuDifficulty
 
     private val _timeDiff = MutableStateFlow<Long?>(null)
     val timeDiff: StateFlow<Long?> = _timeDiff
 
     private val generator = Sudoku.defaultGenerator()
     private val solver = Sudoku.defaultSolver()
-
+    private val rater = Sudoku.defaultRater()
     private var showedSudoku: ServerSudoku? = null
 
     private val _id = MutableStateFlow<Long>(-1)
@@ -80,7 +84,7 @@ class SolveViewModel(
         viewModelScope.launch {
             showedSudoku = repository.fetchSudokuById(id)
             initialTime = repository.fetchSudokuById(id).initTime
-            sudokuDiff = Difficulty.valueOf(repository.fetchSudokuById(id).difficulty)
+            _sudokuDifficulty.value = Difficulty.valueOf(repository.fetchSudokuById(id).difficulty)
 
             val currentBoard = showedSudoku?.currentBoard
                 ?: throw NullPointerException("Nessun sudoku caricato")
@@ -98,14 +102,23 @@ class SolveViewModel(
         }
     }
 
-    fun addSudoku(difficulty: Difficulty) {
+    fun addSudoku() {
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
             Log.d("SolveViewModel", "addSudoku called")
             val email = _email.value ?: repositoryUser.email.firstOrNull()
+
             val result = withContext(Dispatchers.Default) {
-                sudokuDiff = difficulty
+//                val initTime = Calendar.getInstance().time.time
+//                Log.d("inizio generazione", (Calendar.getInstance().time.time -
+//                initTime).toString())
                 val localSudoku = generator.generate(Classic9x9)
+//                Log.d("fine generazione", (Calendar.getInstance().time.time -
+//                initTime).toString())
+
+                _sudokuDifficulty.value = rater.rate(localSudoku)
+//                Log.d("fine rating`", (Calendar.getInstance().time.time -
+//                initTime).toString())
                 val solution = solver.solve(localSudoku)
 
                 val boardStr = localSudoku.toSingleLineString()
@@ -115,7 +128,7 @@ class SolveViewModel(
                 val sudoku = ServerSudoku(
                     data = boardStr,
                     currentBoard = boardStr,
-                    difficulty = difficulty.toString(),
+                    difficulty = _sudokuDifficulty.value.toString(),
                     solution = solutionStr,
                     userId = email,
                     picture = null,
@@ -196,13 +209,14 @@ class SolveViewModel(
 //            val timeDiff = Duration.between(initialTime, LocalDateTime.now()).seconds
             viewModelScope.launch {
                 if(_email.value!=null){
-                    repositoryUser.incrementScore(_email.value!!, getPointsForDifficulty(sudokuDiff))
+                    repositoryUser.incrementScore(_email.value!!, getPointsForDifficulty(_sudokuDifficulty.value))
                 }
                 repository.solveSudoku(showedSudoku!!.id, Calendar.getInstance().time, timeDiff)
             }
         }
         return solved
     }
+
     fun getPointsForDifficulty(difficulty: Difficulty): Int {
         return when (difficulty) {
             Difficulty.EASY -> 50
@@ -212,6 +226,7 @@ class SolveViewModel(
             Difficulty.UNSOLVABLE -> 1000
         }
     }
+
     fun restart() {
         _currentSudoku.value = _originalSudoku.value
     }

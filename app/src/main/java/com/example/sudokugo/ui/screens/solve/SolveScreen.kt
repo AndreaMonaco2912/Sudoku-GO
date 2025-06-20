@@ -49,20 +49,19 @@ import org.koin.androidx.compose.koinViewModel
 fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
     val sudokuViewModel = koinViewModel<SolveViewModel>()
     val timeDiff by sudokuViewModel.timeDiff.collectAsStateWithLifecycle()
+    val sudokuDifficulty by sudokuViewModel.sudokuDifficulty.collectAsStateWithLifecycle()
     val shouldNavigate = remember { mutableStateOf(false) }
-
-    val difficulties = Difficulty.entries.filter { it != Difficulty.UNSOLVABLE }
-    val randomDifficulty = remember{ difficulties.random() }
 
     val id by sudokuViewModel.id.collectAsStateWithLifecycle()
 
     LaunchedEffect(shouldNavigate.value) {
         if (shouldNavigate.value) {
             val diff = timeDiff
-            if (diff != null) {
+            val sudokuDiff = sudokuDifficulty
+            if (diff != null && sudokuDiff != null) {
                 navController.navigate(
                     SudokuGORoute.Congrats(
-                        sudokuViewModel.getPointsForDifficulty(randomDifficulty),
+                        sudokuViewModel.getPointsForDifficulty(sudokuDiff),
                         diff,
                         id
                     )
@@ -87,7 +86,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SudokuGrid(sudokuId, sudokuViewModel, randomDifficulty)
+            SudokuGrid(sudokuId, sudokuViewModel)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -100,7 +99,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
                 shouldNavigate
             )
             Text(
-                text = "Difficoltà: $randomDifficulty"
+                text = "Difficoltà: $sudokuDifficulty"
             )
         }
     }
@@ -108,10 +107,10 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
 
 
 @Composable
-fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel, randomDifficulty: Difficulty) {
+fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
     LaunchedEffect(sudokuId) {
         if (sudokuId == null) {
-            sudokuViewModel.addSudoku(randomDifficulty)
+            sudokuViewModel.addSudoku()
         } else {
             sudokuViewModel.loadSudoku(sudokuId)
         }

@@ -1,8 +1,5 @@
 package com.example.sudokugo.ui.screens.solve
 
-import android.content.ContentResolver
-import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -45,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import com.example.sudokugo.ui.composables.profilePic.rememberCameraLauncher
 import io.github.ilikeyourhat.kudoku.rating.Difficulty
 import org.koin.androidx.compose.koinViewModel
 
@@ -56,7 +52,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
     val shouldNavigate = remember { mutableStateOf(false) }
 
     val difficulties = Difficulty.entries.filter { it != Difficulty.UNSOLVABLE }
-    val randomDifficulty = difficulties.random()
+    val randomDifficulty = remember{ difficulties.random() }
 
     val id by sudokuViewModel.id.collectAsStateWithLifecycle()
 

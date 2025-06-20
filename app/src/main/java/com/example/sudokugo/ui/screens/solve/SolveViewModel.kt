@@ -7,6 +7,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.database.ServerSudoku
@@ -100,10 +101,11 @@ class SolveViewModel(
     fun addSudoku(difficulty: Difficulty) {
         if (_currentSudoku.value != null) return
         viewModelScope.launch {
+            Log.d("SolveViewModel", "addSudoku called")
             val email = _email.value ?: repositoryUser.email.firstOrNull()
             val result = withContext(Dispatchers.Default) {
                 sudokuDiff = difficulty
-                val localSudoku = generator.generate(Classic9x9, difficulty)
+                val localSudoku = generator.generate(Classic9x9)
                 val solution = solver.solve(localSudoku)
 
                 val boardStr = localSudoku.toSingleLineString()

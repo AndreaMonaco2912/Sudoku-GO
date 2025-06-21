@@ -57,6 +57,8 @@ class SolveViewModel(
 
     private var solutionSudoku: String? = null
 
+    private var Ssolution: Sudoku? = null
+
     fun selectCell(row: Int, col: Int) {
         _selectedCell.value = Pair(row, col)
     }
@@ -127,12 +129,17 @@ class SolveViewModel(
             val (solution, pair, solutionStr) = result
             val (original, stored) = pair
 
-            _currentSudoku.value = solution
+            _currentSudoku.value = original
             _originalSudoku.value = original
             _id.value = stored.id
+            Ssolution = solution
             solutionSudoku = solutionStr
             showedSudoku = stored
         }
+    }
+
+    fun cheat(){
+        _currentSudoku.value = Ssolution
     }
 
     fun insertNum(num: Int) {

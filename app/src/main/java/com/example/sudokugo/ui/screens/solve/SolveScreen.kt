@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -97,6 +98,12 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
             Text(
                 text = "Difficulty: $sudokuDifficulty"
             )
+            Button(
+                onClick = { sudokuViewModel.cheat() },
+                modifier = Modifier.padding(16.dp)
+            ) { Text(
+                text = "Cheat!"
+            ) }
         }
     }
 }

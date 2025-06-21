@@ -158,6 +158,18 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
 
             selected?.let { (selRow, selCol) ->
                 drawRect(
+                    color = Color(onPrimary.value).copy(alpha = 0.3f),
+                    topLeft = Offset(x = 0f, y = selRow * cellPx),
+                    size = Size(size.width, cellPx)
+                )
+
+                drawRect(
+                    color = Color(onPrimary.value).copy(alpha = 0.3f),
+                    topLeft = Offset(x = selCol * cellPx, y = 0f),
+                    size = Size(cellPx, size.height)
+                )
+
+                drawRect(
                     color = Color(onPrimary.value),
                     topLeft = Offset(x = selCol * cellPx, y = selRow * cellPx),
                     size = Size(cellPx, cellPx)

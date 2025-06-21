@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
@@ -72,15 +73,12 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
                     if (item != null && userLocation != null) {
                         val distance = haversineDistance(userLocation, item.point)
                         if (distance <= minDistance) {
-                                Log.d("CLICK", "cliccato il sudoku")
+                                Log.d("CLICK", "Clicked sudoku")
                                 playSudoku()
                         } else {
-//                            Toast.makeText(context, "Avvicinati per giocare!", Toast.LENGTH_SHORT)
-//                                .show()
-                            Log.d("CLICK", "cliccato il sudoku") //TODO: remove
-                            playSudoku() //TODO: remove
+                            Toast.makeText(context, "Move closer to play!", Toast.LENGTH_SHORT)
+                                .show()
                         }
-                        Log.d("CLICK", "dopo aver cliccato il sudoku") //TODO: remove
                     }
                     return true
                 }
@@ -142,7 +140,7 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
                 val location =
                     GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
-                val poiItem = OverlayItem("Sudoku", "Gioca!", location)
+                val poiItem = OverlayItem("Sudoku", "Play!", location)
                 val drawable = ContextCompat.getDrawable(context, R.drawable.poi_sudoku_w)
                 val bitmap = (drawable as? BitmapDrawable)?.bitmap!!
 

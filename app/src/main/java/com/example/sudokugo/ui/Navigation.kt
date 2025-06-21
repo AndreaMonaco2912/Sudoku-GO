@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.sudokugo.ui.screens.HomeScreen
+import com.example.sudokugo.ui.screens.home.HomeScreen
 import com.example.sudokugo.ui.screens.login.LoginScreen
 import com.example.sudokugo.ui.screens.register.RegisterScreen
 import com.example.sudokugo.ui.screens.settings.SettingsScreen
@@ -65,7 +65,7 @@ fun SudokuGONavGraph(
         startDestination = SudokuGORoute.Home
     ) {
         composable<SudokuGORoute.Home> {
-            HomeScreen(navController)
+            HomeScreen(navController,setVolume )
         }
         composable<SudokuGORoute.SudokuList> {
             SudokuListScreen(navController)
@@ -80,16 +80,14 @@ fun SudokuGONavGraph(
         composable<SudokuGORoute.Register> {
             RegisterScreen(navController, registerViewModel)
         }
-        composable<SudokuGORoute.User> { backStackEntry ->
-            val route = backStackEntry.toRoute<SudokuGORoute.User>()
+        composable<SudokuGORoute.User> {
             UserScreen(navController, userScreenViewModel)
         }
         composable<SudokuGORoute.Solve> { backStackEntry ->
             val route = backStackEntry.toRoute<SudokuGORoute.Solve>()
             SolveScreen(navController, route.sudokuId)
         }
-        composable<SudokuGORoute.Settings> { backStackEntry ->
-            val route = backStackEntry.toRoute<SudokuGORoute.Settings>()
+        composable<SudokuGORoute.Settings> {
             SettingsScreen(
                 navController,
                 themeState,

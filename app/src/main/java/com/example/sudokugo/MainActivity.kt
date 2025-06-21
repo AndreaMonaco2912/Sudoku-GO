@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         mediaPlayer = MediaPlayer.create(applicationContext, R.raw.sax).apply {
             isLooping = true
-            start()
+            setVolume(0.0f,0.0f)
         }
 
         super.onCreate(savedInstanceState)
@@ -78,6 +78,11 @@ class MainActivity : ComponentActivity() {
                     userScreenViewModel
                 ) {
                     volume -> mediaPlayer.setVolume(volume, volume)
+                    if (!mediaPlayer.isPlaying && volume > 0f) {
+                        mediaPlayer.start()
+                    } else if (volume == 0f && mediaPlayer.isPlaying) {
+                        mediaPlayer.pause()
+                    }
                 }
             }
         }

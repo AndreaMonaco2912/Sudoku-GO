@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +38,6 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
-import androidx.compose.runtime.mutableFloatStateOf
 
 @Composable
 fun SettingsScreen(
@@ -53,10 +51,13 @@ fun SettingsScreen(
     val email by settingsViwModel.email.collectAsStateWithLifecycle()
     val userData by settingsViwModel.userData.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
-        bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.NONE) }
-    ) { contentPadding ->
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
+        bottomBar = {
+            BottomSudokuGoAppBar(
+                navController,
+                selected = BottomNavSelected.NONE
+            )
+        }) { contentPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -115,47 +116,37 @@ fun SettingsScreen(
                         )
                     }
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onLogout()
-                                navController.navigate(SudokuGORoute.Home) {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onLogout()
+                            navController.navigate(SudokuGORoute.Home) {
+                                popUpTo(0) { inclusive = true }
                             }
-                            .padding(16.dp)
-                    ) {
+                        }
+                        .padding(16.dp)) {
                         Text(
-                            "Logout",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = Bold
+                            "Logout", style = MaterialTheme.typography.bodyLarge, fontWeight = Bold
                         )
                     }
                 } else {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onLogout()
-                                navController.navigate(SudokuGORoute.Login)
-                            }
-                            .padding(16.dp)
-                    ) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onLogout()
+                            navController.navigate(SudokuGORoute.Login)
+                        }
+                        .padding(16.dp)) {
                         Text(
-                            "Login",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = Bold
+                            "Login", style = MaterialTheme.typography.bodyLarge, fontWeight = Bold
                         )
                     }
                 }
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showDialog = true }
-                        .padding(16.dp)
-                ) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDialog = true }
+                    .padding(16.dp)) {
                     Text(
                         text = "Change theme",
                         style = MaterialTheme.typography.bodyLarge,
@@ -165,8 +156,7 @@ fun SettingsScreen(
             }
 
             if (showDialog) {
-                RadioOptionsDialog(
-                    title = "Choose theme",
+                RadioOptionsDialog(title = "Choose theme",
                     options = options,
                     selectedOption = selected,
                     onOptionSelected = {
@@ -174,8 +164,7 @@ fun SettingsScreen(
                         showDialog = false
                         onThemeSelected(it)
                     },
-                    onDismiss = { showDialog = false }
-                )
+                    onDismiss = { showDialog = false })
             }
 
             Spacer(modifier = Modifier.size(24.dp))
@@ -196,13 +185,10 @@ fun SettingsScreen(
                 )
 
                 Slider(
-                    value = volume,
-                    onValueChange = {
-                        setVolume(volume)
+                    value = volume, onValueChange = {
+                        setVolume(it)
                         settingsViwModel.changeVolume(it)
-                    },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.weight(1f)
+                    }, valueRange = 0f..1f, modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -217,33 +203,24 @@ fun RadioOptionsDialog(
     onOptionSelected: (Theme) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = {
-            Column {
-                options.forEach { option ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable { onOptionSelected(option) }
-                    ) {
-                        RadioButton(
-                            selected = option == selectedOption,
-                            onClick = { onOptionSelected(option) }
-                        )
-                        Text(text = option.toString())
-                    }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(text = title) }, text = {
+        Column {
+            options.forEach { option ->
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .clickable { onOptionSelected(option) }) {
+                    RadioButton(selected = option == selectedOption,
+                        onClick = { onOptionSelected(option) })
+                    Text(text = option.toString())
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
         }
-    )
+    }, confirmButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Close")
+        }
+    })
 }
 

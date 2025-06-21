@@ -45,7 +45,8 @@ class SettingsViewModel(
                     _email.value = savedEmail
                     getUserData(savedEmail)
                 }
-
+        }
+        viewModelScope.launch {
             volumeRepository.volume.collect {
                 _volume.value = it
             }
@@ -63,6 +64,7 @@ class SettingsViewModel(
 
     fun changeVolume(volume: Float) = viewModelScope.launch {
         volumeRepository.setVolume(volume)
+        _volume.value = volume
     }
 
     private suspend fun getUserData(email: String) {

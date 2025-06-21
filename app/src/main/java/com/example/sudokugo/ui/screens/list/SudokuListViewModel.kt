@@ -21,13 +21,20 @@ class SudokuListViewModel(
     private val _email = MutableStateFlow<String?>(null)
     val email: StateFlow<String?> = _email
 
+    private val _emailRead = MutableStateFlow<Boolean>(false)
+    val emailRead: StateFlow<Boolean> = _emailRead
+
     init {
         viewModelScope.launch {
             repositoryUser.email
-                .filterNotNull()
+//                .filterNotNull()
                 .collect { savedEmail ->
-                    _email.value = savedEmail
-                    _sudokuList.value = repository.fetchAllSudokuByUser(savedEmail)
+                    if (savedEmail != null) {
+                        _email.value = savedEmail
+                        _sudokuList.value = repository.fetchAllSudokuByUser(savedEmail)
+
+                    }
+                    _emailRead.value = true
                 }
         }
     }

@@ -40,7 +40,7 @@ class MapViewModel(
         loadMapInfo()
     }
 
-    fun loadMapInfo() {
+    private fun loadMapInfo() {
         viewModelScope.launch {
             mapRepo.mapData.collect { mapInfo ->
                 if (mapInfo != null) {

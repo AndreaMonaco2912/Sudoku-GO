@@ -43,6 +43,7 @@ import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.R
+import com.example.sudokugo.ui.composables.Loading
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
 import kotlinx.coroutines.delay
@@ -54,21 +55,26 @@ fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
     val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
     val email by sudokuListViewModel.email.collectAsStateWithLifecycle()
+    val emailRead by sudokuListViewModel.emailRead.collectAsStateWithLifecycle()
     val fav = remember { mutableStateOf(false) }
     val filteredSudokus = if (fav.value) sudokus.filter { it.favourite } else sudokus
+
+    if(!emailRead){
+        Loading("Loading collected sudoku")
+        return
+    }
+
+    if (email == null) {
+        navController.navigate(SudokuGORoute.Login) {
+            popUpTo(SudokuGORoute.SudokuList) { inclusive = true }
+        }
+    }
 
     LaunchedEffect(Unit) {
         sudokuListViewModel.refreshList()
     }
 
-    LaunchedEffect(email) {
-        delay(100)
-        if (email == null) {
-            navController.navigate(SudokuGORoute.Login) {
-                popUpTo(SudokuGORoute.SudokuList) { inclusive = true }
-            }
-        }
-    }
+
     Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) },
         floatingActionButton = {

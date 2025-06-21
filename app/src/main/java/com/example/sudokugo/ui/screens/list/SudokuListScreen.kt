@@ -68,6 +68,7 @@ fun SudokuListScreen(navController: NavController) {
         navController.navigate(SudokuGORoute.Login) {
             popUpTo(SudokuGORoute.SudokuList) { inclusive = true }
         }
+        return
     }
 
     LaunchedEffect(Unit) {

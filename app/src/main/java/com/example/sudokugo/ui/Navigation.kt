@@ -57,7 +57,8 @@ fun SudokuGONavGraph(
     themeState: SettingsState,
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
-    userScreenViewModel: UserScreenViewModel
+    userScreenViewModel: UserScreenViewModel,
+    setVolume: (Float) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -93,7 +94,8 @@ fun SudokuGONavGraph(
                 navController,
                 themeState,
                 settingsViewModel::changeTheme,
-                loginViewModel::logoutUser
+                loginViewModel::logoutUser,
+                setVolume
             )
         }
         composable<SudokuGORoute.Congrats> { backStackEntry ->

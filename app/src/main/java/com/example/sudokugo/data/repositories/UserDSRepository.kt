@@ -5,7 +5,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.example.sudokugo.data.models.Theme
 import com.example.sudokugo.data.models.UserServer
 import com.example.sudokugo.supabase
 import io.github.jan.supabase.postgrest.from

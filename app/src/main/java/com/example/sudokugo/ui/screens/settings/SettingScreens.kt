@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,12 +33,22 @@ import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import com.example.sudokugo.ui.screens.list.SudokuListViewModel
-import com.example.sudokugo.ui.screens.login.LoginViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.mutableFloatStateOf
 
 @Composable
-fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSelected: (Theme) -> Unit, onLogout: () -> Unit) {
+fun SettingsScreen(
+    navController: NavController,
+    state: SettingsState,
+    onThemeSelected: (Theme) -> Unit,
+    onLogout: () -> Unit,
+    setVolume: (Float) -> Unit
+) {
     val settingsViwModel = koinViewModel<SettingsViewModel>()
     val email by settingsViwModel.email.collectAsStateWithLifecycle()
     val userData by settingsViwModel.userData.collectAsStateWithLifecycle()
@@ -52,7 +59,10 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
     ) { contentPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(contentPadding).padding(12.dp).fillMaxSize()
+            modifier = Modifier
+                .padding(contentPadding)
+                .padding(12.dp)
+                .fillMaxSize()
         ) {
 
             var showDialog by remember { mutableStateOf(false) }
@@ -66,7 +76,10 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Name: ${userData?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Name: ${userData?.name ?: "Unknown"}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     Row(
@@ -74,7 +87,10 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Username: ${userData?.username ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Username: ${userData?.username ?: "Unknown"}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     Row(
@@ -82,7 +98,10 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Email: ${userData?.email ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Email: ${userData?.email ?: "Unknown"}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     Row(
@@ -90,7 +109,10 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Points: ${userData?.points ?: "Unknown"}", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "Points: ${userData?.points ?: "Unknown"}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
                     Row(
@@ -110,7 +132,7 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                             fontWeight = Bold
                         )
                     }
-                }else {
+                } else {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -153,6 +175,34 @@ fun SettingsScreen(navController: NavController, state: SettingsState, onThemeSe
                         onThemeSelected(it)
                     },
                     onDismiss = { showDialog = false }
+                )
+            }
+
+            Spacer(modifier = Modifier.size(24.dp))
+
+            val volume by settingsViwModel.volume.collectAsStateWithLifecycle()
+
+            Text("Volume", style = MaterialTheme.typography.bodyLarge)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Icon(
+                    imageVector = if (volume == 0f) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+
+                Slider(
+                    value = volume,
+                    onValueChange = {
+                        setVolume(volume)
+                        settingsViwModel.changeVolume(it)
+                    },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

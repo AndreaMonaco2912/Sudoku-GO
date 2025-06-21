@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
             isLooping = true
             start()
         }
+
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
@@ -75,7 +76,9 @@ class MainActivity : ComponentActivity() {
                     loginViewModel,
                     registerViewModel,
                     userScreenViewModel
-                )
+                ) {
+                    volume -> mediaPlayer.setVolume(volume, volume)
+                }
             }
         }
     }

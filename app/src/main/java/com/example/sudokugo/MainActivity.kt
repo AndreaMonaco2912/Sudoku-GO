@@ -3,32 +3,14 @@ package com.example.sudokugo
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.osmdroid.config.Configuration
 import androidx.navigation.compose.rememberNavController
 import com.example.sudokugo.data.models.Theme
@@ -38,14 +20,11 @@ import com.example.sudokugo.ui.screens.register.RegisterViewModel
 import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
+import android.media.MediaPlayer
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
 val supabase: SupabaseClient = createSupabaseClient(
@@ -55,53 +34,16 @@ val supabase: SupabaseClient = createSupabaseClient(
     install(Postgrest)
 }
 
-//@Serializable
-//data class Users(
-//    val email: String,
-//    val name: String,
-//    val username: String,
-//    val password: String
-//)
-//
-//class MainActivity : ComponentActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContent {
-//            SudokuGOTheme {
-//                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                ) {
-//                    UsersList()
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun UsersList() {
-//    var users by remember { mutableStateOf<List<Users>>(listOf()) }
-//    LaunchedEffect(Unit) {
-//        val data = supabase.from("users")
-//            .select()
-//            .decodeList<Users>()
-//        users = data
-//        }
-//
-//    Column {
-//        LazyColumn {
-//            items(users) { instrument ->
-//                Text(text = instrument.email, modifier = Modifier.padding(16.dp))
-//            }
-//        }
-//    }
-//}
 class MainActivity : ComponentActivity() {
+    private lateinit var mediaPlayer: MediaPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        mediaPlayer = MediaPlayer.create(applicationContext, R.raw.sax).apply {
+            isLooping = true
+            start()
+        }
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         Configuration.getInstance().userAgentValue = packageName
 
@@ -135,6 +77,31 @@ class MainActivity : ComponentActivity() {
                     userScreenViewModel
                 )
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::mediaPlayer.isInitialized && !mediaPlayer.isPlaying) {
+            try {
+                mediaPlayer.start()
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::mediaPlayer.isInitialized) {
+            mediaPlayer.release()
         }
     }
 

@@ -48,11 +48,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         Configuration.getInstance().userAgentValue = packageName
 
-        requestPermissionsIfNecessary(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        )
+
 
         setContent {
             val settingsViewModel = koinViewModel<SettingsViewModel>()
@@ -110,17 +106,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.release()
-        }
-    }
-
-    private fun requestPermissionsIfNecessary(permissions: Array<String>) {
-        val toRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-        if (toRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this, toRequest.toTypedArray(), 1
-            )
         }
     }
 }

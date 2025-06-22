@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 class UserScreenViewModel(
     private val userDSRepository: UserDSRepository
 ) : ViewModel() {
@@ -30,11 +29,21 @@ class UserScreenViewModel(
         viewModelScope.launch {
             userDSRepository.email.collect { savedEmail ->
                 _email.value = savedEmail
+                Log.d("Email", "Email: $savedEmail")
                 if (savedEmail != null) {
                     getUserData(savedEmail)
                 } else {
                     _userData.value = null
                 }
+            }
+        }
+    }
+
+    fun refreshUserData() {
+        val currentEmail = _email.value
+        if (currentEmail != null) {
+            viewModelScope.launch {
+                getUserData(currentEmail)
             }
         }
     }
@@ -58,9 +67,7 @@ class UserScreenViewModel(
                         order(column = "points", order = Order.DESCENDING)
                         limit(5)
                     }.decodeList<UserServer>()
-
                 _topUsers.value = topUsers
-
             } catch (e: Exception) {
                 Log.e("Query", "Error on getting data", e)
             }

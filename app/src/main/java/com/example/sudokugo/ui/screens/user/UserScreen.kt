@@ -39,7 +39,9 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
     val topUsers by userScreenViewModel.topUsers.collectAsStateWithLifecycle()
 
     LaunchedEffect(email) {
-        if (email == null) {
+        if (email != null && userData == null) {
+            userScreenViewModel.refreshUserData()
+        } else if (email == null) {
             navController.navigate(SudokuGORoute.Login) {
                 popUpTo(SudokuGORoute.User) { inclusive = true }
             }

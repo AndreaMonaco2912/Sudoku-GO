@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.screens.login
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,11 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,14 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.R
-import com.example.sudokugo.data.models.Theme
-import com.example.sudokugo.data.models.UserServer
-import com.example.sudokugo.supabase
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
-import com.example.sudokugo.ui.screens.settings.SettingsState
-import io.github.jan.supabase.postgrest.from
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -65,7 +56,7 @@ fun LoginScreen(navController: NavController) {
         ) {
             val context = LocalContext.current
             val errorMessage by loginViewModel.errorMessage.collectAsStateWithLifecycle()
-            val success by loginViewModel.loginSucces.collectAsStateWithLifecycle()
+            val success by loginViewModel.loginSuccess.collectAsStateWithLifecycle()
 
             LaunchedEffect(success) {
                 if (success) {

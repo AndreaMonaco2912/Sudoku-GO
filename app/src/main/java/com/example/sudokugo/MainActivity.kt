@@ -1,15 +1,11 @@
 package com.example.sudokugo
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.osmdroid.config.Configuration
 import androidx.navigation.compose.rememberNavController
@@ -21,8 +17,8 @@ import com.example.sudokugo.ui.screens.settings.SettingsViewModel
 import com.example.sudokugo.ui.screens.user.UserScreenViewModel
 import com.example.sudokugo.ui.theme.SudokuGOTheme
 import android.media.MediaPlayer
-
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import org.koin.androidx.compose.koinViewModel
@@ -32,6 +28,7 @@ val supabase: SupabaseClient = createSupabaseClient(
     supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rbmN4cnp6Ym1qbHJtbXdtd2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwMTI2NDksImV4cCI6MjA2MjU4ODY0OX0.ZtetcerEvRH9yiyA523c31J57Vi5ySNxEjRMcWNQIwQ"
 ) {
     install(Postgrest)
+    install(Auth)
 }
 
 class MainActivity : ComponentActivity() {

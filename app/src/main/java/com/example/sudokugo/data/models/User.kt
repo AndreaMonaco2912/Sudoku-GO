@@ -7,6 +7,5 @@ data class UserServer(
     val email: String,
     val name: String,
     val username: String,
-    val password: String,
     val points: Long
 )

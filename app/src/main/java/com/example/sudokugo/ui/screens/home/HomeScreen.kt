@@ -66,10 +66,8 @@ fun HomeScreen(navController: NavController, setVolume: (Float) -> Unit) {
                 permaDenied = false
             }
 
-            statuses.all { it.value == PermissionStatus.PermanentlyDenied } ->
-                permaDenied = true
+            statuses.all { it.value == PermissionStatus.PermanentlyDenied } -> permaDenied = true
         }
-
     }
     LaunchedEffect(Unit) {
         locationPermissions.launchPermissionRequest()
@@ -98,20 +96,20 @@ fun HomeScreen(navController: NavController, setVolume: (Float) -> Unit) {
         navController.navigate(SudokuGORoute.Solve())
     }
     if (canShowMap) {
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
+        Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = { TopSudokuGoAppBar(navController, title = "SudokuGO") },
-            bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.PLAY) }
-        ) { contentPadding ->
+            bottomBar = {
+                BottomSudokuGoAppBar(
+                    navController, selected = BottomNavSelected.PLAY
+                )
+            }) { contentPadding ->
             Log.e("HomeScreen", permaDenied.toString())
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding)
             ) {
-//            if (showMap.value) {
                 Map(playSudoku = playSudoku)
-//            }
             }
         }
     } else {

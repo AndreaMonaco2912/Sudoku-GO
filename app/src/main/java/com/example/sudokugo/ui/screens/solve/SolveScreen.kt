@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
+import com.example.sudokugo.ui.composables.Loading
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import org.koin.androidx.compose.koinViewModel
 
@@ -50,30 +50,26 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
     val sudokuViewModel = koinViewModel<SolveViewModel>()
     val timeDiff by sudokuViewModel.timeDiff.collectAsStateWithLifecycle()
     val sudokuDifficulty by sudokuViewModel.sudokuDifficulty.collectAsStateWithLifecycle()
-    val shouldNavigate = remember { mutableStateOf(false) }
+    val sudokuSolved = remember { mutableStateOf(false) }
 
     val id by sudokuViewModel.id.collectAsStateWithLifecycle()
 
-    LaunchedEffect(shouldNavigate.value) {
-        if (shouldNavigate.value) {
+    LaunchedEffect(sudokuSolved.value) {
+        if (sudokuSolved.value) {
             val diff = timeDiff
             val sudokuDiff = sudokuDifficulty
-            if (diff != null && sudokuDiff != null) {
+            if (diff != null) {
                 navController.navigate(
                     SudokuGORoute.Congrats(
-                        sudokuViewModel.getPointsForDifficulty(sudokuDiff),
-                        diff,
-                        id
+                        sudokuViewModel.getPointsForDifficulty(sudokuDiff), diff, id
                     )
                 )
             }
-            shouldNavigate.value = false
+            sudokuSolved.value = false
         }
     }
 
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "Sudoku") }
-    ) { contentPadding ->
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Sudoku") }) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,7 +77,7 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             SudokuGrid(sudokuId, sudokuViewModel)
 
@@ -92,18 +88,18 @@ fun SolveScreen(navController: NavController, sudokuId: Long? = null) {
             Spacer(modifier = Modifier.height(16.dp))
 
             BottomControls(
-                sudokuViewModel,
-                shouldNavigate
+                sudokuViewModel, sudokuSolved
             )
             Text(
                 text = "Difficulty: $sudokuDifficulty"
             )
             Button(
-                onClick = { sudokuViewModel.cheat() },
-                modifier = Modifier.padding(16.dp)
-            ) { Text(
-                text = "Cheat!"
-            ) }
+                onClick = { sudokuViewModel.cheat() }, modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Cheat!"
+                )
+            }
         }
     }
 }
@@ -124,20 +120,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
     val selected = sudokuViewModel.selectedCell.collectAsStateWithLifecycle().value
 
     if (current == null || original == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(64.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 6.dp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Loading Sudoku...", color = MaterialTheme.colorScheme.onBackground)
-            }
-        }
+        Loading("Loading Sudoku...")
         return
     }
 
@@ -148,8 +131,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
     val primary = MaterialTheme.colorScheme.primary
     val onPrimary = MaterialTheme.colorScheme.primaryContainer
     Box(
-        modifier = Modifier
-            .size(totalSize)
+        modifier = Modifier.size(totalSize)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val cellPx = size.width / gridSize
@@ -197,8 +179,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
             }
 
             drawRect(
-                onBack,
-                style = Stroke(thickLine)
+                onBack, style = Stroke(thickLine)
             )
         }
         Column {
@@ -217,8 +198,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
                                 .size(cellSize)
                                 .clickable(enabled = !isFixed) {
                                     sudokuViewModel.selectCell(row, col)
-                                },
-                            contentAlignment = Alignment.Center
+                                }, contentAlignment = Alignment.Center
                         ) {
                             Text(text = displayVal, color = textColor)
                         }
@@ -236,8 +216,7 @@ fun NumberPad(onNumberClick: (Int) -> Unit) {
     Column {
         for (row in 0 until 2) {
             Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()
             ) {
                 for (i in 0 until 5) {
                     val index = row * 5 + i
@@ -271,7 +250,7 @@ fun NumberPadButton(label: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomControls(sudokuViewModel: SolveViewModel, shouldNavigate: MutableState<Boolean>) {
+fun BottomControls(sudokuViewModel: SolveViewModel, sudokuSolved: MutableState<Boolean>) {
 
     val context = LocalContext.current
     Row(
@@ -284,7 +263,7 @@ fun BottomControls(sudokuViewModel: SolveViewModel, shouldNavigate: MutableState
         }
 
         IconButton(onClick = {
-            if (sudokuViewModel.checkSolution()) shouldNavigate.value = true
+            if (sudokuViewModel.checkSolution()) sudokuSolved.value = true
             else Toast.makeText(context, "Sudoku not solved!", Toast.LENGTH_SHORT).show()
 
         }) {

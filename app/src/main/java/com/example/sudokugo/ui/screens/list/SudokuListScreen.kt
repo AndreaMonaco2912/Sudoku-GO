@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.sudokugo.data.database.ServerSudoku
-
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
@@ -46,20 +44,20 @@ import com.example.sudokugo.R
 import com.example.sudokugo.ui.composables.Loading
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.composables.profilePic.PictureOrDefault
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun SudokuListScreen(navController: NavController) {
     val sudokuListViewModel = koinViewModel<SudokuListViewModel>()
-    val sudokus = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
+    val sudokuList = sudokuListViewModel.sudokuList.collectAsStateWithLifecycle().value
     val email by sudokuListViewModel.email.collectAsStateWithLifecycle()
     val emailRead by sudokuListViewModel.emailRead.collectAsStateWithLifecycle()
-    val fav = remember { mutableStateOf(false) }
-    val filteredSudokus = if (fav.value) sudokus.filter { it.favourite } else sudokus
 
-    if(!emailRead){
+    val fav = remember { mutableStateOf(false) }
+    val filteredSudoku = if (fav.value) sudokuList.filter { it.favourite } else sudokuList
+
+    if (!emailRead) {
         Loading("Loading collected sudoku")
         return
     }
@@ -75,7 +73,6 @@ fun SudokuListScreen(navController: NavController) {
         sudokuListViewModel.refreshList()
     }
 
-
     Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Sudoku List") },
         bottomBar = { BottomSudokuGoAppBar(navController, selected = BottomNavSelected.COLLECTED) },
         floatingActionButton = {
@@ -88,7 +85,6 @@ fun SudokuListScreen(navController: NavController) {
                 )
             }
         }) { contentPadding ->
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -96,7 +92,7 @@ fun SudokuListScreen(navController: NavController) {
             contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 80.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
-            if (sudokus.isEmpty()) {
+            if (sudokuList.isEmpty()) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
                         modifier = Modifier
@@ -120,7 +116,7 @@ fun SudokuListScreen(navController: NavController) {
                     }
                 }
             }
-            if (filteredSudokus.isEmpty() && fav.value) {
+            if (filteredSudoku.isEmpty() && fav.value) {
                 item(span = { GridItemSpan(2) }) {
                     Column(
                         modifier = Modifier
@@ -148,8 +144,8 @@ fun SudokuListScreen(navController: NavController) {
                     }
                 }
             }
-            items(filteredSudokus.size) { index ->
-                val sudoku = filteredSudokus[index]
+            items(filteredSudoku.size) { index ->
+                val sudoku = filteredSudoku[index]
                 SudokuItem(item = sudoku, onClick = {
                     if (sudoku.solved) navController.navigate(SudokuGORoute.SudokuDetails(sudoku.id))
                     else navController.navigate(SudokuGORoute.Solve(sudoku.id))
@@ -159,7 +155,6 @@ fun SudokuListScreen(navController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
     Card(
@@ -181,7 +176,8 @@ fun SudokuItem(item: ServerSudoku, onClick: () -> Unit) {
             if (!item.solved) {
                 Image(
                     painter = painterResource(id = R.drawable.todo),
-                    contentDescription = "Sudoku to be resolved", modifier = Modifier.size(72.dp)
+                    contentDescription = "Sudoku to be resolved",
+                    modifier = Modifier.size(72.dp)
                 )
             } else {
                 PictureOrDefault(item.picture, Modifier.size(72.dp), R.drawable.done)

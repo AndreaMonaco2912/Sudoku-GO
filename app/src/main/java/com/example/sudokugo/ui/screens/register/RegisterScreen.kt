@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,12 +38,12 @@ import androidx.navigation.NavController
 import com.example.sudokugo.R
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
+
 @Composable
-fun RegisterScreen(navController: NavController,
-                   viewModel: RegisterViewModel){
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController,title = "Register") }
-    ) { contentPadding ->
+fun RegisterScreen(
+    navController: NavController, viewModel: RegisterViewModel
+) {
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Register") }) { contentPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -59,7 +58,8 @@ fun RegisterScreen(navController: NavController,
 
             LaunchedEffect(success) {
                 if (success) {
-                    Toast.makeText(context, "User successful registered!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "User successful registered!", Toast.LENGTH_SHORT)
+                        .show()
                     navController.navigate(SudokuGORoute.Login) {
                         popUpTo(SudokuGORoute.Register) { inclusive = true }
                     }
@@ -75,36 +75,30 @@ fun RegisterScreen(navController: NavController,
             }
 
             var password by rememberSaveable { mutableStateOf("") }
-            var passwordVisibility by remember { mutableStateOf(false)}
+            var passwordVisibility by remember { mutableStateOf(false) }
             var email by rememberSaveable { mutableStateOf("") }
             var name by rememberSaveable { mutableStateOf("") }
             var username by rememberSaveable { mutableStateOf("") }
 
-            val icon = if(passwordVisibility)
-                painterResource(id = R.drawable.visibility)
-            else
-                painterResource(id = R.drawable.visibility_off)
+            val icon = if (passwordVisibility) painterResource(id = R.drawable.visibility)
+            else painterResource(id = R.drawable.visibility_off)
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name=it.trim() },
+            OutlinedTextField(value = name,
+                onValueChange = { name = it.trim() },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username=it.trim() },
+            OutlinedTextField(value = username,
+                onValueChange = { username = it.trim() },
                 label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email=it.trim() },
+            OutlinedTextField(value = email,
+                onValueChange = { email = it.trim() },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = password,
+            OutlinedTextField(value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 placeholder = { Text("Password") },
@@ -112,23 +106,24 @@ fun RegisterScreen(navController: NavController,
                     IconButton(onClick = {
                         passwordVisibility = !passwordVisibility
                     }) {
-                        Icon(painter = icon,
-                            contentDescription = "Visibility Icon")
+                        Icon(
+                            painter = icon, contentDescription = "Visibility Icon"
+                        )
                     }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if(passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            {
+                horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()
+            ) {
                 Button(
-                    onClick = { navController.navigate(SudokuGORoute.Login){
-                        popUpTo(SudokuGORoute.Register) { inclusive = true }
-                        popUpTo(SudokuGORoute.Login) { inclusive = true }}
+                    onClick = {
+                        navController.navigate(SudokuGORoute.Login) {
+                            popUpTo(SudokuGORoute.Register) { inclusive = true }
+                            popUpTo(SudokuGORoute.Login) { inclusive = true }
+                        }
                     },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
@@ -138,7 +133,7 @@ fun RegisterScreen(navController: NavController,
                 }
                 Spacer(Modifier.size(24.dp))
                 Button(
-                    onClick = { viewModel.registerUser(email, name, username, password)},
+                    onClick = { viewModel.registerUser(email, name, username, password) },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                 ) {
                     Spacer(Modifier.size(ButtonDefaults.IconSpacing))

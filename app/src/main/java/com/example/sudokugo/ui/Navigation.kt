@@ -29,9 +29,6 @@ sealed interface SudokuGORoute {
     data object SudokuList : SudokuGORoute
 
     @Serializable
-    data class SudokuDetails(val sudokuId: Long) : SudokuGORoute
-
-    @Serializable
     data object Login : SudokuGORoute
 
     @Serializable
@@ -41,13 +38,16 @@ sealed interface SudokuGORoute {
     data object User : SudokuGORoute
 
     @Serializable
+    data object Settings : SudokuGORoute
+
+    @Serializable
     data class Solve(val sudokuId: Long? = null) : SudokuGORoute
 
     @Serializable
-    data class Settings(val userId: String? = null) : SudokuGORoute
+    data class Congrats(val points: Int, val duration: Long, val sudokuId: Long) : SudokuGORoute
 
     @Serializable
-    data class Congrats(val points: Int, val duration: Long, val sudokuId: Long) : SudokuGORoute
+    data class SudokuDetails(val sudokuId: Long) : SudokuGORoute
 }
 
 @Composable
@@ -61,11 +61,10 @@ fun SudokuGONavGraph(
     setVolume: (Float) -> Unit
 ) {
     NavHost(
-        navController = navController,
-        startDestination = SudokuGORoute.Home
+        navController = navController, startDestination = SudokuGORoute.Home
     ) {
         composable<SudokuGORoute.Home> {
-            HomeScreen(navController,setVolume )
+            HomeScreen(navController, setVolume)
         }
         composable<SudokuGORoute.SudokuList> {
             SudokuListScreen(navController)

@@ -22,7 +22,9 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.random.Random
 
-class PoiManager(private val context: Context, private val mapView: MapView, private val playSudoku: () -> Unit) {
+class PoiManager(
+    private val context: Context, private val mapView: MapView, private val playSudoku: () -> Unit
+) {
 
     data class TimedPOI(val item: OverlayItem, val createdAt: Long, val lifespan: Long)
 
@@ -72,8 +74,8 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
                     if (item != null && userLocation != null) {
                         val distance = haversineDistance(userLocation, item.point)
                         if (distance <= minDistance) {
-                                Log.d("CLICK", "Clicked sudoku")
-                                playSudoku()
+                            Log.d("CLICK", "Clicked sudoku")
+                            playSudoku()
                         } else {
                             Toast.makeText(context, "Move closer to play!", Toast.LENGTH_SHORT)
                                 .show()
@@ -95,7 +97,6 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
         val canvas = Canvas(mutableBitmap)
         val paint = Paint()
 
-        // Animazione Fade-In
         ValueAnimator.ofInt(0, 255).apply {
             duration = 500
             addUpdateListener {
@@ -111,9 +112,7 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
     }
 
     fun generateRandomPOIs(
-        context: Context,
-        locationOverlay: MyLocationNewOverlay,
-        center: GeoPoint
+        context: Context, locationOverlay: MyLocationNewOverlay, center: GeoPoint
     ) {
         val currentTime = System.currentTimeMillis()
 
@@ -136,8 +135,7 @@ class PoiManager(private val context: Context, private val mapView: MapView, pri
             if (toAdd > 0) {
                 val latOffset = (Random.nextDouble() - 0.5) / 125
                 val lonOffset = (Random.nextDouble() - 0.5) / 125
-                val location =
-                    GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
+                val location = GeoPoint(center.latitude + latOffset, center.longitude + lonOffset)
 
                 val poiItem = OverlayItem("Sudoku", "Play!", location)
                 val drawable = ContextCompat.getDrawable(context, R.drawable.poi_sudoku_w)

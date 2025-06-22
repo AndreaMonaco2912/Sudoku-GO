@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.screens.register
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.models.UserServer
@@ -65,7 +64,6 @@ class RegisterViewModel : ViewModel() {
                                 try{
                                     supabase.from("users").insert(newUser)
                                     _errorMessage.value = null
-                                    Log.d("Register", "User registered successfully")
                                     _registrationSuccess.value = true
                                 }catch (e: PostgrestRestException){
                                     if(e.error == "duplicate_key_violation"){
@@ -79,7 +77,7 @@ class RegisterViewModel : ViewModel() {
                         }
 
                         SessionStatus.Initializing -> println("Initializing")
-                        is SessionStatus.RefreshFailure -> println("Refresh failure ${it.cause}") //Either a network error or a internal server error
+                        is SessionStatus.RefreshFailure -> println("Refresh failure ${it.cause}")
                         is SessionStatus.NotAuthenticated -> {
                             if (it.isSignOut) {
                                 println("User signed out")

@@ -51,13 +51,11 @@ fun SettingsScreen(
     val email by settingsViwModel.email.collectAsStateWithLifecycle()
     val userData by settingsViwModel.userData.collectAsStateWithLifecycle()
 
-    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Settings") },
-        bottomBar = {
-            BottomSudokuGoAppBar(
-                navController,
-                selected = BottomNavSelected.NONE
-            )
-        }) { contentPadding ->
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Settings") }, bottomBar = {
+        BottomSudokuGoAppBar(
+            navController, selected = BottomNavSelected.NONE
+        )
+    }) { contentPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -133,7 +131,6 @@ fun SettingsScreen(
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            onLogout()
                             navController.navigate(SudokuGORoute.Login)
                         }
                         .padding(16.dp)) {
@@ -211,7 +208,8 @@ fun RadioOptionsDialog(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                         .clickable { onOptionSelected(option) }) {
-                    RadioButton(selected = option == selectedOption,
+                    RadioButton(
+                        selected = option == selectedOption,
                         onClick = { onOptionSelected(option) })
                     Text(text = option.toString())
                 }

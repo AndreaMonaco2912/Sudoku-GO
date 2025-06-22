@@ -16,8 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val DAOrepository: UserDAORepository,
-    private val userDSRepository: UserDSRepository
+    private val userDAORepository: UserDAORepository, private val userDSRepository: UserDSRepository
 ) : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -49,17 +48,17 @@ class LoginViewModel(
                     is SessionStatus.Authenticated -> {
                         if (it.source is SessionSource.SignIn) {
                             _loginSuccess.value = true
-                            val otherUsers = DAOrepository.getAllEmails()
+                            val otherUsers = userDAORepository.getAllEmails()
                             if (!otherUsers.contains(email)) {
                                 val localUser = User(
-                                    email = email,
-                                    profilePicture = null
+                                    email = email, profilePicture = null
                                 )
-                                DAOrepository.upsert(localUser)
+                                userDAORepository.upsert(localUser)
                             }
                             userDSRepository.setUser(email)
                         }
                     }
+
                     SessionStatus.Initializing -> println("Initializing")
                     is SessionStatus.RefreshFailure -> println("Refresh failure ${it.cause}")
                     is SessionStatus.NotAuthenticated -> {

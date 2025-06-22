@@ -1,6 +1,5 @@
 package com.example.sudokugo.ui.composables
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,15 +32,12 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopSudokuGoAppBar(navController: NavController, title: String?) {
-    CenterAlignedTopAppBar(
-        title = {
-        if (title != null) {
-            Text(
-                title,
-                fontWeight = FontWeight.Medium,
-            )
-        }
+fun TopSudokuGoAppBar(navController: NavController, title: String) {
+    CenterAlignedTopAppBar(title = {
+        Text(
+            title,
+            fontWeight = FontWeight.Medium,
+        )
     }, navigationIcon = {
         if (title == "Sudoku Details" || title == "Settings") {
             IconButton(onClick = { navController.navigateUp() }) {
@@ -50,7 +46,7 @@ fun TopSudokuGoAppBar(navController: NavController, title: String?) {
         }
     }, actions = {
         if (title != "Settings" && title != "Login" && title != "Register" && title != "Sudoku") {
-            IconButton(onClick = { navController.navigate(SudokuGORoute.Settings()) }) {
+            IconButton(onClick = { navController.navigate(SudokuGORoute.Settings) }) {
                 Icon(Icons.Outlined.Settings, "Settings")
             }
         }
@@ -66,51 +62,46 @@ fun BottomSudokuGoAppBar(navController: NavController, selected: BottomNavSelect
     val userPic by userPictureViewModel.userPic.collectAsStateWithLifecycle()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    BottomAppBar(
-        actions = {
-            NavigationBarItem(
-                selected = selected == BottomNavSelected.PLAY,
-                onClick = {
-                    Log.d("BottomNav", currentRoute!!)
-                    if(currentRoute != "com.example.sudokugo.ui.SudokuGORoute.Home") navController.navigate(SudokuGORoute.Home)
-                          },
-                icon = {
-                    Box(Modifier.padding(8.dp)) {
-                        Icon(Icons.Outlined.Place, contentDescription = null)
-                    }
-                },
-                label = {
-                    Text(text = "Explore")
-                },
-                alwaysShowLabel = true
+    BottomAppBar(actions = {
+        NavigationBarItem(selected = selected == BottomNavSelected.PLAY, onClick = {
+            if (currentRoute != SudokuGORoute.Home.toString()) navController.navigate(
+                SudokuGORoute.Home
             )
-            NavigationBarItem(
-                selected = selected == BottomNavSelected.COLLECTED,
-                onClick = { navController.navigate(SudokuGORoute.SudokuList) },
-                icon = {
-                    Box(Modifier.padding(8.dp)) {
-                        Icon(Icons.Outlined.BookmarkBorder, contentDescription = null)
-                    }
-                },
-                label = {
-                    Text(text = "Collected")
-                },
-                alwaysShowLabel = true
-            )
-            NavigationBarItem(
-                selected = selected == BottomNavSelected.USER,
-                onClick = { navController.navigate(SudokuGORoute.User) },
-                icon = {
-                    Box(Modifier.padding(8.dp)) {
-                        PictureOrDefault(userPic, Modifier.size(24.dp))
-                    }
-                },
-                label = {
-                    Text(text = "User")
-                },
-                alwaysShowLabel = true
-            )
-        })
+        }, icon = {
+            Box(Modifier.padding(8.dp)) {
+                Icon(Icons.Outlined.Place, contentDescription = null)
+            }
+        }, label = {
+            Text(text = "Explore")
+        }, alwaysShowLabel = true
+        )
+        NavigationBarItem(
+            selected = selected == BottomNavSelected.COLLECTED,
+            onClick = { navController.navigate(SudokuGORoute.SudokuList) },
+            icon = {
+                Box(Modifier.padding(8.dp)) {
+                    Icon(Icons.Outlined.BookmarkBorder, contentDescription = null)
+                }
+            },
+            label = {
+                Text(text = "Collected")
+            },
+            alwaysShowLabel = true
+        )
+        NavigationBarItem(
+            selected = selected == BottomNavSelected.USER,
+            onClick = { navController.navigate(SudokuGORoute.User) },
+            icon = {
+                Box(Modifier.padding(8.dp)) {
+                    PictureOrDefault(userPic, Modifier.size(24.dp))
+                }
+            },
+            label = {
+                Text(text = "User")
+            },
+            alwaysShowLabel = true
+        )
+    })
 }
 
 enum class BottomNavSelected {

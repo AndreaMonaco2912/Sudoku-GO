@@ -36,7 +36,7 @@ val appModule = module {
     single {
         databaseBuilder(
             get(), SudokuGODatabase::class.java, "sudoku-go-database"
-        ).fallbackToDestructiveMigration(true) //TODO: remove
+        ).fallbackToDestructiveMigration(true)
             .build()
     }
 
@@ -51,7 +51,6 @@ val appModule = module {
     single { UserDSRepository(get(named("userDS"))) }
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
     single { VolumeRepository(get(named("volumeDS"))) }
-
 
     viewModel { SettingsViewModel(get(), get(), get()) }
     viewModel { SolveViewModel(get(), get()) }

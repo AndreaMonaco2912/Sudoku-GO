@@ -7,12 +7,10 @@ import com.example.sudokugo.data.repositories.SudokuRepository
 import com.example.sudokugo.data.repositories.UserDSRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class SudokuListViewModel(
-    private val repository: SudokuRepository,
-    private val repositoryUser: UserDSRepository
+    private val repository: SudokuRepository, private val repositoryUser: UserDSRepository
 ) : ViewModel() {
 
     private val _sudokuList = MutableStateFlow<List<ServerSudoku>>(ArrayList())
@@ -21,18 +19,15 @@ class SudokuListViewModel(
     private val _email = MutableStateFlow<String?>(null)
     val email: StateFlow<String?> = _email
 
-    private val _emailRead = MutableStateFlow<Boolean>(false)
+    private val _emailRead = MutableStateFlow(false)
     val emailRead: StateFlow<Boolean> = _emailRead
 
     init {
         viewModelScope.launch {
-            repositoryUser.email
-//                .filterNotNull()
-                .collect { savedEmail ->
+            repositoryUser.email.collect { savedEmail ->
                     if (savedEmail != null) {
                         _email.value = savedEmail
                         _sudokuList.value = repository.fetchAllSudokuByUser(savedEmail)
-
                     }
                     _emailRead.value = true
                 }

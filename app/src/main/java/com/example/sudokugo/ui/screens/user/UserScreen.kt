@@ -2,7 +2,6 @@ package com.example.sudokugo.ui.screens.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,14 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +27,7 @@ import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
+import com.example.sudokugo.ui.composables.Loading
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.ui.composables.profilePic.UserChangePicture
 
@@ -53,27 +48,19 @@ fun UserScreen(navController: NavController, userScreenViewModel: UserScreenView
 
     LaunchedEffect(userData) {
         if (userData != null) {
-            userScreenViewModel.getUserPoints(email!!)
             userScreenViewModel.getTopUsers()
         }
     }
 
-
-
     if (email == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        Loading("Loading user data")
         return
     }
 
-    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = userData?.username) },
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = userData?.username ?: "") },
         bottomBar = {
             BottomSudokuGoAppBar(
-                navController,
-                selected = BottomNavSelected.USER
+                navController, selected = BottomNavSelected.USER
             )
         }) { contentPadding ->
         Column(

@@ -45,7 +45,7 @@ fun CongratsScreen(
         }
     )
 
-    BackHandler() {
+    BackHandler {
         navController.navigate(SudokuGORoute.Home) {
             popUpTo(0) { inclusive = true }
         }
@@ -55,14 +55,13 @@ fun CongratsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
-            ,
+                .padding(contentPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text("Congratulations!", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
-            if(email != null){
+            if (email != null) {
                 Text("You  earned $points punts!")
                 Text("Time to solve: ${minutes}m ${seconds}s")
 
@@ -78,12 +77,12 @@ fun CongratsScreen(
                         Text("Continue")
                     }
                 }
-            }else{
+            } else {
                 Text("Time to solve: ${minutes}m ${seconds}s")
                 Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Button(onClick = {
-                        navController.navigate(SudokuGORoute.Home){
+                        navController.navigate(SudokuGORoute.Home) {
                             popUpTo(0) { inclusive = true }
                         }
                     }) {

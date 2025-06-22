@@ -3,8 +3,6 @@ package com.example.sudokugo.ui.screens.details
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,11 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,9 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -47,12 +40,12 @@ import org.koin.androidx.compose.koinViewModel
 fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
 
     val viewModel = koinViewModel<SudokuDetailsViewModel>()
-
     val sudoku = viewModel.sudoku.collectAsState().value
 
     LaunchedEffect(sudokuId) {
         viewModel.loadSudoku(sudokuId)
     }
+
     val ctx = LocalContext.current
     fun shareDetails() {
         if (sudoku != null) {
@@ -60,8 +53,8 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
             val seconds = (sudoku.finishTime % 60000) / 1000
             val date = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(0)
             val time = sudoku.solveDate?.let { formatDate(it) }?.split(" ")?.get(1)
-            val text = "On $date at $time I solved a sudoku! " +
-                    "It takes me only $minutes minutes and $seconds seconds!"
+            val text =
+                "On $date at $time I solved a sudoku! It takes me only $minutes minutes and $seconds seconds!"
 
             val intent = Intent(Intent.ACTION_SEND).apply {
                 sudoku.picture?.let { uriString ->
@@ -80,7 +73,6 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                     putExtra(Intent.EXTRA_TEXT, text)
                 }
             }
-
             val shareIntent = Intent.createChooser(intent, "Share Sudoku")
             if (shareIntent.resolveActivity(ctx.packageManager) != null) {
                 ctx.startActivity(shareIntent)
@@ -97,28 +89,22 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(end = 8.dp)
             ) {
-                FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                onClick = {
-                    viewModel.changeFav()
-                }
-            ) {
+                FloatingActionButton(containerColor = MaterialTheme.colorScheme.secondary,
+                    onClick = {
+                        viewModel.changeFav()
+                    }) {
                     if (sudoku != null) {
                         Icon(
-                            if(!sudoku.favourite)
-                                Icons.Outlined.FavoriteBorder
-                            else Icons.Outlined.Favorite,
-                            contentDescription = "Add to favorite")
+                            if (!sudoku.favourite) Icons.Outlined.FavoriteBorder
+                            else Icons.Outlined.Favorite, contentDescription = "Add to favorite"
+                        )
                     }
-            }
+                }
                 FloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    onClick = ::shareDetails
+                    containerColor = MaterialTheme.colorScheme.tertiary, onClick = ::shareDetails
                 ) {
                     Icon(Icons.Outlined.Share, contentDescription = "Share Sudoku")
                 }
-
-
             }
         },
     ) { contentPadding ->
@@ -134,32 +120,22 @@ fun SudokuDetailsScreen(navController: NavController, sudokuId: Long) {
                 PictureOrDefault(sudoku.picture, Modifier.size(200.dp), R.drawable.done)
             }
             Text(
-                "Sudoku " +
-                        sudokuId.toString(),
-                style = MaterialTheme.typography.titleLarge
+                "Sudoku " + sudokuId.toString(), style = MaterialTheme.typography.titleLarge
             )
-            Text(
-                sudoku?.solveDate?.let { formatDate(it) } ?: "",
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(sudoku?.solveDate?.let { formatDate(it) } ?: "",
+                style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.size(8.dp))
             Text(
                 if (sudoku != null) {
                     "You caught a sudoku with difficulty: " + sudoku.difficulty
-                } else "",
-                style = MaterialTheme.typography.bodyMedium
+                } else "", style = MaterialTheme.typography.bodyMedium
             )
             Text(
                 if (sudoku != null) {
                     val minutes = sudoku.finishTime!! / 60000
                     val seconds = (sudoku.finishTime % 60000) / 1000
-                    "It took you: " +
-                            minutes +
-                            " minutes and " +
-                            seconds +
-                            " seconds"
-                } else "",
-                style = MaterialTheme.typography.bodyMedium
+                    "It took you: " + minutes + " minutes and " + seconds + " seconds"
+                } else "", style = MaterialTheme.typography.bodyMedium
             )
         }
     }

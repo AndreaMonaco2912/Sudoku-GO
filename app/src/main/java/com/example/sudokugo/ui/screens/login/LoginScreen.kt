@@ -43,9 +43,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun LoginScreen(navController: NavController) {
     val loginViewModel = koinViewModel<LoginViewModel>()
-    Scaffold(
-        topBar = { TopSudokuGoAppBar(navController, title = "Login") }
-    ) { contentPadding ->
+    Scaffold(topBar = { TopSudokuGoAppBar(navController, title = "Login") }) { contentPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,22 +74,21 @@ fun LoginScreen(navController: NavController) {
             }
 
             var password by rememberSaveable { mutableStateOf("") }
-            var passwordVisibility by remember { mutableStateOf(false)}
+            var passwordVisibility by remember { mutableStateOf(false) }
             var email by rememberSaveable { mutableStateOf("") }
 
-            val icon = if(passwordVisibility)
+            val icon = if (passwordVisibility) {
                 painterResource(id = R.drawable.visibility)
-            else
+            } else {
                 painterResource(id = R.drawable.visibility_off)
+            }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email=it.trim() },
+            OutlinedTextField(value = email,
+                onValueChange = { email = it.trim() },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = password,
+            OutlinedTextField(value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 placeholder = { Text("Password") },
@@ -99,19 +96,18 @@ fun LoginScreen(navController: NavController) {
                     IconButton(onClick = {
                         passwordVisibility = !passwordVisibility
                     }) {
-                        Icon(painter = icon,
-                            contentDescription = "Visibility Icon")
+                        Icon(
+                            painter = icon, contentDescription = "Visibility Icon"
+                        )
                     }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if(passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            {
+                horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()
+            ) {
                 Button(
                     onClick = { navController.navigate(SudokuGORoute.Register) },
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
@@ -121,7 +117,7 @@ fun LoginScreen(navController: NavController) {
                     Text("Register")
                 }
                 Spacer(Modifier.size(24.dp))
-                Button(onClick = {loginViewModel.loginUser(email,password)}) {
+                Button(onClick = { loginViewModel.loginUser(email, password) }) {
                     Text("Login")
                 }
             }

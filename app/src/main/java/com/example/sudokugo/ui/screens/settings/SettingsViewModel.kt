@@ -26,7 +26,7 @@ class SettingsViewModel(
     private val repository: ThemeRepository,
     private val repositoryUser: UserDSRepository,
     private val volumeRepository: VolumeRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _email = MutableStateFlow<String?>(null)
     val email: StateFlow<String?> = _email
@@ -46,12 +46,14 @@ class SettingsViewModel(
                     getUserData(savedEmail)
                 }
         }
+
         viewModelScope.launch {
             volumeRepository.volume.collect {
                 _volume.value = it
             }
         }
     }
+
     val state = repository.theme.map { SettingsState(it) }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -77,7 +79,7 @@ class SettingsViewModel(
             _userData.value = user
 
         } catch (e: Exception) {
-            Log.e("GetUserData", "Errore durante la ricezione dei dati utente", e)
+            Log.e("GetUserData", "Error during getUserData", e)
         }
     }
 }

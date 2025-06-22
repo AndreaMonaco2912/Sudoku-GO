@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class HomeScreenViewModel(
     volumeRepository: VolumeRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _volume = MutableStateFlow<Float?>(null)
     val volume: StateFlow<Float?> = _volume
@@ -21,6 +21,4 @@ class HomeScreenViewModel(
             }
         }
     }
-
-
 }

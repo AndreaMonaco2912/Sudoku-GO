@@ -17,8 +17,8 @@ import java.io.FileNotFoundException
 
 class CongratsScreenViewModel(
     private val sudokuRepository: SudokuRepository,
-    private val  repositoryUser: UserDSRepository
-): ViewModel() {
+    private val repositoryUser: UserDSRepository
+) : ViewModel() {
 
     private val _email = MutableStateFlow<String?>(null)
     val email: MutableStateFlow<String?> = _email

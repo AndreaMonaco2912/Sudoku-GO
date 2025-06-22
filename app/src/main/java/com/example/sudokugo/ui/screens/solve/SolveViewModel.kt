@@ -25,13 +25,12 @@ import java.util.Date
 
 
 class SolveViewModel(
-    private val repository: SudokuRepository,
-    private val repositoryUser: UserDSRepository
+    private val repository: SudokuRepository, private val repositoryUser: UserDSRepository
 ) : ViewModel() {
     private lateinit var initialTime: Date
 
-    private val _sudokuDifficulty = MutableStateFlow<Difficulty>(Difficulty.EASY)
-    val sudokuDifficulty: StateFlow<Difficulty?> = _sudokuDifficulty
+    private val _sudokuDifficulty = MutableStateFlow(Difficulty.EASY)
+    val sudokuDifficulty: StateFlow<Difficulty> = _sudokuDifficulty
 
     private val _timeDiff = MutableStateFlow<Long?>(null)
     val timeDiff: StateFlow<Long?> = _timeDiff
@@ -57,8 +56,6 @@ class SolveViewModel(
 
     private var solutionSudoku: String? = null
 
-    private var Ssolution: Sudoku? = null
-
     fun selectCell(row: Int, col: Int) {
         _selectedCell.value = Pair(row, col)
     }
@@ -77,15 +74,11 @@ class SolveViewModel(
             showedSudoku = repository.fetchSudokuById(id)
             initialTime = repository.fetchSudokuById(id).initTime
             _sudokuDifficulty.value = Difficulty.valueOf(repository.fetchSudokuById(id).difficulty)
-
-            val currentBoard = showedSudoku?.currentBoard
-                ?: throw NullPointerException("No sudoku loaded")
-            val originalBoard = showedSudoku?.data
-                ?: throw NullPointerException("No sudoku loaded")
-            val solution = showedSudoku?.solution
-                ?: throw NullPointerException("No sudoku loaded")
-            val identifier = showedSudoku?.id
-                ?: throw NullPointerException("No sudoku loaded")
+            val currentBoard =
+                showedSudoku?.currentBoard ?: throw NullPointerException("No sudoku loaded")
+            val originalBoard = showedSudoku?.data ?: throw NullPointerException("No sudoku loaded")
+            val solution = showedSudoku?.solution ?: throw NullPointerException("No sudoku loaded")
+            val identifier = showedSudoku?.id ?: throw NullPointerException("No sudoku loaded")
 
             _currentSudoku.value = Sudoku.fromSingleLineString(currentBoard)
             _originalSudoku.value = Sudoku.fromSingleLineString(originalBoard)
@@ -122,24 +115,23 @@ class SolveViewModel(
                 )
 
                 val id = if (email != null) repository.insertSudoku(sudoku) else -1
-                Triple(solution, localSudoku to sudoku.copy(id = id), solutionStr)
+                Pair(localSudoku to sudoku.copy(id = id), solutionStr)
 
             }
 
-            val (solution, pair, solutionStr) = result
+            val (pair, solutionStr) = result
             val (original, stored) = pair
 
             _currentSudoku.value = original
             _originalSudoku.value = original
             _id.value = stored.id
-            Ssolution = solution
             solutionSudoku = solutionStr
             showedSudoku = stored
         }
     }
 
-    fun cheat(){
-        _currentSudoku.value = Ssolution
+    fun cheat() {
+        _currentSudoku.value = solutionSudoku?.let { Sudoku.fromSingleLineString(it) }
     }
 
     fun insertNum(num: Int) {
@@ -174,8 +166,7 @@ class SolveViewModel(
             viewModelScope.launch {
                 if (_email.value != null) {
                     repositoryUser.incrementScore(
-                        _email.value!!,
-                        getPointsForDifficulty(_sudokuDifficulty.value)
+                        _email.value!!, getPointsForDifficulty(_sudokuDifficulty.value)
                     )
                 }
                 repository.solveSudoku(showedSudoku!!.id, Calendar.getInstance().time, timeDiff)

@@ -1,4 +1,4 @@
-package com.example.sudokugo.map.view
+package com.example.sudokugo.map.functions
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -15,7 +15,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import com.example.sudokugo.R
-import com.example.sudokugo.map.functions.haversineDistance
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay

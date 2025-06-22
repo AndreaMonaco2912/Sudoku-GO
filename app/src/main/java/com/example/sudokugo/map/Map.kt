@@ -1,4 +1,4 @@
-package com.example.sudokugo.ui.composables
+package com.example.sudokugo.map
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -17,10 +17,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.sudokugo.map.classes.MapViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.views.MapView
-import com.example.sudokugo.map.view.MyMap
+import com.example.sudokugo.ui.composables.Loading
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
@@ -29,7 +28,7 @@ fun Map(playSudoku: () -> Unit) {
     val viewModelMap = koinViewModel<MapViewModel>()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val hasLocation by viewModelMap.hasRealLocation
+    val hasLocation by viewModelMap.hasRealLocation.collectAsStateWithLifecycle()
     val isLoaded by viewModelMap.isMapDataLoaded.collectAsStateWithLifecycle()
     var wasEverLoaded by rememberSaveable { mutableStateOf(false) }
 

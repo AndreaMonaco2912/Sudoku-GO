@@ -5,15 +5,14 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
-import java.time.LocalDateTime
 import java.util.Date
 
 @Dao
-interface SudokuDAO{
+interface SudokuDAO {
     @Query("SELECT * FROM serversudoku WHERE userId = :email")
     suspend fun getAllByUser(email: String?): List<ServerSudoku>
 
-    @Query("SELECT * FROM serversudoku WHERE id = :id")//TODO: it was flow don't know if now it's right
+    @Query("SELECT * FROM serversudoku WHERE id = :id")
     suspend fun getById(id: Long): ServerSudoku
 
     @Insert
@@ -34,8 +33,9 @@ interface SudokuDAO{
     @Query("UPDATE serversudoku SET favourite = :fav WHERE id = :id")
     suspend fun changeFav(id: Long, fav: Boolean)
 }
+
 @Dao
-interface UserDAO{
+interface UserDAO {
     @Query("SELECT email FROM user")
     suspend fun getAllEmails(): List<String>
 
@@ -43,10 +43,10 @@ interface UserDAO{
     suspend fun getByEmail(email: String): User
 
     @Upsert
-    suspend fun upsert(user:User)
+    suspend fun upsert(user: User)
 
     @Delete
-    suspend fun delete(user:User)
+    suspend fun delete(user: User)
 
     @Query("UPDATE user SET profilePicture = :pic WHERE email = :email")
     suspend fun changePic(email: String, pic: String)

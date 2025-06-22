@@ -8,7 +8,6 @@ class SudokuRepository(
     private val dao: SudokuDAO
 ) {
     suspend fun insertSudoku(sudoku: ServerSudoku): Long = dao.insert(sudoku)
-    suspend fun deleteSudoku(sudoku: ServerSudoku) = dao.delete(sudoku)
     suspend fun fetchSudokuById(id: Long) = dao.getById(id)
     suspend fun updateCurrentBoard(id: Long, newBoard: String) = dao.update(id, newBoard)
     suspend fun fetchAllSudokuByUser(email: String?) = dao.getAllByUser(email)

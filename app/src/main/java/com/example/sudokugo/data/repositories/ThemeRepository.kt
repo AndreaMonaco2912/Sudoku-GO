@@ -12,13 +12,15 @@ class ThemeRepository(private val dataStore: DataStore<Preferences>) {
         private val THEME_KEY =
             stringPreferencesKey("theme")
     }
+
     val theme = dataStore.data.map { preferences ->
-            try {
-                Theme.valueOf(preferences[THEME_KEY] ?: "System")
-            } catch (_: Exception) {
-                Theme.System
-            }
+        try {
+            Theme.valueOf(preferences[THEME_KEY] ?: "System")
+        } catch (_: Exception) {
+            Theme.System
         }
+    }
+
     suspend fun setTheme(theme: Theme) =
         dataStore.edit { it[THEME_KEY] = theme.toString() }
 }

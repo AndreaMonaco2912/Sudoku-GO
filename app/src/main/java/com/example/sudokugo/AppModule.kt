@@ -7,12 +7,11 @@ import com.example.sudokugo.data.database.SudokuGODatabase
 import com.example.sudokugo.data.database.UserDAO
 import com.example.sudokugo.data.repositories.SudokuRepository
 import com.example.sudokugo.data.repositories.ThemeRepository
-import com.example.sudokugo.data.repositories.UserPictureRepository
 import com.example.sudokugo.data.repositories.UserDAORepository
 import com.example.sudokugo.data.repositories.UserDSRepository
 import com.example.sudokugo.data.repositories.MapDSRepository
 import com.example.sudokugo.data.repositories.VolumeRepository
-import com.example.sudokugo.map.classes.MapViewModel
+import com.example.sudokugo.map.MapViewModel
 import com.example.sudokugo.ui.composables.profilePic.UserPictureViewModel
 import com.example.sudokugo.ui.screens.details.SudokuDetailsViewModel
 import com.example.sudokugo.ui.screens.home.HomeScreenViewModel
@@ -43,7 +42,6 @@ val appModule = module {
 
     single(named("userDS")) { get<Context>().userDataStore }
     single { get<Context>().themeDataStore }
-    single(named("userPicture")) { get<Context>().userDataStore }
     single { MapDSRepository(get<Context>().mapPrefsDataStore) }
     single(named("volumeDS")) { get<Context>().volumeRepository }
 
@@ -51,7 +49,6 @@ val appModule = module {
     single { ThemeRepository(get()) }
     single { UserDAORepository(get<UserDAO>()) }
     single { UserDSRepository(get(named("userDS"))) }
-    single { UserPictureRepository(get(named("userPicture"))) }
     single { SudokuRepository(get<SudokuGODatabase>().sudokuDAO()) }
     single { VolumeRepository(get(named("volumeDS"))) }
 

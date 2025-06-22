@@ -10,7 +10,6 @@ import com.example.sudokugo.supabase
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.map
 
-
 class UserDSRepository(private val dataStore: DataStore<Preferences>) {
     companion object {
         private val EMAIL =
@@ -31,7 +30,7 @@ class UserDSRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun incrementScore(email: String, points: Int) {
         try {
             val user = supabase.from("users")
-                .select(){
+                .select() {
                     filter {
                         eq("email", email)
                     }
@@ -40,13 +39,13 @@ class UserDSRepository(private val dataStore: DataStore<Preferences>) {
 
             val newScore = user[0].points + points
             supabase.from("users")
-                .update(mapOf("points" to newScore)){
+                .update(mapOf("points" to newScore)) {
                     filter {
                         eq("email", email)
                     }
                 }
         } catch (e: Exception) {
-            Log.e("Supabase", "Errore aggiornamento punteggio: ${e.message}")
+            Log.e("Supabase", "Error incrementing score: ${e.message}")
         }
     }
 }

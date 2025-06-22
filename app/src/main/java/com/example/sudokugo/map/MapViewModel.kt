@@ -1,8 +1,5 @@
-package com.example.sudokugo.map.classes
+package com.example.sudokugo.map
 
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sudokugo.data.repositories.MapDSRepository
@@ -15,17 +12,17 @@ class MapViewModel(
     private val mapRepo: MapDSRepository
 ) : ViewModel() {
 
-    private val _mapCenter = mutableStateOf(GeoPoint(0.0, 0.0))
-    val mapCenter: State<GeoPoint> = _mapCenter
+    private val _mapCenter = MutableStateFlow(GeoPoint(0.0, 0.0))
+    val mapCenter: StateFlow<GeoPoint> = _mapCenter
 
-    private val _zoomLevel = mutableDoubleStateOf(18.0)
-    val zoomLevel: State<Double> = _zoomLevel
+    private val _zoomLevel = MutableStateFlow(18.0)
+    val zoomLevel: StateFlow<Double> = _zoomLevel
 
-    private val _isMapDataLoaded = MutableStateFlow<Boolean>(false)
+    private val _isMapDataLoaded = MutableStateFlow(false)
     val isMapDataLoaded: StateFlow<Boolean> = _isMapDataLoaded
 
-    private val _hasRealLocation = mutableStateOf(false)
-    val hasRealLocation: State<Boolean> = _hasRealLocation
+    private val _hasRealLocation = MutableStateFlow(false)
+    val hasRealLocation: StateFlow<Boolean> = _hasRealLocation
 
     private val _mapDataHasBeenRead = MutableStateFlow(false)
     val mapDataHasBeenRead: StateFlow<Boolean> = _mapDataHasBeenRead
@@ -46,7 +43,7 @@ class MapViewModel(
                 if (mapInfo != null) {
                     val (lat, lon, zoom) = mapInfo
                     _mapCenter.value = GeoPoint(lat, lon)
-                    _zoomLevel.doubleValue = zoom
+                    _zoomLevel.value = zoom
                     _isMapDataLoaded.value = true
                 }
                 _mapDataHasBeenRead.value = true

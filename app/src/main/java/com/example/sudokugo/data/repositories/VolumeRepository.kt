@@ -13,7 +13,7 @@ class VolumeRepository(private val dataStore: DataStore<Preferences>) {
     }
 
     val volume = dataStore.data.map { preferences ->
-        preferences[VOLUME_KEY]?: 0.5f
+        preferences[VOLUME_KEY] ?: 1.0f
     }
 
     suspend fun setVolume(volume: Float) =

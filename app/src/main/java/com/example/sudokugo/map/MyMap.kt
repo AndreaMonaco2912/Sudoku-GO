@@ -1,12 +1,12 @@
-package com.example.sudokugo.map.view
+package com.example.sudokugo.map
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.MotionEvent
-import com.example.sudokugo.map.classes.InertiaAnimation
+import com.example.sudokugo.map.functions.InertiaAnimation
 import com.example.sudokugo.map.functions.createLocationOverlay
 import com.example.sudokugo.map.functions.drawUserCenteredCircle
-import com.example.sudokugo.ui.composables.configureMapView
+import com.example.sudokugo.map.functions.PoiManager
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
@@ -14,11 +14,12 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 
 @SuppressLint("ClickableViewAccessibility")
-class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double, playSudoku: () -> Unit) {
+class MyMap(
+    private val context: Context, mapCenter: GeoPoint, zoomLevel: Double, playSudoku: () -> Unit
+) {
     private val mapView: MapView = MapView(this.context).apply {
         configureMapView(this)
-        val center = mapCenter
-        controller.setCenter(center)
+        controller.setCenter(mapCenter)
         controller.setZoom(zoomLevel)
     }
     private val poiManager: PoiManager = PoiManager(this.context, mapView, playSudoku)
@@ -44,9 +45,7 @@ class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double
 
         mapView.setOnTouchListener { _, event ->
             when (event.actionMasked) {
-
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                    // Se nessun dito attivo, scegli questo
                     if (activePointerId == MotionEvent.INVALID_POINTER_ID) {
                         activePointerId = event.getPointerId(event.actionIndex)
                         lastKnownPositionX = event.getX(event.actionIndex)
@@ -64,7 +63,7 @@ class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double
 
                 MotionEvent.ACTION_MOVE -> {
                     val pointerIndex = event.findPointerIndex(activePointerId)
-                    if (pointerIndex == -1) return@setOnTouchListener true
+                    if (pointerIndex == MotionEvent.INVALID_POINTER_ID) return@setOnTouchListener true
 
                     val x = event.getX(pointerIndex)
                     val y = event.getY(pointerIndex)
@@ -78,7 +77,8 @@ class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double
                         val centerPoint = mapView.projection.toPixels(mapView.mapCenter, null)
                         val dxCenter = x - centerPoint.x
                         val dyCenter = y - centerPoint.y
-                        val angle = Math.toDegrees(atan2(dyCenter.toDouble(), dxCenter.toDouble())).toFloat()
+                        val angle = Math.toDegrees(atan2(dyCenter.toDouble(), dxCenter.toDouble()))
+                            .toFloat()
                         var deltaAngle = angle - lastAngle
                         if (deltaAngle > 180) deltaAngle -= 360
                         if (deltaAngle < -180) deltaAngle += 360
@@ -97,7 +97,6 @@ class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double
                     val liftedPointerId = event.getPointerId(event.actionIndex)
 
                     if (liftedPointerId == activePointerId) {
-                        // Promuovi un altro dito attivo, se ce n'è
                         for (i in 0 until event.pointerCount) {
                             val id = event.getPointerId(i)
                             if (id != liftedPointerId) {
@@ -105,10 +104,12 @@ class MyMap(private val context: Context, mapCenter: GeoPoint, zoomLevel: Double
                                 lastKnownPositionX = event.getX(i)
                                 lastKnownPositionY = event.getY(i)
 
-                                val centerPoint = mapView.projection.toPixels(mapView.mapCenter, null)
+                                val centerPoint =
+                                    mapView.projection.toPixels(mapView.mapCenter, null)
                                 val dx = lastKnownPositionX - centerPoint.x
                                 val dy = lastKnownPositionY - centerPoint.y
-                                lastAngle = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                                lastAngle =
+                                    Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat()
                                 break
                             }
                         }

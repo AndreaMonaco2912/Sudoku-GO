@@ -40,7 +40,7 @@ import androidx.navigation.NavController
 import com.example.sudokugo.ui.SudokuGORoute
 import com.example.sudokugo.ui.composables.BottomNavSelected
 import com.example.sudokugo.ui.composables.BottomSudokuGoAppBar
-import com.example.sudokugo.ui.composables.Map
+import com.example.sudokugo.map.Map
 import com.example.sudokugo.ui.composables.TopSudokuGoAppBar
 import com.example.sudokugo.util.PermissionStatus
 import com.example.sudokugo.util.rememberMultiplePermissions

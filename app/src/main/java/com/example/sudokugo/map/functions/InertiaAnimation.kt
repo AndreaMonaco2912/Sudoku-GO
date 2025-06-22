@@ -1,4 +1,4 @@
-package com.example.sudokugo.map.classes
+package com.example.sudokugo.map.functions
 
 import android.animation.ValueAnimator
 import android.view.animation.DecelerateInterpolator

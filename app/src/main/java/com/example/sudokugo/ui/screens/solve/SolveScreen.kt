@@ -196,7 +196,7 @@ fun SudokuGrid(sudokuId: Long?, sudokuViewModel: SolveViewModel) {
                         Box(
                             modifier = Modifier
                                 .size(cellSize)
-                                .clickable(enabled = !isFixed) {
+                                .clickable {
                                     sudokuViewModel.selectCell(row, col)
                                 }, contentAlignment = Alignment.Center
                         ) {
